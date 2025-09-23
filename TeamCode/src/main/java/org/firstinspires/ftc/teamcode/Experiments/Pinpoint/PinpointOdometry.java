@@ -20,7 +20,7 @@
  *   SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode.Pinpoint;
+package org.firstinspires.ftc.teamcode.Experiments.Pinpoint;
 
 import static com.qualcomm.robotcore.util.TypeConversion.byteArrayToInt;
 

@@ -4,12 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 @Config
 public class Sensors {
-    Telemetry telemetry;
-
 
     // sensors
     RevColorSensorV3 frontSensor1;
@@ -44,7 +40,7 @@ public class Sensors {
     double rS2_blue;
 
 
-    public Sensors(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Sensors(HardwareMap hardwareMap) {
         frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
         frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
         frontSensor3 = hardwareMap.get(RevColorSensorV3.class,"fS3");
@@ -52,8 +48,6 @@ public class Sensors {
         leftSensor2 = hardwareMap.get(RevColorSensorV3.class,"lS2");
         rightSensor1 = hardwareMap.get(RevColorSensorV3.class,"rS1");
         rightSensor2 = hardwareMap.get(RevColorSensorV3.class,"rS2");
-
-        this.telemetry = telemetry;
     }
 
     public int getFrontColor() {

@@ -20,7 +20,7 @@ public class Intake {
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intakeMotor");
         intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
-    public void motorOn() {intakeMotor.setPower(1.0);}
+    public void motorOn() {intakeMotor.setPower(-1.0);}
     public void runIntake() {
         int color = sensors.getFrontColor();
 

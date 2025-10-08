@@ -1,14 +1,33 @@
 package org.firstinspires.ftc.teamcode.Experiments.Drivetrain;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
+import org.opencv.core.Point;
+
 //
+@Config
 public class WheelControl {
+    public static double xp = 0.25, xi = 0, xd = 0.01, xf = 0;
+    public static double yp = 0.3, yi = 0, yd = 0.008, yf = 0;
+    public static double hp = 0.03, hi = 0, hd = 0.003, hF = 0;
+
+    public static double x_sign = 1;
+    public static double y_sign = 1;
+    public static double h_sign = -1;
+    public static double r_sign = -1;
+    public static double oh_sign = -1;
+
+    PIDFController x_controller;
+    PIDFController y_controller;
+    PIDFController h_controller;
+
     public DcMotorEx BR;
     public DcMotorEx BL;
     public DcMotorEx FR;
@@ -40,6 +59,10 @@ public class WheelControl {
         this.odometry = odometry;
         this.voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         this.driveCorrection = new DriveCorrection(odometry);
+
+        x_controller = new PIDFController(xp, xi, xd, xf);
+        y_controller = new PIDFController(yp, yi, yd, yf);
+        h_controller = new PIDFController(hp, hi, hd, hF);
     }
 
     public void setF(double vf, double hf, double rf) {
@@ -223,5 +246,18 @@ public class WheelControl {
             packet.put("Target angle", target_angle);
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
+    }
+    public boolean drive_to_point(Point point, double target_h, double power, double dist_thresh){
+        double rx = odometry.get_x();
+        double ry = odometry.get_y();
+        double rh = odometry.get_heading();
+
+        double y = x_controller.calculate(point.x, rx);
+        double x = y_controller.calculate(point.y, ry);
+        double h = h_controller.calculate(target_h, rh);
+
+        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading()), power);
+
+        return Math.sqrt((rx-x)*(rx-x) + (ry-y)*(ry-y)) <= dist_thresh;
     }
 }

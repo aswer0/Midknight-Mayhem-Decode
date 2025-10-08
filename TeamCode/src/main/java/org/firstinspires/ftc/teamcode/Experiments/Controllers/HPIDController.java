@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Experiments.Controllers;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.GVFNew.Utils;
+import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.GVF.Utils;
 
 public class HPIDController {
     private double kp, ki, kd, ithres;

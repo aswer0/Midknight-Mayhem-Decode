@@ -20,7 +20,7 @@ public class pinpoint_test extends OpMode {
     public void init(){
         turret = hardwareMap.get(Servo.class, "turret");
 
-        odometry = new Odometry(hardwareMap, telemetry,"pinpoint", 7.875, 6.625, 0);
+        odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
         wheelControl = new WheelControl(hardwareMap, odometry);
     }
 

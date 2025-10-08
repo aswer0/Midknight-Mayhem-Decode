@@ -22,6 +22,8 @@ import org.opencv.core.Scalar;
 
 @Config
 public class Odometry {
+    final String pinpointName = "pinpoint";
+    final String limelightName = "limelight";
     Limelight3A limelight;
     PinpointOdometry pinpoint;
     Telemetry telemetry;
@@ -31,6 +33,8 @@ public class Odometry {
 
     public static double xyVariance = 0.1;
     public static double headingVariance = 0.1;
+
+    public static boolean outputDebugInfo = true;
 
 
     Mat covariance = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
@@ -42,7 +46,8 @@ public class Odometry {
     double start_y;
     double start_h;
 
-    public Odometry(HardwareMap hardwareMap, Telemetry telemetry, String pinpointName, double start_x, double start_y, double start_h){
+    public Odometry(HardwareMap hardwareMap, Telemetry telemetry, double start_x, double start_y, double start_h){
+        limelight = hardwareMap.get(Limelight3A.class, limelightName);
         this.pinpoint = hardwareMap.get(PinpointOdometry.class, pinpointName);
         this.telemetry = telemetry;
 
@@ -72,6 +77,8 @@ public class Odometry {
 
     public void update(){
         pinpoint.update();
+        predictMeasurement();
+        updateMeasurements();
     }
     public double get_turret_heading(){
         Point target = new Point(125, 130);
@@ -99,10 +106,10 @@ public class Odometry {
         return pinpoint.getPosY(DistanceUnit.INCH);
     }
 
-
+    // the math is based on https://file.tavsys.net/control/controls-engineering-in-frc.pdf#page=177
     public void updateMeasurements() {
         // TODO reject very out of pocket April tag measurements
-        // TODO adjust the covariance matrices (MT1 stdevs seem very bad)
+        // TODO adjust the covariance matrices (MT1 stdevs seem very unreliable)
         // Predict
         LLResult result = limelight.getLatestResult();
         if(result == null) return;
@@ -139,18 +146,20 @@ public class Odometry {
         xEstimate.put(2,0,wrapAngle(xEstimate.get(2,0)[0]));
 
         pinpoint.setPosition(new Pose2D(DistanceUnit.METER, xEstimate.get(0,0)[0], xEstimate.get(1,0)[0], AngleUnit.DEGREES, xEstimate.get(2,0)[0]));
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("X", xEstimate.get(0,0)[0]/0.9144*36);
-        packet.put("Y", xEstimate.get(1,0)[0]/0.9144*36);
-        packet.put("H", xEstimate.get(2,0)[0]);
-        packet.put("Measured X", measurement.x/0.9144*36);
-        packet.put("Measured Y", measurement.y/0.9144*36);
-        packet.put("Measured H", result.getBotpose().getOrientation().getYaw());
-        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+        if(outputDebugInfo) {
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("X", xEstimate.get(0, 0)[0] / 0.9144 * 36);
+            packet.put("Y", xEstimate.get(1, 0)[0] / 0.9144 * 36);
+            packet.put("H", xEstimate.get(2, 0)[0]);
+            packet.put("Measured X", measurement.x / 0.9144 * 36);
+            packet.put("Measured Y", measurement.y / 0.9144 * 36);
+            packet.put("Measured H", result.getBotpose().getOrientation().getYaw());
+            (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+        }
     }
 
 
-    public void predictMeasurement(double currentTime) {
+    public void predictMeasurement() {
         // updateX
         // (y, -x)
         Pose2D position = pinpoint.getPosition();
@@ -167,11 +176,13 @@ public class Odometry {
         //Core.multiply(stdDevM, new Scalar(currentTime - lastTime), stdDevM);
         Core.add(covariance, stdDevM, covariance);
 
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("X", xEstimate.get(0,0)[0]/0.9144*36);
-        packet.put("Y", xEstimate.get(1,0)[0]/0.9144*36);
-        packet.put("H", xEstimate.get(2,0)[0]);
-        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+        if(outputDebugInfo) {
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("X", xEstimate.get(0, 0)[0] / 0.9144 * 36);
+            packet.put("Y", xEstimate.get(1, 0)[0] / 0.9144 * 36);
+            packet.put("H", xEstimate.get(2, 0)[0]);
+            (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+        }
     }
 
     public double wrapAngle(double heading) {

@@ -28,7 +28,7 @@ public class pid_point_test extends OpMode {
 
     @Override
     public void init(){
-        odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        odometry = new Odometry(hardwareMap, telemetry, 0, 0, 179);
         wheelControl = new WheelControl(hardwareMap, odometry);
         dashboard = FtcDashboard.getInstance();
     }

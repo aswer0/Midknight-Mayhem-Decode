@@ -36,7 +36,7 @@ public class pinpoint_test extends OpMode {
             odometry.reset_original_pos();
         }
 
-        wheelControl.correction_drive(-y, -x, rx*0.7, -Math.toRadians(odometry.get_heading()), power);
+        //wheelControl.correction_drive(-y, -x, rx*0.7, -Math.toRadians(odometry.get_heading()), power);
 
 //        double turretAngle = odometry.get_turret_heading();
 //        double servoPos = (turretAngle + 90) / 180.0;

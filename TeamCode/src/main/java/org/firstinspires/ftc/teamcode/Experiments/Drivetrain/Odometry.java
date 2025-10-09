@@ -7,6 +7,8 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -26,15 +28,20 @@ public class Odometry {
     final String limelightName = "limelight";
     Limelight3A limelight;
     PinpointOdometry pinpoint;
+    Servo llServo;
     Telemetry telemetry;
+    ElapsedTime lastMeasurementTime;
 
     public static double offset_x = -2.375;
     public static double offset_y = 5.1875;
 
-    public static double xyVariance = 0.1;
-    public static double headingVariance = 0.1;
+    public static double xyVariance = 25;
+    public static double headingVariance = 100;
+
+    public static double llPosition = 0.91;
 
     public static boolean outputDebugInfo = true;
+
 
 
     Mat covariance = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
@@ -50,6 +57,10 @@ public class Odometry {
         limelight = hardwareMap.get(Limelight3A.class, limelightName);
         this.pinpoint = hardwareMap.get(PinpointOdometry.class, pinpointName);
         this.telemetry = telemetry;
+        llServo = hardwareMap.get(Servo.class, "llServo");
+        llServo.setPosition(llPosition);
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
         pinpoint.setEncoderResolution(PinpointOdometry.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(PinpointOdometry.EncoderDirection.REVERSED, PinpointOdometry.EncoderDirection.FORWARD);
@@ -76,6 +87,7 @@ public class Odometry {
     }
 
     public void update(){
+        llServo.setPosition(llPosition);
         pinpoint.update();
         predictMeasurement();
         updateMeasurements();
@@ -108,13 +120,21 @@ public class Odometry {
 
     // the math is based on https://file.tavsys.net/control/controls-engineering-in-frc.pdf#page=177
     public void updateMeasurements() {
-        // TODO reject very out of pocket April tag measurements
-        // TODO adjust the covariance matrices (MT1 stdevs seem very unreliable)
         // Predict
         LLResult result = limelight.getLatestResult();
         if(result == null) return;
         if(result.getBotposeTagCount() == 0) return;
+
+
+        if(lastMeasurementTime == null) {
+            lastMeasurementTime = new ElapsedTime();
+        }
+        if(lastMeasurementTime.milliseconds() < 250) return;
+
+
         Position measurement = result.getBotpose().getPosition();
+        // reject too deviant measurements
+        if(Math.pow(measurement.x - xEstimate.get(0,0)[0],2) + Math.pow(measurement.y - xEstimate.get(1,0)[0], 2) > Math.pow(0.25,2)) return;
         Mat measurementM = new MatOfDouble(measurement.x, measurement.y, result.getBotpose().getOrientation().getYaw());
         double[] mStdDev = result.getStddevMt1();
         Mat measurementCov = new Mat(3, 3, CvType.CV_64FC1,new Scalar(0));
@@ -154,6 +174,7 @@ public class Odometry {
             packet.put("Measured X", measurement.x / 0.9144 * 36);
             packet.put("Measured Y", measurement.y / 0.9144 * 36);
             packet.put("Measured H", result.getBotpose().getOrientation().getYaw());
+            packet.fieldOverlay().fillRect(xEstimate.get(0,0)[0] / 0.9144 * 36, xEstimate.get(1,0)[0] / 0.9144 * 36, 2, 2);
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
     }
@@ -167,6 +188,7 @@ public class Odometry {
         xEstimate.put(1,0,position.getY(DistanceUnit.METER));
         xEstimate.put(2,0,position.getHeading(AngleUnit.DEGREES));
         xEstimate.put(2,0,wrapAngle(xEstimate.get(2,0)[0]));
+        limelight.updateRobotOrientation(position.getHeading(AngleUnit.DEGREES));
 
         //update Covariances
         Mat stdDevM = (new Mat(3, 3, CvType.CV_64FC1, new Scalar(0)));
@@ -181,6 +203,7 @@ public class Odometry {
             packet.put("X", xEstimate.get(0, 0)[0] / 0.9144 * 36);
             packet.put("Y", xEstimate.get(1, 0)[0] / 0.9144 * 36);
             packet.put("H", xEstimate.get(2, 0)[0]);
+            packet.fieldOverlay().fillRect(xEstimate.get(0,0)[0] / 0.9144 * 36, xEstimate.get(1,0)[0] / 0.9144 * 36, 2, 2);
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
     }

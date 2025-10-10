@@ -91,11 +91,11 @@ public class Odometry {
         predictMeasurement();
         updateMeasurements();
     }
-    public double get_turret_heading(){
+    public double get_turret_heading(boolean use_kalman){
         Point target = new Point(125, 130);
 
-        double angleToTarget = Math.toDegrees(Math.atan2(target.y - this.get_y(), target.x - this.get_x()));
-        double turretAngle = angleToTarget - this.get_heading();
+        double angleToTarget = Math.toDegrees(Math.atan2(target.y - this.get_y(use_kalman), target.x - this.get_x(use_kalman)));
+        double turretAngle = angleToTarget - this.get_heading(use_kalman);
 
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;

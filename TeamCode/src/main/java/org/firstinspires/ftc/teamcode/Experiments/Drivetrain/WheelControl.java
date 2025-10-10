@@ -239,7 +239,7 @@ public class WheelControl {
 
             this.drive(
                     left_stick_y, left_stick_x,
-                    driveCorrection.stable_correction(target_angle),
+                    driveCorrection.stable_correction(target_angle, use_kalman),
                     angle,
                     powerLevel
             );

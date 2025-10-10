@@ -65,9 +65,11 @@ public class VectorField {
     public double x_error;
     public double y_error;
 
+    boolean use_kalman;
+
     // Constructor
     public VectorField(WheelControl w,
-                       Odometry o) {
+                       Odometry o, boolean uk) {
         // Inputs
         this.odometry = o;
         this.drive = w;
@@ -86,6 +88,7 @@ public class VectorField {
         // Timer
         timer = new ElapsedTime();
         prev_pos = get_pos();
+        use_kalman = uk;
     }
 
     public void setPath(BCPath path, double end_heading, boolean path_heading) {
@@ -102,17 +105,17 @@ public class VectorField {
 
     // x position of robot
     public double get_x() {
-        return odometry.get_x();
+        return odometry.get_x(use_kalman);
     }
 
     // y position of robot
     public double get_y() {
-        return odometry.get_y();
+        return odometry.get_y(use_kalman);
     }
 
     // Heading of robot
     public double get_heading() {
-        return odometry.get_heading();
+        return odometry.get_heading(use_kalman);
     }
 
     // Gets position of robot

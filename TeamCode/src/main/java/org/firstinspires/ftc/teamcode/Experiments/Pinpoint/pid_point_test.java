@@ -46,7 +46,7 @@ public class pid_point_test extends OpMode {
             new Point(109, 121.2),
         }};
 
-        vf = new VectorField(wheelControl, odometry);
+        vf = new VectorField(wheelControl, odometry, uk);
         path = new BCPath(follow_path);
 
         pathPoints = path.get_path_points();

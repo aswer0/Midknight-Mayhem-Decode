@@ -22,15 +22,15 @@ public class DriveCorrection {
         set_correction = new PIDFController(set_hd, set_hi, set_hp, 0);
     }
 
-    public double stable_correction(double target_angle){
-        double error = stable_correction.calculate(odometry.get_heading(), target_angle);
+    public double stable_correction(double target_angle, boolean use_kalman){
+        double error = stable_correction.calculate(odometry.get_heading(use_kalman), target_angle);
         if (error <= tolerance){
             return 0.0;
         }
         return error;
     }
 
-    public double set_correction(double target_angle){
-        return set_correction.calculate(odometry.get_heading(), target_angle);
+    public double set_correction(double target_angle, boolean use_kalman){
+        return set_correction.calculate(odometry.get_heading(use_kalman), target_angle);
     }
 }

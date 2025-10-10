@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experiments.Pinpoint;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.WheelControl;
 
 @TeleOp
+@Config
 public class pinpoint_test extends OpMode {
     Servo turret;
 
@@ -15,6 +17,7 @@ public class pinpoint_test extends OpMode {
     WheelControl wheelControl;
 
     double power = 0.9;
+    public static boolean use_kalman;
 
     @Override
     public void init(){
@@ -44,11 +47,11 @@ public class pinpoint_test extends OpMode {
 //
 //        turret.setPosition(servoPos);
 
-        telemetry.addData("X position", odometry.get_x());
-        telemetry.addData("Y position", odometry.get_y());
-        telemetry.addData("Direction", odometry.get_heading());
-        telemetry.addData("Turret Direction", odometry.get_turret_heading());
-        telemetry.addData("Turret Servo Pos", odometry.get_turret_heading()/300);
+        telemetry.addData("X position", odometry.get_x(use_kalman));
+        telemetry.addData("Y position", odometry.get_y(use_kalman));
+        telemetry.addData("Direction", odometry.get_heading(use_kalman));
+        telemetry.addData("Turret Direction", odometry.get_turret_heading(use_kalman));
+        telemetry.addData("Turret Servo Pos", odometry.get_turret_heading(use_kalman)/300);
 
     }
 }

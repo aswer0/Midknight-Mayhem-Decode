@@ -123,7 +123,7 @@ public class Odometry {
         // Predict
         LLResult result = limelight.getLatestResult();
         if(result == null) return;
-        if(result.getBotposeTagCount() == 0) return;
+        if(!result.isValid()) return;
 
 
         if(lastMeasurementTime == null) {

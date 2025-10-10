@@ -31,6 +31,9 @@ public class BCPath {
 
         this.final_point = forward(n_bz);
     }
+    public ArrayList<Point> get_path_points(){
+        return this.F[0].get_path_points(100);
+    }
 
     public int get_bz(double t) {
         int bz = (int)Math.floor(t);

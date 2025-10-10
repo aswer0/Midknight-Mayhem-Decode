@@ -48,7 +48,6 @@ public class Odometry {
     // x, y, yaw
     Mat xEstimate = new Mat(3, 1, CvType.CV_64FC1, new Scalar(0));
 
-
     double start_x;
     double start_y;
     double start_h;
@@ -108,13 +107,22 @@ public class Odometry {
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, start_x, start_y, AngleUnit.DEGREES, start_h));
         pinpoint.recalibrateIMU();
     }
-    public double get_heading(){
+    public double get_heading(boolean use_kalman){
+        if (use_kalman){
+            return xEstimate.get(2, 0)[0];
+        }
         return pinpoint.getPosition().getHeading(AngleUnit.DEGREES);
     }
-    public double get_x(){
+    public double get_x(boolean use_kalman){
+        if (use_kalman){
+            return xEstimate.get(0, 0)[0] / 0.9144 * 36;
+        }
         return pinpoint.getPosX(DistanceUnit.INCH);
     }
-    public double get_y(){
+    public double get_y(boolean use_kalman){
+        if (use_kalman){
+            return xEstimate.get(1, 0)[0] / 0.9144 * 36;
+        }
         return pinpoint.getPosY(DistanceUnit.INCH);
     }
 

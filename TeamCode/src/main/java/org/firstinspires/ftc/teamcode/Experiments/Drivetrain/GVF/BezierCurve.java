@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experiments.Drivetrain.GVF;
 import org.opencv.core.Point;
 
+import java.util.ArrayList;
+
 public class BezierCurve {
     // Declare control points as (x, y)
     Point[] P;
@@ -17,6 +19,15 @@ public class BezierCurve {
 
         // Get estimated arc length
         this.est_arclen = this.est_arclen(0.05);
+    }
+    public ArrayList<Point> get_path_points(int iters){
+        ArrayList<Point> points = new ArrayList<>();
+
+        for (int i=0; i<iters; i++){
+            points.add(this.forward((double)i/iters));
+        }
+
+        return points;
     }
 
     public double est_arclen(double step) {

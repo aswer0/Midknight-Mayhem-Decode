@@ -18,17 +18,16 @@ public class Pathing {
         this.wheelControl = wheelControl;
     }
 
-    public boolean pointDriver(ArrayList<Point> points, double end_heading) {
+    public boolean pointDriver(ArrayList<Point> points, double end_heading, boolean use_kalman) {
         double last_point = points.size() - 1;
 
-
-        double rotation = Math.atan2(points.get(count).y - odometry.get_y(), points.get(count).x - odometry.get_x());
+        double rotation = Math.atan2(points.get(count).y - odometry.get_y(use_kalman), points.get(count).x - odometry.get_x(use_kalman));
 
         if (count == last_point) {
-            if (wheelControl.drive_to_point(points.get(count), end_heading, 0.5, 0.5)) {
+            if (wheelControl.drive_to_point(points.get(count), end_heading, 0.5, 0.5, use_kalman)){
                 return true;
             }
-        } else if (wheelControl.drive_to_point(points.get(count), rotation, 0.5, 0.5)) {
+        } else if (wheelControl.drive_to_point(points.get(count), rotation, 0.5, 0.5, use_kalman)){
             count++;
         }
         return false;

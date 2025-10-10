@@ -38,6 +38,7 @@ public class WheelControl {
     private VoltageSensor voltageSensor;
 
     Odometry odometry;
+
     DriveCorrection driveCorrection;
     double target_angle = 0;
 
@@ -222,9 +223,9 @@ public class WheelControl {
         this.FL.setZeroPowerBehavior(mode);
     }
 
-    public void correction_drive(double left_stick_y, double left_stick_x, double rotate, double angle, double powerLevel){
+    public void correction_drive(double left_stick_y, double left_stick_x, double rotate, double angle, double powerLevel, boolean use_kalman){
         if(rotate != 0) {
-            target_angle = odometry.get_heading();
+            target_angle = odometry.get_heading(use_kalman);
             this.drive(
                     left_stick_y, left_stick_x,
                     rotate,
@@ -247,16 +248,16 @@ public class WheelControl {
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
     }
-    public boolean drive_to_point(Point point, double target_h, double power, double dist_thresh){
-        double rx = odometry.get_x();
-        double ry = odometry.get_y();
-        double rh = odometry.get_heading();
+    public boolean drive_to_point(Point point, double target_h, double power, double dist_thresh, boolean use_kalman){
+        double rx = odometry.get_x(use_kalman);
+        double ry = odometry.get_y(use_kalman);
+        double rh = odometry.get_heading(use_kalman);
 
         double y = x_controller.calculate(point.x, rx);
         double x = y_controller.calculate(point.y, ry);
         double h = h_controller.calculate(target_h, rh);
 
-        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading()), power);
+        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading(use_kalman)), power);
 
         return Math.sqrt((rx-x)*(rx-x) + (ry-y)*(ry-y)) <= dist_thresh;
     }

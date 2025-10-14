@@ -20,7 +20,7 @@ public class Park {
         hangController = new PIDFController(hp, hi, hd, 0);
     }
     public void goPark() {
-        act_pos = parkMotor.getCurrentPosition()
+        act_pos = parkMotor.getCurrentPosition();
         parkMotor.setPower(-hangController.calculate(tar_pos, act_pos));
     }
 }

@@ -251,7 +251,7 @@ public class VectorField {
         turn_speed = h_PID.calculate(get_heading(), target_heading);
 
         // Drive
-        drive.drive_limit_power(x_error, y_error, turn_speed, max_speed, get_heading());
+        drive.drive_limit_power(y_error, x_error, turn_speed, max_speed, get_heading());
     }
 
     public void set_drive_speed(double turn_speed) {
@@ -284,6 +284,6 @@ public class VectorField {
         error = Utils.dist(get_pos(), path.forward(T));
 
         // Drive according to calculations
-        drive.drive(-powers.x, -powers.y, turn_speed, Math.toRadians(get_heading()), 1);
+        drive.drive(powers.x, powers.y, -turn_speed, -Math.toRadians(-get_heading()), 1);
     }
 }

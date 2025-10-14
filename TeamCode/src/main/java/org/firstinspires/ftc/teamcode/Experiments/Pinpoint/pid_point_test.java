@@ -34,7 +34,7 @@ public class pid_point_test extends OpMode {
 
     @Override
     public void init(){
-        odometry = new Odometry(hardwareMap, telemetry, 0, 0, 179);
+        odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
         wheelControl = new WheelControl(hardwareMap, odometry);
         dashboard = FtcDashboard.getInstance();
 
@@ -48,6 +48,7 @@ public class pid_point_test extends OpMode {
 
         vf = new VectorField(wheelControl, odometry, uk);
         path = new BCPath(follow_path);
+        vf.setPath(path, 90, true);
 
         pathPoints = path.get_path_points();
 
@@ -84,10 +85,6 @@ public class pid_point_test extends OpMode {
             .fillCircle(7.875, 6.625, 2)
             .strokeLine(7.875, 6.625, pathPoints.get(0).x, pathPoints.get(0).y);
 
-        for (int i=0; i<pathPoints.size(); i++) {
-            packet.fieldOverlay()
-                .fillCircle(pathPoints.get(i).x, pathPoints.get(i).y, 2);
-        }
         for (int i=0; i<pathPoints.size()-1; i++) {
             packet.fieldOverlay()
                 .strokeLine(pathPoints.get(i).x, pathPoints.get(i).y, pathPoints.get(i + 1).x, pathPoints.get(i + 1).y);

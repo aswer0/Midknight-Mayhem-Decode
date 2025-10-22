@@ -38,6 +38,7 @@ public class WheelControl {
     private VoltageSensor voltageSensor;
 
     Odometry odometry;
+    public HardwareMap hardwareMap;
 
     DriveCorrection driveCorrection;
     double target_angle = 0;
@@ -60,6 +61,7 @@ public class WheelControl {
         this.odometry = odometry;
         this.voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         this.driveCorrection = new DriveCorrection(odometry);
+        this.hardwareMap = hardwareMap;
 
         x_controller = new PIDFController(xp, xi, xd, xf);
         y_controller = new PIDFController(yp, yi, yd, yf);
@@ -257,7 +259,13 @@ public class WheelControl {
         double x = y_controller.calculate(point.y, ry);
         double h = h_controller.calculate(target_h, rh);
 
-        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading(use_kalman)), power);
+        double nominalVoltage = 13.0;
+        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double voltageComp = nominalVoltage / currentVoltage;
+        double compensatedPower = power * voltageComp;
+        compensatedPower = Math.min(compensatedPower, 1.0);
+
+        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading(use_kalman)), compensatedPower);
 
         return Math.sqrt((rx-x)*(rx-x) + (ry-y)*(ry-y)) <= dist_thresh;
     }

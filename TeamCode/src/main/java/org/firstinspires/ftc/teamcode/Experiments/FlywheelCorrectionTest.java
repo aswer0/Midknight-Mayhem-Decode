@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Experiments.PinpointTests;
+package org.firstinspires.ftc.teamcode.Experiments;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelCon
 
 @TeleOp
 @Config
-public class pinpoint_test extends OpMode {
+public class FlywheelCorrectionTest extends OpMode {
     Servo turret;
 
     Odometry odometry;

@@ -283,7 +283,12 @@ public class VectorField {
         // Error
         error = Utils.dist(get_pos(), path.forward(T));
 
+        double nominalVoltage = 13.0;
+        double currentVoltage = drive.hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double compensatedPower = nominalVoltage / currentVoltage;
+        compensatedPower = Math.min(compensatedPower, 1.0);
+
         // Drive according to calculations
-        drive.drive(powers.x, powers.y, -turn_speed, -Math.toRadians(-get_heading()), 1);
+        drive.drive(powers.x, powers.y, -turn_speed, -Math.toRadians(-get_heading()), compensatedPower);
     }
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Experiments.PinpointTests;
+package org.firstinspires.ftc.teamcode.Experiments;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 @TeleOp
 @Config
-public class pid_point_test extends OpMode {
+public class GVFtest extends OpMode {
     Odometry odometry;
     WheelControl wheelControl;
 

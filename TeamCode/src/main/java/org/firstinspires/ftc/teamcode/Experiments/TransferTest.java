@@ -10,10 +10,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class TransferTest extends OpMode {
     public CRServo transferServo;
 
-    // comment so i can make another commit hooray
-    // another comment so i can make another commit
-    // happy birthday benjamin wong
-
     @Override
     public void init() {
         transferServo = hardwareMap.get(CRServo.class, "transferServo");

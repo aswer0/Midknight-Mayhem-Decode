@@ -102,6 +102,15 @@ public class Odometry {
         return turretAngle;
 
     }
+    public void set_x(double x){
+        pinpoint.setPosX(x, DistanceUnit.INCH);
+    }
+    public void set_y(double y){
+        pinpoint.setPosY(y, DistanceUnit.INCH);
+    }
+    public void set_heaidng(double heading){
+        pinpoint.setHeading(heading, AngleUnit.DEGREES);
+    }
     public void reset_original_pos(){
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, start_x, start_y, AngleUnit.DEGREES, start_h));
         pinpoint.recalibrateIMU();

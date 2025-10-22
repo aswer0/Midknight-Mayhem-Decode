@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.Experiments.Pinpoint;
+package org.firstinspires.ftc.teamcode.Experiments.PinpointTests;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 
 @TeleOp
 @Config

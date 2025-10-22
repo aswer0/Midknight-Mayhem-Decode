@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.Experiments.Controllers;
+package org.firstinspires.ftc.teamcode.Experiments.Utils.Controllers;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experiments.Drivetrain.GVF.Utils;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.Utils;
 
 public class HPIDController {
     private double kp, ki, kd, ithres;

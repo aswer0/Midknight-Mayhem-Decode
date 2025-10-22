@@ -9,9 +9,11 @@ public class PIDFController {
     private double ki;
     private double kf;
     private double p;
+    private double i;
     private double d;
     private double e;
     private double e_last;
+    private double iSum = 0;
     private ElapsedTime timer;
 
     public PIDFController(double kp, double ki, double kd,double kf) {
@@ -23,9 +25,13 @@ public class PIDFController {
     }
 
     public double calculate(double tar, double act) {
+        double s = timer.seconds();
         e = tar - act;
         p = kp * (e);
-        d = kd * ((e - e_last) / timer.seconds());
+        i = ki * iSum;
+        d = kd * ((e - e_last) / s);
+
+        iSum += s * e;
         e_last = e;
         timer.reset();
         return p + d + kf;

@@ -1,21 +1,28 @@
 package org.firstinspires.ftc.teamcode.Experiments;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 
 @TeleOp
 public class DriveTest extends OpMode {
-    IMU imu;
+    double drivePower = 1;
+    boolean fieldOriented = false;
+    double botHeading = 0;
+
     DcMotorEx BL;
     DcMotorEx BR;
     DcMotorEx FL;
     DcMotorEx FR;
+
+    Odometry odo;
+
+    Gamepad currentGamepad1 = new Gamepad();
+    Gamepad previousGamepad1 = new Gamepad();
 
     @Override
     public void init() {
@@ -27,10 +34,31 @@ public class DriveTest extends OpMode {
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         FL.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        odo = new Odometry(hardwareMap, telemetry, 0, 0, 0);
     }
 
     @Override
     public void loop() {
+        previousGamepad1.copy(currentGamepad1);
+        currentGamepad1.copy(gamepad1);
+        odo.update();
+
+        if (!previousGamepad1.left_bumper && currentGamepad1.left_bumper) {
+            drivePower -= 0.1;
+        } else if (!previousGamepad1.right_bumper && currentGamepad1.right_bumper) {
+            drivePower += 0.1;
+        }
+
+        if (!previousGamepad1.options && currentGamepad1.options) {
+            botHeading = 0;
+            fieldOriented = !fieldOriented;
+        }
+
+        if (fieldOriented) {
+            botHeading = Math.toRadians(odo.get_heading(false));
+        }
+
+        //debug motor ports
         if (gamepad1.square) FL.setPower(1);
         if (gamepad1.triangle) FR.setPower(1);
         if (gamepad1.circle) BR.setPower(1);
@@ -40,13 +68,10 @@ public class DriveTest extends OpMode {
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
 
-
-        double botHeading = 0;
-
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        rotX = rotX * 1.1;
+        rotX *= 1.1;
 
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = (rotY + rotX + rx) / denominator;
@@ -58,5 +83,8 @@ public class DriveTest extends OpMode {
         BR.setPower(backRightPower);
         FL.setPower(frontLeftPower);
         FR.setPower(frontRightPower);
+
+        telemetry.addData("Drive power", drivePower);
+        telemetry.addData("Field oriented", fieldOriented);
     }
 }

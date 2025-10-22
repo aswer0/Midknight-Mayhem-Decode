@@ -15,7 +15,12 @@ public class Flywheel {
     public static boolean outputDebugInfo = false;
 
     private int targetRPM = 0;
+    private int currentRPM = 0;
+
     public static double kp=1, ki=0, kd=0;
+    public static int CLOSE_RPM = 3000;
+    public static int FAR_RPM = 4000;
+    public static int THRESHOLD = 100;
 
     public DcMotorEx flywheel;
     PIDFController flywheelController = new PIDFController(kp, ki, kd, 0);
@@ -28,10 +33,28 @@ public class Flywheel {
     public void setTargetRPM(int target) {
         targetRPM = target;
     }
+    public int getCurrentRPM() {
+        return (int) (flywheel.getVelocity() / 28 * 60);
+    }
+
+    public boolean isReady() {
+        return Math.abs(currentRPM - targetRPM) < THRESHOLD;
+    }
+
+    public void stop() {
+        setTargetRPM(0);
+    }
+    public void shootClose() {
+        setTargetRPM(CLOSE_RPM);
+    }
+    public void shootFar() {
+        setTargetRPM(FAR_RPM);
+    }
 
     public void update() {
-        double currentRPM = flywheel.getVelocity() / 28 * 60;
-        double power = flywheelController.calculate(targetRPM, currentRPM);
+        currentRPM = getCurrentRPM();
+        double power = 0;
+        if (targetRPM != 0) power = flywheelController.calculate(targetRPM, currentRPM);
         flywheel.setPower(power);
 
         if (outputDebugInfo) {

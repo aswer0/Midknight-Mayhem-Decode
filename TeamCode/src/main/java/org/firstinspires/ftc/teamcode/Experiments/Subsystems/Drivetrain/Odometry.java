@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -21,6 +23,8 @@ import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+
+// ToDO: Scale cov with measured position
 @Config
 public class Odometry {
     final String pinpointName = "pinpoint";
@@ -37,14 +41,14 @@ public class Odometry {
     public static double xyVariance = 25;
     public static double headingVariance = 100;
 
-    public static double llPosition = 0.91;
+    public static double llPosition = 0.88;
 
     public static boolean outputDebugInfo = true;
 
 
 
     Mat covariance = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
-    // x, y, yaw
+    // xMeasurements, yMeasurements, yaw
     Mat xEstimate = new Mat(3, 1, CvType.CV_64FC1, new Scalar(0));
 
     double start_x;
@@ -88,7 +92,7 @@ public class Odometry {
         llServo.setPosition(llPosition);
         pinpoint.update();
         predictMeasurement();
-        updateMeasurements();
+        //updateMeasurements();
     }
     public double get_turret_heading(boolean use_kalman){
         Point target = new Point(125, 130);
@@ -101,15 +105,6 @@ public class Odometry {
 
         return turretAngle;
 
-    }
-    public void set_x(double x){
-        pinpoint.setPosX(x, DistanceUnit.INCH);
-    }
-    public void set_y(double y){
-        pinpoint.setPosY(y, DistanceUnit.INCH);
-    }
-    public void set_heaidng(double heading){
-        pinpoint.setHeading(heading, AngleUnit.DEGREES);
     }
     public void reset_original_pos(){
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, start_x, start_y, AngleUnit.DEGREES, start_h));
@@ -135,50 +130,37 @@ public class Odometry {
     }
 
     // the math is based on https://file.tavsys.net/control/controls-engineering-in-frc.pdf#page=177
-    public void updateMeasurements() {
-        // Predict
-        LLResult result = limelight.getLatestResult();
-        if(result == null) return;
-        if(!result.isValid()) return;
+    public void updateMeasurements(LLResultTypes.FiducialResult tag) {
 
-
-        if(lastMeasurementTime == null) {
-            lastMeasurementTime = new ElapsedTime();
-        }
-        if(lastMeasurementTime.milliseconds() < 250) return;
-
-
-        Position measurement = result.getBotpose().getPosition();
+        Pose3D measurement = tag.getRobotPoseFieldSpace();
         // reject too deviant measurements
-        if(Math.pow(measurement.x - xEstimate.get(0,0)[0],2) + Math.pow(measurement.y - xEstimate.get(1,0)[0], 2) > Math.pow(0.25,2)) return;
-        Mat measurementM = new MatOfDouble(measurement.x, measurement.y, result.getBotpose().getOrientation().getYaw());
-        double[] mStdDev = result.getStddevMt1();
-        Mat measurementCov = new Mat(3, 3, CvType.CV_64FC1,new Scalar(0));
-        measurementCov.put(0,0,xyVariance);
-        measurementCov.put(1,1,xyVariance);
-        measurementCov.put(2,2, headingVariance);
+        //if(Math.pow(measurement.xMeasurements - xEstimate.get(0,0)[0],2) + Math.pow(measurement.yMeasurements - xEstimate.get(1,0)[0], 2) > Math.pow(0.25,2)) return;
+        Mat measurementM = new MatOfDouble(measurement.getPosition().x, measurement.getPosition().y, measurement.getOrientation().getYaw());
+        Mat measurementCov = calculateMeasurementCovariance(tag);
 
 
         // Calc Kalman Gain
+        // K = PCᵀS⁻¹ where S = (CPCᵀ + R) = P + R (because C = I)
+        // KS = PCᵀ
+        // SᵀKᵀ = CPᵀ
+        Mat kT = new Mat(3, 3, CvType.CV_64FC1); // kT = solve(Sᵀ, CPᵀ or CP)
+        Core.add(covariance, measurementCov, kT);
+        Core.solve(kT, covariance, kT);
         Mat kalmanGain = new Mat(3, 3, CvType.CV_64FC1);
-        covariance.copyTo(kalmanGain);
-        Core.add(measurementCov, kalmanGain, kalmanGain); // S = P + R
-        kalmanGain = covariance.matMul(kalmanGain.inv()); // P*S^-1
-        Mat a = new Mat(3, 3, CvType.CV_64FC1);
-        Core.subtract(Mat.eye(3,3,CvType.CV_64FC1), kalmanGain,a); // I - K
+        Core.transpose(kT, kalmanGain);
 
         // Update Covariance
+        Mat a = new Mat(3, 3, CvType.CV_64FC1);
+        Core.subtract(Mat.eye(3,3,CvType.CV_64FC1), kalmanGain,a);
         Mat aT = new Mat(3, 3, CvType.CV_64FC1); // (I-K)^T
         Core.transpose(a, aT);
         covariance = a.matMul(covariance).matMul(aT); // (I - K)*P*(I - K)^T
-        Mat kT = new Mat(3, 3, CvType.CV_64FC1);
-        Core.transpose(kalmanGain, kT);
-        Core.add(covariance, kalmanGain.matMul(measurementCov).matMul(kT), covariance); // (I - K)*P*(I - K)^T * KRK^t
+        Core.add(covariance, kalmanGain.matMul(measurementCov).matMul(kT), covariance); // (I - K)*P*(I - K)^T + KRK^t
 
         // Update X variable
-        Mat xDelta = new Mat(3, 1, CvType.CV_64FC1); // (x - m)
+        Mat xDelta = new Mat(3, 1, CvType.CV_64FC1); // (xMeasurements - m)
         Core.subtract(measurementM, xEstimate, xDelta);
-        Core.add(xEstimate, kalmanGain.matMul(xDelta), xEstimate);// x + K(x - m)
+        Core.add(xEstimate, kalmanGain.matMul(xDelta), xEstimate);// xMeasurements + K(xMeasurements - m)
         xEstimate.put(2,0,wrapAngle(xEstimate.get(2,0)[0]));
 
         pinpoint.setPosition(new Pose2D(DistanceUnit.METER, xEstimate.get(0,0)[0], xEstimate.get(1,0)[0], AngleUnit.DEGREES, xEstimate.get(2,0)[0]));
@@ -187,18 +169,24 @@ public class Odometry {
             packet.put("X", xEstimate.get(0, 0)[0] / 0.9144 * 36);
             packet.put("Y", xEstimate.get(1, 0)[0] / 0.9144 * 36);
             packet.put("H", xEstimate.get(2, 0)[0]);
-            packet.put("Measured X", measurement.x / 0.9144 * 36);
-            packet.put("Measured Y", measurement.y / 0.9144 * 36);
-            packet.put("Measured H", result.getBotpose().getOrientation().getYaw());
+            packet.put("Measured X", measurement.getPosition().x / 0.9144 * 36);
+            packet.put("Measured Y", measurement.getPosition().y / 0.9144 * 36);
+            packet.put("Measured H", measurement.getOrientation().getYaw());
             packet.fieldOverlay().fillRect(xEstimate.get(0,0)[0] / 0.9144 * 36, xEstimate.get(1,0)[0] / 0.9144 * 36, 2, 2);
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
     }
 
-
+    public Mat calculateMeasurementCovariance(LLResultTypes.FiducialResult tag) {
+        Mat measurementCov = new Mat(3, 3, CvType.CV_64FC1,new Scalar(0));
+        measurementCov.put(0,0,xyVariance);
+        measurementCov.put(1,1,xyVariance);
+        measurementCov.put(2,2, headingVariance);
+        return measurementCov;
+    }
     public void predictMeasurement() {
         // updateX
-        // (y, -x)
+        // (yMeasurements, -xMeasurements)
         Pose2D position = pinpoint.getPosition();
         xEstimate.put(0,0,position.getX(DistanceUnit.METER));
         xEstimate.put(1,0,position.getY(DistanceUnit.METER));
@@ -208,8 +196,8 @@ public class Odometry {
 
         //update Covariances
         Mat stdDevM = (new Mat(3, 3, CvType.CV_64FC1, new Scalar(0)));
-        stdDevM.put(0,0,Math.pow(0.1, 2)); // TODO these need to be tuned
-        stdDevM.put(1,1,Math.pow(0.1, 2));
+        stdDevM.put(0,0,Math.pow(0.1, 2));
+        stdDevM.put(1,1,Math.pow(0.1, 2)); // TODO: scale covariance with displacement
         stdDevM.put(2,2,Math.pow(0.1, 2));
         //Core.multiply(stdDevM, new Scalar(currentTime - lastTime), stdDevM);
         Core.add(covariance, stdDevM, covariance);

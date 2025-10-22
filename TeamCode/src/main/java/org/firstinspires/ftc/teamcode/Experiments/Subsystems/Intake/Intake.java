@@ -14,6 +14,9 @@ public class Intake {
     public Servo intakeDoor;
     public Sensors sensors;
 
+    public double v;
+    public double v_last;
+
     public Intake(HardwareMap hardwareMap, Sensors sensors) {
         this.sensors = sensors;
 
@@ -30,6 +33,20 @@ public class Intake {
             intakeDoor.setPosition(0.25);
         } else {
             intakeDoor.setPosition(0.75);
+        }
+    }
+
+    public void motorReverse() {intakeMotor.setPower(1.0);}
+
+    public boolean jamDetect() {
+        v = intakeMotor.getVelocity();
+
+        if (v_last - v < 500) {
+            v_last = v;
+            return true;
+        } else {
+            v_last = v;
+            return false;
         }
     }
 }

@@ -11,6 +11,9 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.BCPa
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -63,6 +66,10 @@ public class LeagueMeet1Auto extends OpMode {
     BCPath path;
     ElapsedTime timer;
 
+    Intake intake;
+    Flywheel flywheel;
+    ArmTransfer transfer;
+
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static boolean uk = false;
@@ -71,6 +78,7 @@ public class LeagueMeet1Auto extends OpMode {
     public static double shoot_angle = 116;
     public static double power = 0.8;
     int loops = 0;
+    int shots = 0;
 
     ArrayList<Point> pathPoints;
 
@@ -98,12 +106,16 @@ public class LeagueMeet1Auto extends OpMode {
         switch (state){
             case intakeBatch:
                 vf.move();
+                intake.motorOn();
+
                 if (vf.at_end(gvf_threshold)){
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
+                intake.motorOff();
+
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
                     timer.reset();
                     state = State.shootBall;
@@ -111,12 +123,24 @@ public class LeagueMeet1Auto extends OpMode {
                 break;
 
             case shootBall:
+                flywheel.shootFar();
+                flywheel.update();
+
+                boolean transferReady = transfer.update();
+
                 wheelControl.drive(0, 0, 0, 0, 0);
-                if (timer.milliseconds() >= 2000){
+
+                if (flywheel.isReady() && transferReady){
+                    transfer.transfer();
+                    shots++;
+                }
+
+                if (shots > 3 && !flywheel.isReady()){
                     loops++;
                     vf.setPath(follow_paths[loops], 180, true);
                     pathPoints = follow_paths[loops].get_path_points();
 
+                    shots = 0;
                     state = State.intakeBatch;
                 }
 

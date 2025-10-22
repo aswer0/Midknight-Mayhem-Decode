@@ -24,6 +24,7 @@ public class Intake {
         intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
     public void motorOn() {intakeMotor.setPower(-1.0);}
+    public void motorOff() {intakeMotor.setPower(0);}
     public void runIntake() {
         int color = sensors.getFrontColor();
 

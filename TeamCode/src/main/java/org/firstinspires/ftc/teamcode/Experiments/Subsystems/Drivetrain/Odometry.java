@@ -138,7 +138,6 @@ public class Odometry {
         Mat measurementM = new MatOfDouble(measurement.getPosition().x, measurement.getPosition().y, measurement.getOrientation().getYaw());
         Mat measurementCov = calculateMeasurementCovariance(tag);
 
-
         // Calc Kalman Gain
         // K = PCᵀS⁻¹ where S = (CPCᵀ + R) = P + R (because C = I)
         // KS = PCᵀ

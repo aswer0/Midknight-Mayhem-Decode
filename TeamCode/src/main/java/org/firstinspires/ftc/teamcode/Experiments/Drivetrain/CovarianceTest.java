@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Experiments.Drivetrain;
 
-import static org.firstinspires.ftc.teamcode.Experiments.Drivetrain.Odometry.llPosition;
+import static org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry.llPosition;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -53,6 +53,7 @@ public class CovarianceTest extends LinearOpMode {
             prevStartCapture = !startCapture;
             int iterations = 0;
             Mat samples = new Mat(3, numIterations, CvType.CV_64FC1, new Scalar(0));
+            double[] area = new double[numIterations];
             while (iterations < numIterations) {
                 if(isStopRequested()) return;
                 LLResult result = limelight.getLatestResult();
@@ -60,7 +61,6 @@ public class CovarianceTest extends LinearOpMode {
                 if (result == null) continue;
                 if (!result.isValid()) continue;
                 lastTimestamp = result.getTimestamp();
-                double[] area = new double[numIterations];
                 for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
                     if (tag.getFiducialId() != tagId) continue;
                     Pose3D position = tag.getCameraPoseTargetSpace();
@@ -105,12 +105,13 @@ public class CovarianceTest extends LinearOpMode {
 //            Core.transpose(a, aT);
 //            covarianceMatrix = a.matMul(covarianceMatrix).matMul(aT);
             // Ellipse Rotation ~ -2.06628*atan2(-Y,X) + 186.08724 (prob 2*atan2(X, -Y))
-            // 0.3 (uncertain) - variance on the axis perpendicular to the tag
-            //
+            // Long-span (heading is around -28) \left(3.65493\times10^{-7}\right)\cdot x^{-3.33343}
+            // Long-span (perpendicular to apriltag) 0.00000513871\cdot x^{-2.964}
             packet.put("X", mean.get(0, 0)[0]);
             packet.put("Y", mean.get(1, 0)[0]);
             packet.put("Direction from April Tag", Math.toDegrees(Math.atan2(-mean.get(1,0)[0],mean.get(0,0)[0])));
             packet.put("H", mean.get(2, 0)[0]);
+            packet.put("Area", Arrays.stream(area).reduce(Double::sum).getAsDouble()/numIterations);
 
 
             // draw the error ellipse
@@ -131,7 +132,7 @@ public class CovarianceTest extends LinearOpMode {
             packet.put("Ellipse rotation", Math.toDegrees(Math.atan2(eigenvectors.get(0,1)[0],eigenvectors.get(0,0)[0])));
             packet.put("a",eigenvalues.get(0,0)[0]);
             packet.put("b",eigenvalues.get(1,0)[0]);
-            //packet.put("Covariance matrix", covarianceMatrix.dump().substring(1, covarianceMatrix.dump().length() - 1).replace("\n",""));
+            packet.put("Covariance matrix", covarianceMatrix.dump().substring(1, covarianceMatrix.dump().length() - 1).replace("\n",""));
             dashboard.sendTelemetryPacket(packet);
             telemetry.addData("c", covarianceMatrix.dump());
         }

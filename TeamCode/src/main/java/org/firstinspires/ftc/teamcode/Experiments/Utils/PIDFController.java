@@ -23,6 +23,13 @@ public class PIDFController {
         this.kf = kf;
         timer = new ElapsedTime();
     }
+    public PIDFController(PIDFCoefficients coefficients) {
+        this.kp = coefficients.p;
+        this.kd = coefficients.d;
+        this.ki = coefficients.i;
+        this.kf = coefficients.f;
+        timer = new ElapsedTime();
+    }
 
     public static double wrapError(double target, double current) {
         double error = (target - current + 180) % 360;

@@ -55,9 +55,9 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.right_bumper) {
             intake.motorOn();
         } else if (currentGamepad1.right_trigger > 0.3) {
-            //reverse intake
+            intake.motorReverse();
         } else {
-            //stop intake
+            intake.motorOff();
         }
 
         if (currentGamepad1.cross && !previousGamepad1.cross) {

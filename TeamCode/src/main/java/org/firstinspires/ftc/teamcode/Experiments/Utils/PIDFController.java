@@ -19,7 +19,7 @@ public class PIDFController {
     public PIDFController(double kp, double ki, double kd,double kf) {
         this.kp = kp;
         this.kd = kd;
-        this.ki = 0;
+        this.ki = ki;
         this.kf = kf;
         timer = new ElapsedTime();
     }
@@ -34,6 +34,6 @@ public class PIDFController {
         iSum += s * e;
         e_last = e;
         timer.reset();
-        return p + d + kf;
+        return p + i + d + kf;
     }
 }

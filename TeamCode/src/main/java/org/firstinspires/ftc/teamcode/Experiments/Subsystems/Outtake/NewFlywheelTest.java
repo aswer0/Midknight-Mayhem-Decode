@@ -30,6 +30,15 @@ public class NewFlywheelTest extends OpMode {
         } else if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {
             target += 50;
         }
+
+        if (currentGamepad1.cross && !previousGamepad1.cross) {
+            target = 0;
+        } else if (currentGamepad1.square && !previousGamepad1.square) {
+            target = 3300;
+        } else if (currentGamepad1.circle && !previousGamepad1.circle) {
+            target = 4500;
+        }
+
         flywheel.setTargetRPM(target);
 
         telemetry.addData("target RPM", target);

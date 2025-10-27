@@ -15,7 +15,7 @@ import org.opencv.core.Point;
 @Config
 public class WheelControl {
     public static double xp = 0.25, xi = 0, xd = 0.01, xf = 0;
-    public static double yp = 0.3, yi = 0, yd = 0.008, yf = 0;
+    public static double yp = 0.3, yi = 0, yd = 0.01, yf = 0;
     public static double hp = 0.03, hi = 0, hd = 0.003, hF = 0;
 
     public static double x_sign = 1;
@@ -23,6 +23,7 @@ public class WheelControl {
     public static double h_sign = -1;
     public static double r_sign = -1;
     public static double oh_sign = -1;
+    //real drive signs: -1 -1, 1, -1, -1
 
     PIDFController x_controller;
     PIDFController y_controller;
@@ -250,6 +251,7 @@ public class WheelControl {
             (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
         }
     }
+
     public boolean drive_to_point(Point point, double target_h, double power, double dist_thresh, boolean use_kalman){
         double rx = odometry.get_x(use_kalman);
         double ry = odometry.get_y(use_kalman);
@@ -257,7 +259,7 @@ public class WheelControl {
 
         double y = x_controller.calculate(point.x, rx);
         double x = y_controller.calculate(point.y, ry);
-        double h = h_controller.calculate(target_h, rh);
+        double h = h_controller.calculate_heading(target_h, rh);
 
         double nominalVoltage = 13.0;
         double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
@@ -267,6 +269,12 @@ public class WheelControl {
 
         this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading(use_kalman)), compensatedPower);
 
-        return Math.sqrt((rx-x)*(rx-x) + (ry-y)*(ry-y)) <= dist_thresh;
+        double error = Math.sqrt((rx-point.x)*(rx-point.x) + (ry-point.y)*(ry-point.y));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("error from target", error);
+        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+
+        return error <= dist_thresh;
     }
 }

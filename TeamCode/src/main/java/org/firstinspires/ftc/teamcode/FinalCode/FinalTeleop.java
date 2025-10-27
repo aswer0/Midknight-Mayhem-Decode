@@ -50,7 +50,7 @@ public class FinalTeleop extends OpMode {
             //set heading to 0
         }
 
-        drive.drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, Math.toRadians(odo.get_heading(useKalmanOdo)), drivePower);
+        drive.drive(-gamepad1.left_stick_y, -1.2 * gamepad1.left_stick_x, gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
 
         if (currentGamepad1.right_bumper) {
             intake.motorOn();

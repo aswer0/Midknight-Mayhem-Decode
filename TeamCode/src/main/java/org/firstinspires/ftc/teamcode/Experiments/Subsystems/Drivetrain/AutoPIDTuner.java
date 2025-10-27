@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -20,21 +21,25 @@ public class AutoPIDTuner extends OpMode {
     public static double k = 0.5;
     public static boolean uk = false;
 
-    public static Point t = new Point(30, 30);
-    public static double ta = 90;
+    public static double tx=30, ty=30, th=90;
 
     Odometry odometry;
     WheelControl wheelControl;
 
-    public static Mat gains = new Mat(3, 2, CvType.CV_64FC1, new Scalar(0.2));
+    public static Mat k_matrix = new Mat(3, 2, CvType.CV_64FC1);
+    public static Mat t_matrix = new Mat(3, 1, CvType.CV_64FC1);
 
     @Override
     public void init() {
         odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
-        gains.row(0).setTo(new Scalar(0.3));
-        gains.row(1).setTo(new Scalar(0.02));
+        k_matrix.col(0).setTo(new Scalar(0.3));
+        k_matrix.col(1).setTo(new Scalar(0.02));
+
+        t_matrix.put(0, 0, tx);
+        t_matrix.put(0, 1, ty);
+        t_matrix.put(0, 2, th);
     }
 
     public double s(double x, double k) {
@@ -45,22 +50,17 @@ public class AutoPIDTuner extends OpMode {
     public void loop() {
         odometry.update();
 
-        Mat pos = new Mat(1, 3, CvType.CV_64FC1);
-        pos.put(0, 0, odometry.get_x(uk));
-        pos.put(0, 1, odometry.get_y(uk));
-        pos.put(0, 2, odometry.get_heading(uk));
+        Mat r_matrix = new Mat(3, 1, CvType.CV_64FC1);
+        r_matrix.put(0, 0, odometry.get_x(uk));
+        r_matrix.put(0, 1, odometry.get_y(uk));
+        r_matrix.put(0, 2, odometry.get_heading(uk));
 
-        Mat grad = new Mat(2, 3, CvType.CV_64FC1);
+        Mat kp = new Mat(3, 1, CvType.CV_64FC1);
+        Mat kd = new Mat(3, 1, CvType.CV_64FC1);
+        Core.subtract(r_matrix, t_matrix, kp);
+        Core.subtract(t_matrix, r_matrix, kd);
 
-        grad.put(0, 0, pos.get(0, 0)[0]-t.x);
-        grad.put(0, 1, pos.get(0, 1)[0]-t.y);
-        grad.put(0, 2, pos.get(0, 1)[0]-ta);
-
-        grad.put(1, 0, t.x-pos.get(0, 0)[0]);
-        grad.put(1, 1, t.y-pos.get(0, 1)[0]);
-        grad.put(1, 2, ta-pos.get(0, 1)[0]);
-
-
+        Mat grad_matrix = new Mat(3, 2, CvType.CV_64FC1);
 
     }
 }

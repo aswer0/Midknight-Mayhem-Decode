@@ -23,6 +23,13 @@ public class PIDFController {
         this.kf = kf;
         timer = new ElapsedTime();
     }
+    public PIDFController(PIDFCoefficients coefficients) {
+        this.kp = coefficients.p;
+        this.kd = coefficients.d;
+        this.ki = coefficients.i;
+        this.kf = coefficients.f;
+        timer = new ElapsedTime();
+    }
 
     public double calculate(double tar, double act) {
         double s = timer.seconds();

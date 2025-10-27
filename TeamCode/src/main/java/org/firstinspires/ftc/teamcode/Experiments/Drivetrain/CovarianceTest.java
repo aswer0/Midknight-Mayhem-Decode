@@ -132,7 +132,7 @@ public class CovarianceTest extends LinearOpMode {
             packet.put("Ellipse rotation", Math.toDegrees(Math.atan2(eigenvectors.get(0,1)[0],eigenvectors.get(0,0)[0])));
             packet.put("a",eigenvalues.get(0,0)[0]);
             packet.put("b",eigenvalues.get(1,0)[0]);
-            packet.put("Covariance matrix", covarianceMatrix.dump().substring(1, covarianceMatrix.dump().length() - 1).replace("\n",""));
+            //packet.put("Covariance matrix", covarianceMatrix.dump().substring(1, covarianceMatrix.dump().length() - 1).replace("\n",""));
             dashboard.sendTelemetryPacket(packet);
             telemetry.addData("c", covarianceMatrix.dump());
         }

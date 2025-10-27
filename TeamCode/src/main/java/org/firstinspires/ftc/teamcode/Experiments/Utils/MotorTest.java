@@ -1,29 +1,43 @@
 package org.firstinspires.ftc.teamcode.Experiments.Utils;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
+import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 
-@Config
 @TeleOp
+@Config
 public class MotorTest extends OpMode {
     DcMotorEx motor;
-    public static double power = 0.6;
+    FtcDashboard dashboard;
+    static public double power = 1d;
+    PIDFController controller;
+    static public PIDFCoefficients coefficients = new PIDFCoefficients(0.01,0,0,0);
 
     @Override
     public void init() {
-        motor = hardwareMap.get(DcMotorEx.class, "motor");
+        controller = new PIDFController(coefficients);
+        dashboard = FtcDashboard.getInstance();
+        motor = hardwareMap.get(DcMotorEx.class, "flywheel");
+        //motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
     public void loop() {
-        double p = gamepad1.left_stick_y;
-        motor.setPower(p*power);
+        //motor.setVelocity(power, AngleUnit.DEGREES);
+
+        //motor.setPower(controller.calculate((motor.getVelocity()/28 * 60), power));
+        //motor.setPower(power);
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("RPM", motor.getVelocity()/28 * 60); // REV HD hex has 28 counts per revolution
+        dashboard.sendTelemetryPacket(packet);
     }
+
+
 }

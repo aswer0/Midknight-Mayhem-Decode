@@ -46,7 +46,6 @@ public class Odometry {
     public static boolean outputDebugInfo = true;
 
 
-
     Mat covariance = new Mat(3, 3, CvType.CV_64FC1, new Scalar(0));
     // xMeasurements, yMeasurements, yaw
     Mat xEstimate = new Mat(3, 1, CvType.CV_64FC1, new Scalar(0));
@@ -86,6 +85,9 @@ public class Odometry {
         covariance.put(0, 0, 1);
         covariance.put(1, 1, 1);
         covariance.put(2, 2, 1);
+    }
+    public void setOutputDebugInfo(boolean mode){
+        outputDebugInfo = mode;
     }
 
     public void update(){

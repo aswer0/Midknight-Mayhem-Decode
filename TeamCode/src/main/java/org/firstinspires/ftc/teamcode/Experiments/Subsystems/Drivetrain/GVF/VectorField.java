@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -9,11 +12,18 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.opencv.core.Point;
 
+@Config
 public class VectorField {
     // Robot controls
     public Odometry odometry;
     public WheelControl drive;
     public BCPath path;
+
+    public static double x_sign = 1;
+    public static double y_sign = 1;
+    public static double h_sign = -1;
+    public static double r_sign = -1;
+    public static double oh_sign = -1;
 
     // Motion profiling
     double velocity_update_rate = 0.1;
@@ -23,13 +33,13 @@ public class VectorField {
     public Point velocity = new Point(0, 0);
 
     // Speed tuning
-    double max_speed = 1;
-    double min_speed = 0.8;
-    double max_turn_speed = 0.5;
+    public static double max_speed = 1;
+    public static double min_speed = 0.8;
+    public static double max_turn_speed = 0.5;
 
     // Correction constants
-    double path_corr = 0.1;
-    double centripetal_corr = 0.02;
+    public static double path_corr = 0.4;
+    public static double centripetal_corr = 0.3;
     //double centripetal_threshold = 10;
     double accel_corr = 0;
 
@@ -245,13 +255,7 @@ public class VectorField {
     public void pid_to_point(Point p, double target_heading, double max_speed) {
         end_target = p;
 
-        // PID errors
-        x_error = x_PID.calculate(get_x(), p.x);
-        y_error = y_PID.calculate(get_y(), p.y);
-        turn_speed = h_PID.calculate(get_heading(), target_heading);
-
-        // Drive
-        drive.drive_limit_power(y_error, x_error, turn_speed, max_speed, get_heading());
+        drive.drive_to_point(p, target_heading, max_speed, 1, use_kalman);
     }
 
     public void set_drive_speed(double turn_speed) {
@@ -264,6 +268,10 @@ public class VectorField {
     public void move() {
         // Set end target
         end_target = path.final_point;
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("path error", error);
+        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
 
         // PID at the end
         if (T > T_from_end(PID_dist)) {
@@ -289,6 +297,6 @@ public class VectorField {
         compensatedPower = Math.min(compensatedPower, 1.0);
 
         // Drive according to calculations
-        drive.drive(powers.x, powers.y, -turn_speed, -Math.toRadians(-get_heading()), compensatedPower);
+        drive.drive(x_sign*powers.x, y_sign*powers.y, h_sign*turn_speed, r_sign*Math.toRadians(oh_sign*get_heading()), compensatedPower);
     }
 }

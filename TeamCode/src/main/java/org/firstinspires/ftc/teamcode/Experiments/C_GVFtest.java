@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 @TeleOp
 @Config
-public class GVFtest extends OpMode {
+public class C_GVFtest extends OpMode {
     Odometry odometry;
     WheelControl wheelControl;
 
@@ -32,6 +32,7 @@ public class GVFtest extends OpMode {
     @Override
     public void init(){
         odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        odometry.setOutputDebugInfo(false);
         wheelControl = new WheelControl(hardwareMap, odometry);
         dashboard = FtcDashboard.getInstance();
 

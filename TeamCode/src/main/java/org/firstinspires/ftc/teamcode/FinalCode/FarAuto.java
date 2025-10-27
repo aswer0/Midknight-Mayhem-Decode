@@ -7,11 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experiments.Sensors;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
@@ -20,8 +21,8 @@ import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class LeagueMeet1Auto extends OpMode {
-    public static Point start_point = new Point(50, 6.625);
+public class FarAuto extends OpMode {
+    public static Point start_point = new Point(47, 6.625);
     public static Point shoot_point = new Point(52, 11);
 
     BCPath[] follow_paths = {
@@ -58,7 +59,7 @@ public class LeagueMeet1Auto extends OpMode {
         shootBall,
     }
 
-    State state = State.intakeBatch;
+    State state = State.driveToShootPos;
 
     WheelControl wheelControl;
     Odometry odometry;
@@ -69,6 +70,7 @@ public class LeagueMeet1Auto extends OpMode {
     Intake intake;
     Flywheel flywheel;
     ArmTransfer transfer;
+    Sensors sensors;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -77,7 +79,7 @@ public class LeagueMeet1Auto extends OpMode {
     public static double pid_threshold = 1.2;
     public static double shoot_angle = 116;
     public static double power = 0.8;
-    int loops = 0;
+    int loops = -1;
     int shots = 0;
 
     ArrayList<Point> pathPoints;
@@ -90,8 +92,10 @@ public class LeagueMeet1Auto extends OpMode {
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
 
-        vf.setPath(follow_paths[loops], 180, true);
-        pathPoints = follow_paths[loops].get_path_points();
+        sensors = new Sensors(hardwareMap);
+        intake = new Intake(hardwareMap, sensors);
+        transfer = new ArmTransfer(hardwareMap);
+        flywheel = new Flywheel(hardwareMap);
     }
 
     @Override

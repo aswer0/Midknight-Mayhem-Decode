@@ -23,6 +23,32 @@ public class PIDFController {
         this.kf = kf;
         timer = new ElapsedTime();
     }
+    public PIDFController(PIDFCoefficients coefficients) {
+        this.kp = coefficients.p;
+        this.kd = coefficients.d;
+        this.ki = coefficients.i;
+        this.kf = coefficients.f;
+        timer = new ElapsedTime();
+    }
+
+    public static double wrapError(double target, double current) {
+        double error = (target - current + 180) % 360;
+        if (error < 0) error += 360;
+        return error - 180;
+    }
+    public double calculate_heading(double tar, double act) {
+        double s = timer.seconds();
+
+        e = wrapError(tar, act);
+        p = kp * (e);
+        i = ki * iSum;
+        d = kd * ((e - e_last) / s);
+
+        iSum += s * e;
+        e_last = e;
+        timer.reset();
+        return p + d + kf;
+    }
 
     public double calculate(double tar, double act) {
         double s = timer.seconds();

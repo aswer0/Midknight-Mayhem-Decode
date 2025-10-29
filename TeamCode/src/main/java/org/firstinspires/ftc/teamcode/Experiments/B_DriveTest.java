@@ -18,7 +18,7 @@ public class B_DriveTest extends OpMode {
 
     public static double x_sign = -1;
     public static double y_sign = -1;
-    public static double h_sign = 1;
+    public static double h_sign = -1;
     public static double r_sign = -1;
     public static double oh_sign = -1;
 
@@ -28,14 +28,6 @@ public class B_DriveTest extends OpMode {
     Gamepad previousGamepad1 = new Gamepad();
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
-
-    @Override
-    public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
-        drive = new WheelControl(hardwareMap, odo);
-
-        odo.setOutputDebugInfo(false);
-    }
 
     @Override
     public void loop() {
@@ -65,5 +57,13 @@ public class B_DriveTest extends OpMode {
         telemetry.addData("Y position", odo.get_y(false));
         telemetry.addData("Heading position", odo.get_heading(false));
         telemetry.update();
+    }
+    @Override
+    public void init() {
+        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        drive = new WheelControl(hardwareMap, odo);
+
+        odo.setOutputDebugInfo(false);
+
     }
 }

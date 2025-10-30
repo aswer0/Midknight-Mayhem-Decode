@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 
 @TeleOp
 @Config
@@ -18,11 +19,13 @@ public class B_DriveTest extends OpMode {
 
     public static double x_sign = -1;
     public static double y_sign = -1;
-    public static double h_sign = 1;
+    public static double h_sign = -1;
     public static double r_sign = -1;
     public static double oh_sign = -1;
 
     Odometry odo;
+    Intake intake;
+    Sensors sensors;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -30,23 +33,17 @@ public class B_DriveTest extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     @Override
-    public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
-        drive = new WheelControl(hardwareMap, odo);
-
-        odo.setOutputDebugInfo(false);
-    }
-
-    @Override
     public void loop() {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
+        sensors = new Sensors(hardwareMap);
+        intake = new Intake(hardwareMap, sensors);
         odo.update();
 
         if (!previousGamepad1.left_bumper && currentGamepad1.left_bumper) {
-            drivePower -= 0.1;
+            intake.motorOn();
         } else if (!previousGamepad1.right_bumper && currentGamepad1.right_bumper) {
-            drivePower += 0.1;
+            intake.motorOff();
         }
 
         double y = gamepad1.left_stick_y;
@@ -65,5 +62,13 @@ public class B_DriveTest extends OpMode {
         telemetry.addData("Y position", odo.get_y(false));
         telemetry.addData("Heading position", odo.get_heading(false));
         telemetry.update();
+    }
+    @Override
+    public void init() {
+        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        drive = new WheelControl(hardwareMap, odo);
+
+        odo.setOutputDebugInfo(false);
+
     }
 }

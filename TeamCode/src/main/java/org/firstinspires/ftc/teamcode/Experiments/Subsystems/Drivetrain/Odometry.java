@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -55,13 +56,13 @@ public class Odometry {
     double start_h;
 
     public Odometry(HardwareMap hardwareMap, Telemetry telemetry, double start_x, double start_y, double start_h){
-        limelight = hardwareMap.get(Limelight3A.class, limelightName);
+//        limelight = hardwareMap.get(Limelight3A.class, limelightName);
         this.pinpoint = hardwareMap.get(PinpointOdometry.class, pinpointName);
         this.telemetry = telemetry;
-        llServo = hardwareMap.get(Servo.class, "llServo");
-        llServo.setPosition(llPosition);
-        limelight.pipelineSwitch(0);
-        limelight.start();
+//        llServo = hardwareMap.get(Servo.class, "llServo");
+//        llServo.setPosition(llPosition);
+//        limelight.pipelineSwitch(0);
+//        limelight.start();
 
         pinpoint.setEncoderResolution(PinpointOdometry.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(PinpointOdometry.EncoderDirection.REVERSED, PinpointOdometry.EncoderDirection.FORWARD);
@@ -91,10 +92,10 @@ public class Odometry {
     }
 
     public void update(){
-        llServo.setPosition(llPosition);
-        pinpoint.update();
-        predictMeasurement();
+        //llServo.setPosition(llPosition);
+        //predictMeasurement();
         //updateMeasurements();
+        pinpoint.update();
     }
     public double get_turret_heading(boolean use_kalman){
         Point target = new Point(125, 130);
@@ -129,6 +130,16 @@ public class Odometry {
             return xEstimate.get(1, 0)[0] / 0.9144 * 36;
         }
         return pinpoint.getPosY(DistanceUnit.INCH);
+    }
+
+    public double get_x_velocity(){
+        return pinpoint.getVelX(DistanceUnit.INCH);
+    }
+    public double get_y_velocity(){
+        return pinpoint.getVelY(DistanceUnit.INCH);
+    }
+    public double get_h_velocity(){
+        return pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
     }
 
     // the math is based on https://file.tavsys.net/control/controls-engineering-in-frc.pdf#page=177

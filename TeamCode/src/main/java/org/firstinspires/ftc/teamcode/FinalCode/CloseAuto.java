@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.Sensors;
@@ -57,9 +58,10 @@ public class CloseAuto extends OpMode {
         intakeBatch,
         driveToShootPos,
         shootBall,
+        wait,
     }
 
-    State state = State.driveToShootPos;
+    State state = State.wait;
 
     WheelControl wheelControl;
     Odometry odometry;
@@ -73,6 +75,8 @@ public class CloseAuto extends OpMode {
     Sensors sensors;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
+    Gamepad currentGamepad1 = new Gamepad();
+    Gamepad previousGamepad1 = new Gamepad();
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
@@ -81,6 +85,12 @@ public class CloseAuto extends OpMode {
     public static double power = 0.8;
     int loops = -1;
     int shots = 0;
+
+    int wait_time = 0;
+
+    boolean do_path1 = true;
+    boolean do_path2 = true;
+    boolean do_path3 = true;
 
     ArrayList<Point> pathPoints;
 
@@ -103,6 +113,29 @@ public class CloseAuto extends OpMode {
     @Override
     public void init_loop(){
         timer.reset();
+
+        if (!previousGamepad1.square && currentGamepad1.square){
+            do_path1 = !do_path1;
+        }
+        if (!previousGamepad1.triangle && currentGamepad1.triangle){
+            do_path2 = !do_path2;
+        }
+        if (!previousGamepad1.circle && currentGamepad1.circle){
+            do_path3 = !do_path3;
+        }
+        if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
+            wait_time--;
+            wait_time = Math.max(wait_time, 0);
+        }
+        if (!previousGamepad1.dpad_right && currentGamepad1.dpad_right){
+            wait_time++;
+        }
+
+        telemetry.addData("do path 1? (square)", do_path1);
+        telemetry.addData("do path 2? (triangle)", do_path2);
+        telemetry.addData("do path 3? (circle)", do_path3);
+        telemetry.addData("wait time (dpad)", wait_time);
+        telemetry.update();
     }
 
     @Override
@@ -110,7 +143,17 @@ public class CloseAuto extends OpMode {
         odometry.update();
 
         switch (state){
+            case wait:
+                if (timer.milliseconds() >= wait_time){
+                    state = State.driveToShootPos;
+                }
+                break;
+
             case intakeBatch:
+                if (loops >= 3){
+                    state = State.intakeBatch;
+                }
+
                 vf.move();
                 intake.motorOn();
 
@@ -142,7 +185,17 @@ public class CloseAuto extends OpMode {
                 }
 
                 if (shots > 3 && !flywheel.isReady()){
-                    loops--;
+                    loops++;
+                    if (loops == 0 && !do_path1){
+                        loops++;
+                    }
+                    if (loops == 1 && !do_path2){
+                        loops++;
+                    }
+                    if (loops == 2 && !do_path3){
+                        loops++;
+                    }
+
                     vf.setPath(follow_paths[loops], 180, true);
                     pathPoints = follow_paths[loops].get_path_points();
 

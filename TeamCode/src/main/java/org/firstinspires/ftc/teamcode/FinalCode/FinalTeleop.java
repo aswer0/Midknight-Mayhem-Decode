@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelCon
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
 
 @TeleOp
 public class FinalTeleop extends OpMode {
@@ -18,7 +19,8 @@ public class FinalTeleop extends OpMode {
     Sensors sensors;
     Intake intake;
     Flywheel flywheel;
-    ArmTransfer armTransfer;
+    BeltTransfer beltTransfer;
+    //ArmTransfer armTransfer;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -35,7 +37,8 @@ public class FinalTeleop extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
-        armTransfer = new ArmTransfer(hardwareMap);
+        beltTransfer = new BeltTransfer(hardwareMap);
+        //armTransfer = new ArmTransfer(hardwareMap);
     }
 
     @Override
@@ -44,22 +47,33 @@ public class FinalTeleop extends OpMode {
         currentGamepad1.copy(gamepad1);
         odo.update();
         flywheel.update();
-        isTransferReady = armTransfer.update();
+        //isTransferReady = armTransfer.update();
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
         }
 
+        //drive
         drive.drive(-gamepad1.left_stick_y, -1.2 * gamepad1.left_stick_x, gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
 
+        //intake
         if (currentGamepad1.right_bumper) {
             intake.motorOn();
         } else if (currentGamepad1.right_trigger > 0.3) {
             intake.motorReverse();
         } else {
-            intake.motorOff();
+            //transfer
+            if (currentGamepad1.left_bumper) {
+//              if (isTransferReady) armTransfer.transfer();
+                beltTransfer.up();
+                intake.motorOn();
+            } else {
+                beltTransfer.stop();
+                intake.motorOff();
+            }
         }
 
+        //flywheel
         if (currentGamepad1.cross && !previousGamepad1.cross) {
             flywheel.stop();
         } else if (currentGamepad1.square && !previousGamepad1.square) {
@@ -70,10 +84,6 @@ public class FinalTeleop extends OpMode {
 
         if (flywheel.isReady()) {
             gamepad1.rumble(100);
-        }
-
-        if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
-            if (isTransferReady) armTransfer.transfer();
         }
     }
 }

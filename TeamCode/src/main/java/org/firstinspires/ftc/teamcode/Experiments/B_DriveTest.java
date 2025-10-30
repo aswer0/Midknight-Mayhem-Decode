@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 
 @TeleOp
 @Config
@@ -23,6 +24,8 @@ public class B_DriveTest extends OpMode {
     public static double oh_sign = -1;
 
     Odometry odo;
+    Intake intake;
+    Sensors sensors;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -33,12 +36,14 @@ public class B_DriveTest extends OpMode {
     public void loop() {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
+        sensors = new Sensors(hardwareMap);
+        intake = new Intake(hardwareMap, sensors);
         odo.update();
 
         if (!previousGamepad1.left_bumper && currentGamepad1.left_bumper) {
-            drivePower -= 0.1;
+            intake.motorOn();
         } else if (!previousGamepad1.right_bumper && currentGamepad1.right_bumper) {
-            drivePower += 0.1;
+            intake.motorOff();
         }
 
         double y = gamepad1.left_stick_y;

@@ -132,6 +132,16 @@ public class Odometry {
         return pinpoint.getPosY(DistanceUnit.INCH);
     }
 
+    public void set_heading(double heading){
+        pinpoint.setHeading(heading, AngleUnit.DEGREES);
+    }
+    public void set_x(double x){
+        pinpoint.setPosX(x, DistanceUnit.INCH);
+    }
+    public void set_y(double y){
+        pinpoint.setPosY(y, DistanceUnit.INCH);
+    }
+
     public double get_x_velocity(){
         return pinpoint.getVelX(DistanceUnit.INCH);
     }

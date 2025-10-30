@@ -15,10 +15,10 @@ import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 public class Flywheel {
     public static boolean outputDebugInfo = false;
 
-    private int targetRPM = 0;
-    private int currentRPM = 0;
+    private double targetRPM = 0;
+    private double currentRPM = 0;
 
-    public static double kp=0.001, ki=0.001, kd=0, kf=0.1;
+    public static double kp=0.01, ki=0.000, kd=0, kf=0.25;
     public static int CLOSE_RPM = 3500;
     public static int FAR_RPM = 4000;
     public static int THRESHOLD = 100;
@@ -32,11 +32,11 @@ public class Flywheel {
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void setTargetRPM(int target) {
+    public void setTargetRPM(double target) {
         targetRPM = target;
     }
-    public int getCurrentRPM() {
-        return (int) (flywheel.getVelocity() / 28 * 60);
+    public double getCurrentRPM() {
+        return (flywheel.getVelocity() / 28 * 60);
     }
 
     public boolean isReady() {

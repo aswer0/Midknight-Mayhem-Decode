@@ -5,137 +5,90 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experiments.Sensors;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class CloseAuto extends OpMode {
-    public static Point start_point = new Point(47, 7.88);
-    public static Point shoot_point = new Point(60, 81);
+public class ClosePathOnlyAutoRed extends OpMode {
+    public static Point start_point = new Point(117, 126);
+    public static Point shoot_point = new Point(82, 81);
+
 
     BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
-                            new Point(60, 81),
-                            new Point(54,81.4),
-                            new Point(34.8,82.6),
-                            new Point(20,82.5),
+                            new Point(82, 81),
+                            new Point(88, 81.4),
+                            new Point(107.2, 82.6),
+                            new Point(122, 82.5),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(60, 81),
-                            new Point(45.3,73),
-                            new Point(62.4,55.7),
-                            new Point(20,59),
+                            new Point(82, 81),
+                            new Point(96.7, 73),
+                            new Point(79.6, 55.7),
+                            new Point(122, 59),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(52.6,102.4),
-                            new Point(50.2,72),
-                            new Point(62.6,27.7),
-                            new Point(53.7,35.7),
-                            new Point(20,35.2),
+                            new Point(89.4, 102.4),
+                            new Point(91.8, 72),
+                            new Point(79.4, 27.7),
+                            new Point(88.3, 35.7),
+                            new Point(122, 35.2),
                     }
             })
     };
+
 
     enum State{
         intakeBatch,
         driveToShootPos,
         shootBall,
-        wait,
     }
 
-    State state = State.wait;
+    State state = State.driveToShootPos;
 
     WheelControl wheelControl;
     Odometry odometry;
     VectorField vf;
-    BCPath path;
     ElapsedTime timer;
 
-    Intake intake;
-    Flywheel flywheel;
-    ArmTransfer transfer;
-    Sensors sensors;
-
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    Gamepad currentGamepad1 = new Gamepad();
-    Gamepad previousGamepad1 = new Gamepad();
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 0.8;
-    public static double shoot_angle = 135;
+    public static double shoot_angle = -135;
     public static double power = 0.8;
     int loops = -1;
-    int shots = 0;
-
-    int wait_time = 0;
-
-    boolean do_path1 = true;
-    boolean do_path2 = true;
-    boolean do_path3 = true;
 
     ArrayList<Point> pathPoints;
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 90);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
 
         pathPoints = follow_paths[loops+1].get_path_points();
-
-        sensors = new Sensors(hardwareMap);
-        intake = new Intake(hardwareMap, sensors);
-        transfer = new ArmTransfer(hardwareMap);
-        flywheel = new Flywheel(hardwareMap);
     }
 
     @Override
     public void init_loop(){
         timer.reset();
-
-        if (!previousGamepad1.square && currentGamepad1.square){
-            do_path1 = !do_path1;
-        }
-        if (!previousGamepad1.triangle && currentGamepad1.triangle){
-            do_path2 = !do_path2;
-        }
-        if (!previousGamepad1.circle && currentGamepad1.circle){
-            do_path3 = !do_path3;
-        }
-        if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
-            wait_time--;
-            wait_time = Math.max(wait_time, 0);
-        }
-        if (!previousGamepad1.dpad_right && currentGamepad1.dpad_right){
-            wait_time++;
-        }
-
-        telemetry.addData("do path 1? (square)", do_path1);
-        telemetry.addData("do path 2? (triangle)", do_path2);
-        telemetry.addData("do path 3? (circle)", do_path3);
-        telemetry.addData("wait time (dpad)", wait_time);
-        telemetry.update();
     }
 
     @Override
@@ -143,19 +96,8 @@ public class CloseAuto extends OpMode {
         odometry.update();
 
         switch (state){
-            case wait:
-                if (timer.milliseconds() >= wait_time){
-                    state = State.driveToShootPos;
-                }
-                break;
-
             case intakeBatch:
-                if (loops >= 3){
-                    state = State.intakeBatch;
-                }
-
                 vf.move();
-                intake.motorOn();
 
                 if (vf.at_end(gvf_threshold)){
                     state = State.driveToShootPos;
@@ -163,8 +105,6 @@ public class CloseAuto extends OpMode {
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
-
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
                     timer.reset();
                     state = State.shootBall;
@@ -172,34 +112,13 @@ public class CloseAuto extends OpMode {
                 break;
 
             case shootBall:
-                flywheel.shootFar();
-                flywheel.update();
-
-                boolean transferReady = transfer.update();
-
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (flywheel.isReady() && transferReady){
-                    transfer.transfer();
-                    shots++;
-                }
-
-                if (shots > 3 && !flywheel.isReady()){
+                if (timer.milliseconds() >= 2000){
                     loops++;
-                    if (loops == 0 && !do_path1){
-                        loops++;
-                    }
-                    if (loops == 1 && !do_path2){
-                        loops++;
-                    }
-                    if (loops == 2 && !do_path3){
-                        loops++;
-                    }
-
                     vf.setPath(follow_paths[loops], 180, true);
                     pathPoints = follow_paths[loops].get_path_points();
 
-                    shots = 0;
                     state = State.intakeBatch;
                 }
 
@@ -227,10 +146,9 @@ public class CloseAuto extends OpMode {
         }
 
         packet.put("state", state);
-        packet.put("x", odometry.get_x(uk));
-        packet.put("y", odometry.get_y(uk));
-        packet.put("heading", odometry.get_heading(uk));
 
         dashboard.sendTelemetryPacket(packet);
     }
 }
+
+

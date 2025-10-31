@@ -5,23 +5,21 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class ClosePathOnlyAuto extends OpMode {
-    public static Point start_point = new Point(21, 122);
+public class ClosePathOnlyAutoBlue extends OpMode {
+    public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
 
     BCPath[] follow_paths = {
@@ -75,6 +73,14 @@ public class ClosePathOnlyAuto extends OpMode {
     int loops = -1;
 
     ArrayList<Point> pathPoints;
+    Gamepad currentGamepad1 = new Gamepad();
+    Gamepad previousGamepad1 = new Gamepad();
+
+    int wait_time = 0;
+
+    boolean do_path1 = true;
+    boolean do_path2 = true;
+    boolean do_path3 = true;
 
     @Override
     public void init() {
@@ -90,6 +96,29 @@ public class ClosePathOnlyAuto extends OpMode {
     @Override
     public void init_loop(){
         timer.reset();
+
+        if (!previousGamepad1.square && currentGamepad1.square){
+            do_path1 = !do_path1;
+        }
+        if (!previousGamepad1.triangle && currentGamepad1.triangle){
+            do_path2 = !do_path2;
+        }
+        if (!previousGamepad1.circle && currentGamepad1.circle){
+            do_path3 = !do_path3;
+        }
+        if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
+            wait_time--;
+            wait_time = Math.max(wait_time, 0);
+        }
+        if (!previousGamepad1.dpad_right && currentGamepad1.dpad_right){
+            wait_time++;
+        }
+
+        telemetry.addData("do path 1? (square)", do_path1);
+        telemetry.addData("do path 2? (triangle)", do_path2);
+        telemetry.addData("do path 3? (circle)", do_path3);
+        telemetry.addData("wait time (dpad)", wait_time);
+        telemetry.update();
     }
 
     @Override
@@ -151,3 +180,4 @@ public class ClosePathOnlyAuto extends OpMode {
         dashboard.sendTelemetryPacket(packet);
     }
 }
+

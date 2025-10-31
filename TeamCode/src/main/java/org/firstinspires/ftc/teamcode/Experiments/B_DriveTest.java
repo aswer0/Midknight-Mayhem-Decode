@@ -15,7 +15,6 @@ import org.opencv.core.Point;
 @TeleOp
 @Config
 public class B_DriveTest extends OpMode {
-    double drivePower = 1;
     WheelControl drive;
     public static Point start_point = new Point(8, 8);
 
@@ -28,6 +27,14 @@ public class B_DriveTest extends OpMode {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
+    boolean useDriveCorrecton = true;
+    boolean pidToPoint = false;
+    public static Point shoot_point = new Point(60, 81);
+    public static double target_shoot_heading = 135;
+    int turnPower = 1;
+    double drivePower = 1;
+    boolean useKalmanOdo = false;
+
     @Override
     public void loop() {
         previousGamepad1.copy(currentGamepad1);
@@ -36,17 +43,43 @@ public class B_DriveTest extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         odo.update();
 
+        if (currentGamepad1.options && !previousGamepad1.options) {
+            //set heading to 0
+            odo.set_heading(0);
+        }
+        if (currentGamepad1.share && !previousGamepad1.share) {
+            //set heading to 0
+            useDriveCorrecton = !useDriveCorrecton;
+        }
+        if (currentGamepad1.right_stick_button && !previousGamepad1.right_stick_button) {
+            pidToPoint = true;
+        }
+
+        if (currentGamepad1.left_stick_button){
+            drivePower = drivePower/(drivePower+1);
+        }
+        else{
+            drivePower = 1;
+        }
+
         if (!previousGamepad1.left_bumper && currentGamepad1.left_bumper) {
             intake.motorOn();
         } else if (!previousGamepad1.right_bumper && currentGamepad1.right_bumper) {
             intake.motorOff();
         }
 
-        double y = gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double r = gamepad1.right_stick_x;
+        if (useDriveCorrecton && !pidToPoint){
+            drive.correction_drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower, false);
+        }
+        else{
+            if (!pidToPoint){
+                drive.drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
+            }
+        }
+        if (pidToPoint){
+            drive.drive_to_point(shoot_point, target_shoot_heading, 1, 0.5, false);
+        }
 
-        drive.drive(y, 1.2*x, -r, -Math.toRadians(-odo.get_heading(false)), drivePower);
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("X position", odo.get_x(false));

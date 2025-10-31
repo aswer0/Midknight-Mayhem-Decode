@@ -17,6 +17,7 @@ import java.util.ArrayList;
 @TeleOp
 @Config
 public class C_GVFtest extends OpMode {
+    public static Point start_point = new Point(8, 8);
     Odometry odometry;
     WheelControl wheelControl;
 
@@ -31,8 +32,8 @@ public class C_GVFtest extends OpMode {
 
     @Override
     public void init(){
-        odometry = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
-        odometry.setOutputDebugInfo(false);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 0);
+        odometry.setOutputDebugInfo(true);
         wheelControl = new WheelControl(hardwareMap, odometry);
         dashboard = FtcDashboard.getInstance();
 
@@ -43,6 +44,15 @@ public class C_GVFtest extends OpMode {
             new Point(1.5, 100.6),
             new Point(109, 121.2),
         }};
+
+        /*
+        P_0 = (12.1, 9)
+        P_1 = (76.8, 5)
+        P_2 = (97.3, 61.9)
+        P_3 = (1.5, 100.6)
+        P_4 = (109, 121.2)
+
+         */
 
         vf = new VectorField(wheelControl, odometry, uk);
         path = new BCPath(follow_path);
@@ -74,14 +84,14 @@ public class C_GVFtest extends OpMode {
             .setTranslation(-72, 72)
             .setRotation(Math.toRadians(-90))
             .setStroke("blue")
-            .strokeCircle(odometry.get_x(uk), odometry.get_y(uk), 15/2)
-            .strokeLine(odometry.get_x(uk), odometry.get_y(uk),odometry.get_x(uk) + 15/2*Math.cos(odometry.get_heading(uk)), odometry.get_y(uk) + 15/2*Math.sin(odometry.get_heading(uk)));
+            .strokeCircle(odometry.get_x(uk), odometry.get_y(uk), Math.sqrt(63))
+            .strokeLine(odometry.get_x(uk), odometry.get_y(uk),odometry.get_x(uk) + Math.sqrt(63)*Math.cos(odometry.get_heading(uk)), odometry.get_y(uk) + Math.sqrt(63)*Math.sin(odometry.get_heading(uk)));
 
         packet.fieldOverlay() //draw target path
             .setFill("red")
             .setStroke("orange")
-            .fillCircle(7.875, 6.625, 2)
-            .strokeLine(7.875, 6.625, pathPoints.get(0).x, pathPoints.get(0).y);
+            .fillCircle(start_point.x, start_point.y, 2)
+            .strokeLine(start_point.x, start_point.y, pathPoints.get(0).x, pathPoints.get(0).y);
 
         for (int i=0; i<pathPoints.size()-1; i++) {
             packet.fieldOverlay()

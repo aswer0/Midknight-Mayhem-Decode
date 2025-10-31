@@ -18,13 +18,6 @@ public class WheelControl {
     public static double yp = 0.3, yi = 0, yd = 0.01, yf = 0;
     public static double hp = 0.03, hi = 0, hd = 0.003, hF = 0;
 
-    public static double x_sign = 1;
-    public static double y_sign = 1;
-    public static double h_sign = -1;
-    public static double r_sign = -1;
-    public static double oh_sign = -1;
-    //real drive signs: -1 -1, 1, -1, -1
-
     PIDFController x_controller;
     PIDFController y_controller;
     PIDFController h_controller;
@@ -267,7 +260,7 @@ public class WheelControl {
         double compensatedPower = power * voltageComp;
         compensatedPower = Math.min(compensatedPower, 1.0);
 
-        this.drive(y_sign*y, x_sign*x, h_sign*h, r_sign*Math.toRadians(oh_sign*odometry.get_heading(use_kalman)), compensatedPower);
+        this.drive(-y, -x, h, -Math.toRadians(-odometry.get_heading(use_kalman)), compensatedPower);
 
         double error = Math.sqrt((rx-point.x)*(rx-point.x) + (ry-point.y)*(ry-point.y));
 

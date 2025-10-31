@@ -297,6 +297,6 @@ public class VectorField {
         compensatedPower = Math.min(compensatedPower, 1.0);
 
         // Drive according to calculations
-        drive.drive(x_sign*powers.x, y_sign*powers.y, h_sign*turn_speed, r_sign*Math.toRadians(oh_sign*get_heading()), compensatedPower);
+        drive.drive(-powers.x, -powers.y, turn_speed, -Math.toRadians(-get_heading()), compensatedPower);
     }
 }

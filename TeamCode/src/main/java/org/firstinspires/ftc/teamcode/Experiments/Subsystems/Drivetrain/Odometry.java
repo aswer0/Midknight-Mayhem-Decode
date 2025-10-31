@@ -36,8 +36,8 @@ public class Odometry {
     Telemetry telemetry;
     ElapsedTime lastMeasurementTime;
 
-    public static double offset_x = -2.375;
-    public static double offset_y = 5.1875;
+    public static double offset_x = 5;
+    public static double offset_y = -4.5;
 
     public static double xyVariance = 25;
     public static double headingVariance = 100;
@@ -65,7 +65,7 @@ public class Odometry {
 //        limelight.start();
 
         pinpoint.setEncoderResolution(PinpointOdometry.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(PinpointOdometry.EncoderDirection.REVERSED, PinpointOdometry.EncoderDirection.FORWARD);
+        pinpoint.setEncoderDirections(PinpointOdometry.EncoderDirection.FORWARD, PinpointOdometry.EncoderDirection.REVERSED);
         /*
         Horizontal: 2.375in
         Vertical: 5.1875in

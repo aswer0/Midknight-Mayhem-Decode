@@ -14,7 +14,7 @@ import org.opencv.core.Point;
 @TeleOp
 @Config
 public class B_PIDtoPointTest extends OpMode {
-    double drivePower = 1;
+    public static Point start_point = new Point(8, 8);
     WheelControl drive;
     Odometry odo;
 
@@ -29,7 +29,7 @@ public class B_PIDtoPointTest extends OpMode {
 
     @Override
     public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        odo = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 0);
         drive = new WheelControl(hardwareMap, odo);
 
         odo.setOutputDebugInfo(true);
@@ -45,6 +45,9 @@ public class B_PIDtoPointTest extends OpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("At point", at_point);
+        packet.put("X", odo.get_x(false));
+        packet.put("Y", odo.get_y(false));
+        packet.put("heading", odo.get_heading(false));
         dashboard.sendTelemetryPacket(packet);
 
     }

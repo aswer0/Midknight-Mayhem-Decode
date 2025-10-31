@@ -21,7 +21,7 @@ import java.util.ArrayList;
 @Autonomous
 @Config
 public class ClosePathOnlyAuto extends OpMode {
-    public static Point start_point = new Point(47, 7.88);
+    public static Point start_point = new Point(21, 122);
     public static Point shoot_point = new Point(60, 81);
 
     BCPath[] follow_paths = {
@@ -78,7 +78,7 @@ public class ClosePathOnlyAuto extends OpMode {
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 90);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);

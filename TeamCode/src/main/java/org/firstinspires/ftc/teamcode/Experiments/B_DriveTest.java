@@ -10,18 +10,14 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
+import org.opencv.core.Point;
 
 @TeleOp
 @Config
 public class B_DriveTest extends OpMode {
     double drivePower = 1;
     WheelControl drive;
-
-    public static double x_sign = -1;
-    public static double y_sign = -1;
-    public static double h_sign = -1;
-    public static double r_sign = -1;
-    public static double oh_sign = -1;
+    public static Point start_point = new Point(8, 8);
 
     Odometry odo;
     Intake intake;
@@ -50,7 +46,7 @@ public class B_DriveTest extends OpMode {
         double x = gamepad1.left_stick_x;
         double r = gamepad1.right_stick_x;
 
-        drive.drive(y_sign*y, x_sign*1.2*x, r_sign*r, h_sign*Math.toRadians(oh_sign*odo.get_heading(false)), drivePower);
+        drive.drive(y, 1.2*x, -r, -Math.toRadians(-odo.get_heading(false)), drivePower);
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("X position", odo.get_x(false));
@@ -65,7 +61,7 @@ public class B_DriveTest extends OpMode {
     }
     @Override
     public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 7.875, 6.625, 0);
+        odo = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 0);
         drive = new WheelControl(hardwareMap, odo);
 
         odo.setOutputDebugInfo(false);

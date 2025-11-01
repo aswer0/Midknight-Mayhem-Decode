@@ -27,6 +27,19 @@ public class CloseAutoBlueSide extends OpMode {
     public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
 
+    /*
+    P_0 = (52.6,102.4)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,35.7)
+    P_4 = (20,35.2)
+
+     = (60, 81)
+     = (45.3,73)
+     = (62.4,55.7)
+     = (20,59)
+     */
+
     BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
@@ -39,9 +52,9 @@ public class CloseAutoBlueSide extends OpMode {
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
-                            new Point(45.3,73),
+                            new Point(54.7,71.6),
                             new Point(62.4,55.7),
-                            new Point(20,59),
+                            new Point(19,62.1),
                     }
             }),
             new BCPath(new Point[][] {
@@ -49,8 +62,8 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(52.6,102.4),
                             new Point(50.2,72),
                             new Point(62.6,27.7),
-                            new Point(53.7,35.7),
-                            new Point(20,35.2),
+                            new Point(53.7,39),
+                            new Point(19.4,38.6),
                     }
             })
     };
@@ -182,6 +195,7 @@ public class CloseAutoBlueSide extends OpMode {
                 intake.motorOn();
                 beltTransfer.up();
 
+                wheelControl.setI();
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
                 if (timer.milliseconds() >= 5000){
@@ -196,6 +210,7 @@ public class CloseAutoBlueSide extends OpMode {
                         loops++;
                     }
 
+                    wheelControl.zeroI();
                     vf.setPath(follow_paths[loops], 180, true);
                     pathPoints = follow_paths[loops].get_path_points();
 

@@ -62,6 +62,16 @@ public class WheelControl {
         h_controller = new PIDFController(hp, hi, hd, hF);
     }
 
+    public void zeroI(){
+        this.xi = 0;
+        this.yi = 0;
+
+    }
+    public void setI(){
+        xi = 0.01;
+        yi = 0.01;
+    }
+
     public void setF(double vf, double hf, double rf) {
         this.vf = vf;
         this.hf = hf;

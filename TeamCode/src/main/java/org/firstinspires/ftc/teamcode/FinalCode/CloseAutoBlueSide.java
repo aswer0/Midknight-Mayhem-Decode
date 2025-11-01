@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -71,8 +72,8 @@ public class CloseAutoBlueSide extends OpMode {
 
     Intake intake;
     Flywheel flywheel;
-    ArmTransfer transfer;
     Sensors sensors;
+    BeltTransfer beltTransfer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
@@ -98,6 +99,7 @@ public class CloseAutoBlueSide extends OpMode {
     public void init() {
         odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
+        beltTransfer = new BeltTransfer(hardwareMap);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
@@ -106,7 +108,6 @@ public class CloseAutoBlueSide extends OpMode {
 
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
-        transfer = new ArmTransfer(hardwareMap);
         flywheel = new Flywheel(hardwareMap);
     }
 
@@ -150,6 +151,10 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case intakeBatch:
+                flywheel.stop();
+                beltTransfer.stop();
+                intake.motorOff();
+
                 if (loops >= 3){
                     state = State.intakeBatch;
                 }
@@ -172,19 +177,14 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case shootBall:
-                flywheel.shootFar();
+                flywheel.shootClose();
                 flywheel.update();
-
-                boolean transferReady = transfer.update();
+                intake.motorOn();
+                beltTransfer.up();
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (flywheel.isReady() && transferReady){
-                    transfer.transfer();
-                    shots++;
-                }
-
-                if (shots > 3 && !flywheel.isReady()){
+                if (timer.milliseconds() >= 5000){
                     loops++;
                     if (loops == 0 && !do_path1){
                         loops++;

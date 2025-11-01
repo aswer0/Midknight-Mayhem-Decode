@@ -36,6 +36,8 @@ public class FinalTeleop extends OpMode {
     boolean useDriveCorrecton = true;
     boolean pidToPoint = false;
 
+    boolean stopFlywheel = false;
+
     @Override
     public void init() {
         odo = new Odometry(hardwareMap, telemetry, 0, 0, 0);
@@ -58,40 +60,41 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
             odo.set_heading(0);
+            odo.set_x(8);
+            odo.set_y(8);
         }
         if (currentGamepad1.share && !previousGamepad1.share) {
             //set heading to 0
             useDriveCorrecton = !useDriveCorrecton;
-        }
-        if (currentGamepad1.right_stick_button && !previousGamepad1.right_stick_button) {
-            pidToPoint = true;
         }
 
         //drive
         if (useDriveCorrecton && !pidToPoint){
             drive.correction_drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower, false);
         }
-        else{
-            if (!pidToPoint){
-                drive.drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
-            }
+        else if (!pidToPoint){
+            drive.drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
         }
-        if (pidToPoint){
-            drive.drive_to_point(shoot_point, target_shoot_heading, 1, 0.5, false);
+        else{
+            drive.drive_to_point(new Point(77, 77), 45, 1, 0.5, false);
         }
 
-        if (currentGamepad1.left_stick_button){
-            drivePower = drivePower/(drivePower+1);
+        if (currentGamepad1.left_trigger > 0.3){
+            pidToPoint = true;
         }
         else{
-            drivePower = 1;
+            pidToPoint = false;
         }
 
         //intake
         if (currentGamepad1.right_bumper) {
             intake.motorOn();
+            beltTransfer.down();
         } else if (currentGamepad1.right_trigger > 0.3) {
             intake.motorReverse();
+            beltTransfer.down();
+            flywheel.setTargetRPM(-670);
+            stopFlywheel = true;
         } else {
             //transfer
             if (currentGamepad1.left_bumper) {
@@ -105,6 +108,13 @@ public class FinalTeleop extends OpMode {
         }
 
         //flywheel
+        //blue close
+        //red far
+        //green stop
+        if (stopFlywheel && currentGamepad1.right_trigger <= 0.3){
+            flywheel.stop();
+            stopFlywheel = false;
+        }
         if (currentGamepad1.cross && !previousGamepad1.cross) {
             flywheel.stop();
         } else if (currentGamepad1.square && !previousGamepad1.square) {
@@ -116,5 +126,8 @@ public class FinalTeleop extends OpMode {
         if (flywheel.isReady()) {
             gamepad1.rumble(100);
         }
+
+        telemetry.addData("power", drivePower);
+        telemetry.update();
     }
 }

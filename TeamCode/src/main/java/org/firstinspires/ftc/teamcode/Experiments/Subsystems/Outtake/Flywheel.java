@@ -28,7 +28,7 @@ public class Flywheel {
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 

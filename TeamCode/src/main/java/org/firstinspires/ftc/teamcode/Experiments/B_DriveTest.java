@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
 @TeleOp
@@ -21,6 +22,7 @@ public class B_DriveTest extends OpMode {
     Odometry odo;
     Intake intake;
     Sensors sensors;
+    BeltTransfer beltTransfer;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();

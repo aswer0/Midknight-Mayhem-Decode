@@ -37,6 +37,12 @@ public class FinalTeleop extends OpMode {
     boolean pidToPoint = false;
 
     boolean stopFlywheel = false;
+    Alliance alliance;
+
+    enum Alliance{
+        red,
+        blue,
+    }
 
     @Override
     public void init() {
@@ -46,7 +52,23 @@ public class FinalTeleop extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         beltTransfer = new BeltTransfer(hardwareMap);
+        alliance = Alliance.red;
         //armTransfer = new ArmTransfer(hardwareMap);
+    }
+
+    @Override
+    public void init_loop(){
+        if (currentGamepad1.options && !previousGamepad1.options){
+            if (alliance == Alliance.red){
+                alliance = Alliance.blue;
+            }
+            else{
+                alliance = Alliance.red;
+            }
+        }
+
+        telemetry.addData("Alliance", alliance);
+        telemetry.update();
     }
 
     @Override
@@ -60,8 +82,15 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
             odo.set_heading(0);
-            odo.set_x(8);
-            odo.set_y(8);
+
+            if (alliance == Alliance.red){
+                odo.set_x(8);
+                odo.set_y(8);
+            }
+            else if (alliance == Alliance.blue){
+                odo.set_x(142-8);
+                odo.set_y(8);
+            }
         }
         if (currentGamepad1.share && !previousGamepad1.share) {
             //set heading to 0

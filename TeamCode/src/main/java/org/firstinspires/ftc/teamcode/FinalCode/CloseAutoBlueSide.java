@@ -28,16 +28,16 @@ public class CloseAutoBlueSide extends OpMode {
     public static Point shoot_point = new Point(60, 81);
 
     /*
-    P_0 = (52.6,102.4)
-    P_1 = (50.2,72)
-    P_2 = (62.6,27.7)
-    P_3 = (53.7,35.7)
-    P_4 = (20,35.2)
+    P_0 = (60, 81)
+    P_1 = (54,81.4)
+    P_2 = (34.8,82.6)
+    P_3 = (20,82.5)
 
-     = (60, 81)
-     = (45.3,73)
-     = (62.4,55.7)
-     = (20,59)
+    P_0 = (60, 81)
+    P_1 = (54.7,71.6)
+    P_2 = (62.4,55.7)
+    P_3 = (28,60)
+
      */
 
     BCPath[] follow_paths = {
@@ -46,15 +46,15 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(60, 81),
                             new Point(54,81.4),
                             new Point(34.8,82.6),
-                            new Point(20,82.5),
+                            new Point(32,82.5),
                     }
             }),
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
                             new Point(54.7,71.6),
-                            new Point(62.4,55.7),
-                            new Point(19,62.1),
+                            new Point(62,61.7),
+                            new Point(19,64.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -63,7 +63,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(50.2,72),
                             new Point(62.6,27.7),
                             new Point(53.7,39),
-                            new Point(19.4,38.6),
+                            new Point(31.4,38.6),
                     }
             })
     };
@@ -73,6 +73,7 @@ public class CloseAutoBlueSide extends OpMode {
         driveToShootPos,
         shootBall,
         wait,
+        park,
     }
 
     State state = State.wait;
@@ -82,6 +83,7 @@ public class CloseAutoBlueSide extends OpMode {
     VectorField vf;
     BCPath path;
     ElapsedTime timer;
+    ElapsedTime autoTimer;
 
     Intake intake;
     Flywheel flywheel;
@@ -116,6 +118,7 @@ public class CloseAutoBlueSide extends OpMode {
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
+        autoTimer = new ElapsedTime();
 
         pathPoints = follow_paths[loops+1].get_path_points();
 
@@ -127,6 +130,7 @@ public class CloseAutoBlueSide extends OpMode {
     @Override
     public void init_loop(){
         timer.reset();
+        autoTimer.reset();
 
         if (!previousGamepad1.square && currentGamepad1.square){
             do_path1 = !do_path1;
@@ -164,26 +168,30 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case intakeBatch:
-                flywheel.stop();
-                beltTransfer.stop();
-                intake.motorOff();
+                flywheel.setTargetRPM(-670);
+                flywheel.update();
+                beltTransfer.down();
+                intake.motorOn();
 
                 if (loops >= 3){
                     state = State.intakeBatch;
                 }
 
                 vf.move();
-                intake.motorOn();
 
                 if (vf.at_end(gvf_threshold)){
+                    timer.reset();
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
                 intake.motorOff();
+                flywheel.shootClose();
+                flywheel.update();
+                beltTransfer.stop();
 
-                if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
+                if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
                     state = State.shootBall;
                 }
@@ -192,11 +200,22 @@ public class CloseAutoBlueSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
-                intake.motorOn();
-                beltTransfer.up();
+
+                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
+                    intake.motorOn();
+                    beltTransfer.up();
+                }
+                else if (timer.milliseconds() >= 2500){
+                    intake.motorOn();
+                    beltTransfer.up();
+                }
 
                 wheelControl.setI();
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
+
+                if (autoTimer.milliseconds() >= 27000){
+                    state = State.park;
+                }
 
                 if (timer.milliseconds() >= 5000){
                     loops++;
@@ -211,13 +230,21 @@ public class CloseAutoBlueSide extends OpMode {
                     }
 
                     wheelControl.zeroI();
-                    vf.setPath(follow_paths[loops], 180, true);
+                    vf.setPath(follow_paths[loops], 180, false);
                     pathPoints = follow_paths[loops].get_path_points();
 
                     shots = 0;
                     state = State.intakeBatch;
                 }
 
+                break;
+
+            case park:
+                flywheel.stop();
+                beltTransfer.stop();
+                intake.motorOff();
+
+                wheelControl.drive_to_point(new Point(40, 40), 0, 1, 0.5, false);
                 break;
         }
 

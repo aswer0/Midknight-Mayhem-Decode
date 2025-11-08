@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -23,33 +24,46 @@ import java.util.ArrayList;
 @Autonomous
 @Config
 public class CloseAutoRedSide extends OpMode {
-    public static Point start_point = new Point(117, 126);
-    public static Point shoot_point = new Point(82, 81);
+    public static Point start_point = new Point(142-25, 126);
+    public static Point shoot_point = new Point(142-60, 81);
+
+    /*
+    P_0 = (60, 81)
+    P_1 = (54,81.4)
+    P_2 = (34.8,82.6)
+    P_3 = (20,82.5)
+
+    P_0 = (142-60, 81)
+    P_1 = (142-54.7,71.6)
+    P_2 = (142-62.4,55.7)
+    P_3 = (142-28,60)
+
+     */
 
     BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
-                            new Point(82, 81),
-                            new Point(88, 81.4),
-                            new Point(107.2, 82.6),
-                            new Point(122, 82.5),
+                            new Point(142-60, 81),
+                            new Point(142-54,81.4),
+                            new Point(142-34.8,82.6),
+                            new Point(142-32,82.5),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(82, 81),
-                            new Point(96.7, 73),
-                            new Point(79.6, 55.7),
-                            new Point(122, 59),
+                            new Point(82,81),
+                            new Point(87.3,83.3),
+                            new Point(79.6,55.7),
+                            new Point(114,64.6),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(89.4, 102.4),
-                            new Point(91.8, 72),
-                            new Point(79.4, 27.7),
-                            new Point(88.3, 35.7),
-                            new Point(122, 35.2),
+                            new Point(142-52.6,102.4),
+                            new Point(142-50.2,72),
+                            new Point(142-62.6,27.7),
+                            new Point(142-53.7,39),
+                            new Point(142-31.4,38.6),
                     }
             })
     };
@@ -59,6 +73,7 @@ public class CloseAutoRedSide extends OpMode {
         driveToShootPos,
         shootBall,
         wait,
+        park,
     }
 
     State state = State.wait;
@@ -68,11 +83,12 @@ public class CloseAutoRedSide extends OpMode {
     VectorField vf;
     BCPath path;
     ElapsedTime timer;
+    ElapsedTime autoTimer;
 
     Intake intake;
     Flywheel flywheel;
-    ArmTransfer transfer;
     Sensors sensors;
+    BeltTransfer beltTransfer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
@@ -81,7 +97,7 @@ public class CloseAutoRedSide extends OpMode {
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 0.8;
-    public static double shoot_angle = 135;
+    public static double shoot_angle = 45;
     public static double power = 0.8;
     int loops = -1;
     int shots = 0;
@@ -96,23 +112,25 @@ public class CloseAutoRedSide extends OpMode {
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 45);
         wheelControl = new WheelControl(hardwareMap, odometry);
+        beltTransfer = new BeltTransfer(hardwareMap);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
+        autoTimer = new ElapsedTime();
 
         pathPoints = follow_paths[loops+1].get_path_points();
 
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
-        transfer = new ArmTransfer(hardwareMap);
         flywheel = new Flywheel(hardwareMap);
     }
 
     @Override
     public void init_loop(){
         timer.reset();
+        autoTimer.reset();
 
         if (!previousGamepad1.square && currentGamepad1.square){
             do_path1 = !do_path1;
@@ -150,41 +168,56 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case intakeBatch:
+                flywheel.setTargetRPM(-670);
+                flywheel.update();
+                beltTransfer.down();
+                intake.motorOn();
+
                 if (loops >= 3){
                     state = State.intakeBatch;
                 }
 
                 vf.move();
-                intake.motorOn();
 
                 if (vf.at_end(gvf_threshold)){
+                    timer.reset();
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
                 intake.motorOff();
+                flywheel.shootClose();
+                flywheel.update();
+                beltTransfer.stop();
 
-                if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
+                if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
                     state = State.shootBall;
                 }
                 break;
 
             case shootBall:
-                flywheel.shootFar();
+                flywheel.shootClose();
                 flywheel.update();
 
-                boolean transferReady = transfer.update();
-
-                wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
-
-                if (flywheel.isReady() && transferReady){
-                    transfer.transfer();
-                    shots++;
+                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
+                    intake.motorOn();
+                    beltTransfer.up();
+                }
+                else if (timer.milliseconds() >= 2500){
+                    intake.motorOn();
+                    beltTransfer.up();
                 }
 
-                if (shots > 3 && !flywheel.isReady()){
+                wheelControl.setI();
+                wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
+
+                if (autoTimer.milliseconds() >= 27000){
+                    state = State.park;
+                }
+
+                if (timer.milliseconds() >= 5000){
                     loops++;
                     if (loops == 0 && !do_path1){
                         loops++;
@@ -196,13 +229,22 @@ public class CloseAutoRedSide extends OpMode {
                         loops++;
                     }
 
-                    vf.setPath(follow_paths[loops], 180, true);
+                    wheelControl.zeroI();
+                    vf.setPath(follow_paths[loops], 0, false);
                     pathPoints = follow_paths[loops].get_path_points();
 
                     shots = 0;
                     state = State.intakeBatch;
                 }
 
+                break;
+
+            case park:
+                flywheel.stop();
+                beltTransfer.stop();
+                intake.motorOff();
+
+                wheelControl.drive_to_point(new Point(40, 40), 0, 1, 0.5, false);
                 break;
         }
 
@@ -234,3 +276,5 @@ public class CloseAutoRedSide extends OpMode {
         dashboard.sendTelemetryPacket(packet);
     }
 }
+
+

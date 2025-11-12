@@ -38,11 +38,11 @@ public class C_GVFtest extends OpMode {
         dashboard = FtcDashboard.getInstance();
 
         Point[][] follow_path = {{
-            new Point(12.1, 9),
-            new Point(76.8, 5),
-            new Point(97.3, 61.9),
-            new Point(1.5, 100.6),
-            new Point(109, 121.2),
+                new Point(12.1, 9),
+                new Point(76.8, 5),
+                new Point(97.3, 61.9),
+                new Point(1.5, 100.6),
+                new Point(109, 121.2),
         }};
 
         /*
@@ -56,7 +56,7 @@ public class C_GVFtest extends OpMode {
 
         vf = new VectorField(wheelControl, odometry, uk);
         path = new BCPath(follow_path);
-        vf.setPath(path, 90, true);
+        vf.setPath(path, 90, false);
 
         pathPoints = path.get_path_points();
 
@@ -81,21 +81,21 @@ public class C_GVFtest extends OpMode {
         TelemetryPacket packet = new TelemetryPacket();
 
         packet.fieldOverlay() //draw robot
-            .setTranslation(-72, 72)
-            .setRotation(Math.toRadians(-90))
-            .setStroke("blue")
-            .strokeCircle(odometry.get_x(uk), odometry.get_y(uk), Math.sqrt(63))
-            .strokeLine(odometry.get_x(uk), odometry.get_y(uk),odometry.get_x(uk) + Math.sqrt(63)*Math.cos(odometry.get_heading(uk)), odometry.get_y(uk) + Math.sqrt(63)*Math.sin(odometry.get_heading(uk)));
+                .setTranslation(-72, 72)
+                .setRotation(Math.toRadians(-90))
+                .setStroke("blue")
+                .strokeCircle(odometry.get_x(uk), odometry.get_y(uk), Math.sqrt(63))
+                .strokeLine(odometry.get_x(uk), odometry.get_y(uk),odometry.get_x(uk) + Math.sqrt(63)*Math.cos(odometry.get_heading(uk)), odometry.get_y(uk) + Math.sqrt(63)*Math.sin(odometry.get_heading(uk)));
 
         packet.fieldOverlay() //draw target path
-            .setFill("red")
-            .setStroke("orange")
-            .fillCircle(start_point.x, start_point.y, 2)
-            .strokeLine(start_point.x, start_point.y, pathPoints.get(0).x, pathPoints.get(0).y);
+                .setFill("red")
+                .setStroke("orange")
+                .fillCircle(start_point.x, start_point.y, 2)
+                .strokeLine(start_point.x, start_point.y, pathPoints.get(0).x, pathPoints.get(0).y);
 
         for (int i=0; i<pathPoints.size()-1; i++) {
             packet.fieldOverlay()
-                .strokeLine(pathPoints.get(i).x, pathPoints.get(i).y, pathPoints.get(i + 1).x, pathPoints.get(i + 1).y);
+                    .strokeLine(pathPoints.get(i).x, pathPoints.get(i).y, pathPoints.get(i + 1).x, pathPoints.get(i + 1).y);
         }
 
         dashboard.sendTelemetryPacket(packet);

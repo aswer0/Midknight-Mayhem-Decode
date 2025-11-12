@@ -19,7 +19,7 @@ public class Flywheel {
     private double currentRPM = 0;
 
     public static double kp=0.01, ki=0.000, kd=0, kf=0.32;
-    public static int CLOSE_RPM = 3500;
+    public static int CLOSE_RPM = 3000;
     public static int FAR_RPM = 4000;
     public static int THRESHOLD = 100;
 
@@ -28,7 +28,7 @@ public class Flywheel {
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 

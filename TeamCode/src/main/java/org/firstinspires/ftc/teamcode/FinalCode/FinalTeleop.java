@@ -119,6 +119,8 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.right_bumper) {
             intake.motorOn();
             beltTransfer.down();
+            flywheel.setTargetRPM(-670);
+            stopFlywheel = true;
         } else if (currentGamepad1.right_trigger > 0.3) {
             intake.motorReverse();
             beltTransfer.down();
@@ -144,6 +146,11 @@ public class FinalTeleop extends OpMode {
             flywheel.stop();
             stopFlywheel = false;
         }
+        else if (stopFlywheel && !currentGamepad1.right_bumper){
+            flywheel.stop();
+            stopFlywheel = false;
+        }
+
         if (currentGamepad1.cross && !previousGamepad1.cross) {
             flywheel.stop();
         } else if (currentGamepad1.square && !previousGamepad1.square) {

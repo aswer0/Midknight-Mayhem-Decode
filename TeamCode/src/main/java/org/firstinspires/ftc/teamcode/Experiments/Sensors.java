@@ -89,7 +89,7 @@ public class Sensors {
         return 0;
     }
 
-    public int getLeftColor() {
+    public int getMidColor() {
 
         lS1_red = leftSensor1.red();
         lS1_green = leftSensor1.green();
@@ -118,7 +118,7 @@ public class Sensors {
         return 0;
     }
 
-    public int getRightColor() {
+    public int getBackColor() {
 
         rS1_red = rightSensor1.red();
         rS1_green = rightSensor1.green();

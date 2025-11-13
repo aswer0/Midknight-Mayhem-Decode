@@ -20,7 +20,7 @@ public class Flywheel {
 
     public static double kp=0.01, ki=0.000, kd=0, kf=0.32;
     public static int CLOSE_RPM = 3000;
-    public static int FAR_RPM = 4000;
+    public static int FAR_RPM = 4200;
     public static int THRESHOLD = 100;
 
     public DcMotorEx flywheel;

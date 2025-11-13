@@ -244,7 +244,7 @@ public class CloseAutoBlueSide extends OpMode {
                 beltTransfer.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(40, 40), 0, 1, 0.5, false);
+                wheelControl.drive_to_point(new Point(20, 100), 0, 1, 0.5, false);
                 break;
         }
 

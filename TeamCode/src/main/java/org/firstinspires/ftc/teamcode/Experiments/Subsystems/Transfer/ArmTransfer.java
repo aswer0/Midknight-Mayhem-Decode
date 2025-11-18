@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Config
 public class ArmTransfer {
     public static double IDLE_POS = 0.5;
-    public static double TRANSFER_POS = 0.5;
+    public static double TRANSFER_POS = 0.85;
     public static int TRANSFER_WAIT_TIME1 = 500;
     public static int TRANSFER_WAIT_TIME2 = 500;
 

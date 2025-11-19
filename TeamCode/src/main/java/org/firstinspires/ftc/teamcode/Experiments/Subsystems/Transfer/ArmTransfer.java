@@ -5,20 +5,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
+
 @Config
 public class ArmTransfer {
     public static double IDLE_POS = 0.5;
     public static double TRANSFER_POS = 0.85;
     public static int TRANSFER_WAIT_TIME1 = 500;
     public static int TRANSFER_WAIT_TIME2 = 500;
+    public static int INTAKE_TIME = 100;
 
-    private int transferStage = 3;
+    private int transferStage = 5;
     private ElapsedTime timer;
 
     public Servo transferServo;
+    Intake intake;
 
-    public ArmTransfer(HardwareMap hardwareMap) {
+    public ArmTransfer(HardwareMap hardwareMap, Intake intake) {
         transferServo = hardwareMap.get(Servo.class, "transferServo");
+        this.intake = intake;
         timer = new ElapsedTime();
     }
 
@@ -44,7 +49,10 @@ public class ArmTransfer {
                 transferStage++;
                 return false;
             case 1: //wait for arm to move up
-                if (timer.milliseconds() > TRANSFER_WAIT_TIME1) transferStage++;
+                if (timer.milliseconds() > TRANSFER_WAIT_TIME1) {
+                    timer.reset();
+                    transferStage++;
+                }
                 return false;
             case 2: //move arm back down
                 toIdle();
@@ -52,7 +60,19 @@ public class ArmTransfer {
                 transferStage++;
                 return false;
             case 3: //wait for arm to reset
-                if (timer.milliseconds() > TRANSFER_WAIT_TIME2) transferStage++;
+                if (timer.milliseconds() > TRANSFER_WAIT_TIME2) {
+                    timer.reset();
+                    transferStage++;
+                }
+                return false;
+            case 4:
+                if (timer.milliseconds() < INTAKE_TIME) {
+                    intake.motorOn();
+                } else {
+                    intake.motorOff();
+                    timer.reset();
+                    transferStage++;
+                }
                 return false;
             case 5: //idle ready
                 return true;

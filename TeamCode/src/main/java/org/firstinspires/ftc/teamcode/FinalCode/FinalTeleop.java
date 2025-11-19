@@ -20,7 +20,6 @@ public class FinalTeleop extends OpMode {
     Sensors sensors;
     Intake intake;
     Flywheel flywheel;
-    //BeltTransfer beltTransfer;
     ArmTransfer armTransfer;
 
     Gamepad currentGamepad1 = new Gamepad();
@@ -51,9 +50,8 @@ public class FinalTeleop extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
-        //beltTransfer = new BeltTransfer(hardwareMap);
         alliance = Alliance.red;
-        armTransfer = new ArmTransfer(hardwareMap);
+        armTransfer = new ArmTransfer(hardwareMap, intake);
     }
 
     @Override
@@ -118,14 +116,14 @@ public class FinalTeleop extends OpMode {
         //intake
         if (currentGamepad1.right_bumper) {
             intake.motorOn();
-            //beltTransfer.down();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
         } else if (currentGamepad1.right_trigger > 0.3) {
             intake.motorReverse();
-            //beltTransfer.down();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
+        } else if (currentGamepad1.y) {
+            intake.motorOn();
         } else {
             //transfer
             if (currentGamepad1.left_bumper) {

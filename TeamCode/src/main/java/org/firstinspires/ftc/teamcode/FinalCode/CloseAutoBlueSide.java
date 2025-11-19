@@ -124,7 +124,7 @@ public class CloseAutoBlueSide extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
-        armTransfer = new ArmTransfer(hardwareMap);
+        armTransfer = new ArmTransfer(hardwareMap, intake);
     }
 
     @Override

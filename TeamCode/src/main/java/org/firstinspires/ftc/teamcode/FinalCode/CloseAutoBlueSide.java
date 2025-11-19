@@ -88,7 +88,7 @@ public class CloseAutoBlueSide extends OpMode {
     Intake intake;
     Flywheel flywheel;
     Sensors sensors;
-    BeltTransfer beltTransfer;
+    ArmTransfer armTransfer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
@@ -114,7 +114,6 @@ public class CloseAutoBlueSide extends OpMode {
     public void init() {
         odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
-        beltTransfer = new BeltTransfer(hardwareMap);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
@@ -125,6 +124,7 @@ public class CloseAutoBlueSide extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
+        armTransfer = new ArmTransfer(hardwareMap);
     }
 
     @Override
@@ -170,7 +170,6 @@ public class CloseAutoBlueSide extends OpMode {
             case intakeBatch:
                 flywheel.setTargetRPM(-670);
                 flywheel.update();
-                beltTransfer.down();
                 intake.motorOn();
 
                 if (loops >= 3){
@@ -189,7 +188,6 @@ public class CloseAutoBlueSide extends OpMode {
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
-                beltTransfer.stop();
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
@@ -200,36 +198,23 @@ public class CloseAutoBlueSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
+                armTransfer.update();
 
-                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-                else if (timer.milliseconds() >= 2500){
-                    intake.motorOn();
-                    beltTransfer.up();
+                if (flywheel.isReady() && armTransfer.isReady()){
+                    armTransfer.transfer();
+                    timer.reset();
+                    shots++;
                 }
 
-                wheelControl.setI();
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
                 if (autoTimer.milliseconds() >= 27000){
                     state = State.park;
                 }
 
-                if (timer.milliseconds() >= 5000){
+                if (shots >= 3 && timer.milliseconds() >= 1000){
                     loops++;
-                    if (loops == 0 && !do_path1){
-                        loops++;
-                    }
-                    if (loops == 1 && !do_path2){
-                        loops++;
-                    }
-                    if (loops == 2 && !do_path3){
-                        loops++;
-                    }
 
-                    wheelControl.zeroI();
                     vf.setPath(follow_paths[loops], 180, false);
                     pathPoints = follow_paths[loops].get_path_points();
 
@@ -241,7 +226,6 @@ public class CloseAutoBlueSide extends OpMode {
 
             case park:
                 flywheel.stop();
-                beltTransfer.stop();
                 intake.motorOff();
 
                 wheelControl.drive_to_point(new Point(20, 100), 0, 1, 0.5, false);

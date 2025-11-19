@@ -210,7 +210,6 @@ public class CloseAutoRedSide extends OpMode {
                     beltTransfer.up();
                 }
 
-                wheelControl.setI();
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
                 if (autoTimer.milliseconds() >= 27000){
@@ -229,7 +228,6 @@ public class CloseAutoRedSide extends OpMode {
                         loops++;
                     }
 
-                    wheelControl.zeroI();
                     vf.setPath(follow_paths[loops], 0, false);
                     pathPoints = follow_paths[loops].get_path_points();
 

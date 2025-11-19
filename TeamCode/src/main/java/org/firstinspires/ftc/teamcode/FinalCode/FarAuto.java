@@ -153,7 +153,6 @@ public class FarAuto extends OpMode {
                     beltTransfer.up();
                 }
 
-                wheelControl.setI();
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
                 if (autoTimer.milliseconds() >= 27000){
@@ -163,7 +162,6 @@ public class FarAuto extends OpMode {
                 if (timer.milliseconds() >= 5000){
                     loops++;
 
-                    wheelControl.zeroI();
                     vf.setPath(follow_paths[loops], 180, false);
                     pathPoints = follow_paths[loops].get_path_points();
 

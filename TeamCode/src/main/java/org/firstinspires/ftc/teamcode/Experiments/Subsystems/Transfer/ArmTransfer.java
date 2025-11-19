@@ -32,7 +32,9 @@ public class ArmTransfer {
     public void transfer() {
         transferStage = 0;
     }
-
+    public boolean isReady(){
+        return transferStage == 0;
+    }
 
     public boolean update() {
         switch (transferStage) {

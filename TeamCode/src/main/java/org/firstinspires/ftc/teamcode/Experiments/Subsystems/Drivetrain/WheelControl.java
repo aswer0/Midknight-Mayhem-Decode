@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.AutoTuner.Vec3d;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 import org.opencv.core.Point;
 
@@ -62,14 +63,23 @@ public class WheelControl {
         h_controller = new PIDFController(hp, hi, hd, hF);
     }
 
-    public void zeroI(){
-        this.xi = 0;
-        this.yi = 0;
+    public void update_gains(Vec3d p, Vec3d i, Vec3d d){
+        xp = p.x;
+        yp = p.y;
+        hp = p.h;
 
+        xi = i.x;
+        yi = i.y;
+        hi = i.h;
+
+        xd = d.x;
+        yd = d.y;
+        hd = d.h;
     }
-    public void setI(){
-        xi = 0.01;
-        yi = 0.01;
+    public void original_gains(){
+        xp = 0.25; xi = 0; xd = 0.01;
+        yp = 0.3; yi = 0; yd = 0.01;
+        hp = 0.03; hi = 0; hd = 0.003;
     }
 
     public void setF(double vf, double hf, double rf) {

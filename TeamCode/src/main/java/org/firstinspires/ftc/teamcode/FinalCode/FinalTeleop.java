@@ -131,7 +131,7 @@ public class FinalTeleop extends OpMode {
             if (currentGamepad1.left_bumper) {
                 armTransfer.toTransfer();
                 //beltTransfer.up();
-                intake.motorOn();
+                intake.motorOff();
             } else {
                 armTransfer.toIdle();
                 intake.motorOff();

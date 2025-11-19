@@ -14,7 +14,11 @@ public class Camera {
         PGP,
         GPP
     }
-    Limelight3A limelight;
+    public enum Alliance {
+        RED,
+        BLUE
+    }
+    public Limelight3A limelight;
     public Pattern detectedPattern = null;
     public Camera(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");

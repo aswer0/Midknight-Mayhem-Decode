@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.FinalCode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -26,6 +28,8 @@ public class FinalTeleop extends OpMode {
     Gamepad previousGamepad1 = new Gamepad();
 
     public static Point shoot_point = new Point(60, 81);
+    public static Point target_shoot = new Point(11, 134);
+
     public static double target_shoot_heading = 135;
 
     double turnPower = 1;
@@ -37,6 +41,7 @@ public class FinalTeleop extends OpMode {
 
     boolean stopFlywheel = false;
     Alliance alliance;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     enum Alliance{
         red,
@@ -163,5 +168,13 @@ public class FinalTeleop extends OpMode {
 
         telemetry.addData("power", drivePower);
         telemetry.update();
+
+        Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));
+        double dist = Math.sqrt((pos.x-target_shoot.x)*(pos.x-target_shoot.x) + (pos.y-target_shoot.y)*(pos.y-target_shoot.y));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("distance", dist);
+        packet.put("Current RPM", Flywheel.CLOSE_RPM);
+        dashboard.sendTelemetryPacket(packet);
     }
 }

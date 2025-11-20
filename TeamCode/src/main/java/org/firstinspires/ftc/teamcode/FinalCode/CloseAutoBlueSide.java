@@ -172,10 +172,6 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.update();
                 intake.motorOn();
 
-                if (loops >= 3){
-                    state = State.intakeBatch;
-                }
-
                 vf.move();
 
                 if (vf.at_end(gvf_threshold)){
@@ -214,6 +210,10 @@ public class CloseAutoBlueSide extends OpMode {
 
                 if (shots >= 3 && timer.milliseconds() >= 1000){
                     loops++;
+
+                    if (loops >= 3){
+                        state = State.park;
+                    }
 
                     vf.setPath(follow_paths[loops], 180, false);
                     pathPoints = follow_paths[loops].get_path_points();

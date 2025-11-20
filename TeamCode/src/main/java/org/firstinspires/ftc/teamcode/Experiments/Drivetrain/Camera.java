@@ -22,6 +22,8 @@ public class Camera {
     public Pattern detectedPattern = null;
     public Camera(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
     }
     public void update() {
         LLResult result = limelight.getLatestResult();

@@ -6,13 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.Experiments.Sensors;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 @TeleOp
@@ -119,23 +118,20 @@ public class FinalTeleop extends OpMode {
         }
 
         //intake
-        if (currentGamepad1.right_bumper) {
+        if (currentGamepad1.right_bumper) { //in
             intake.motorOn();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
-        } else if (currentGamepad1.right_trigger > 0.3) {
+        } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
-        } else if (currentGamepad1.y) {
-            intake.motorOn();
         } else {
-            //transfer
-            if (gamepad1.left_bumper) {
+            if (gamepad1.left_bumper) { //transfer
                 if (isTransferReady) {
                     armTransfer.transfer();
                 }
-            } else {
+            } else { //idle
                 intake.motorOff();
             }
         }

@@ -8,15 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experiments.Sensors;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.BCPath;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.GVF.VectorField;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public class CloseAutoRedSide extends OpMode {
     Intake intake;
     Flywheel flywheel;
     Sensors sensors;
-    BeltTransfer beltTransfer;
+    ArmTransfer armTransfer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
@@ -114,7 +113,6 @@ public class CloseAutoRedSide extends OpMode {
     public void init() {
         odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 45);
         wheelControl = new WheelControl(hardwareMap, odometry);
-        beltTransfer = new BeltTransfer(hardwareMap);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
@@ -125,6 +123,7 @@ public class CloseAutoRedSide extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
+        armTransfer = new ArmTransfer(hardwareMap, intake);
     }
 
     @Override
@@ -160,6 +159,10 @@ public class CloseAutoRedSide extends OpMode {
     public void loop() {
         odometry.update();
 
+        if (autoTimer.milliseconds() >= 27000){
+            state = State.park;
+        }
+
         switch (state){
             case wait:
                 if (timer.milliseconds() >= wait_time){
@@ -170,12 +173,7 @@ public class CloseAutoRedSide extends OpMode {
             case intakeBatch:
                 flywheel.setTargetRPM(-670);
                 flywheel.update();
-                beltTransfer.down();
                 intake.motorOn();
-
-                if (loops >= 3){
-                    state = State.intakeBatch;
-                }
 
                 vf.move();
 
@@ -189,7 +187,6 @@ public class CloseAutoRedSide extends OpMode {
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
-                beltTransfer.stop();
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
@@ -200,46 +197,42 @@ public class CloseAutoRedSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
+                boolean isTransferReady = armTransfer.update();
 
-                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-                else if (timer.milliseconds() >= 2500){
-                    intake.motorOn();
-                    beltTransfer.up();
+                if (flywheel.isReady() && isTransferReady) {
+                    armTransfer.transfer();
+                    timer.reset();
+                    shots++;
                 }
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (autoTimer.milliseconds() >= 27000){
-                    state = State.park;
-                }
-
-                if (timer.milliseconds() >= 5000){
+                if (shots >= 3 && timer.milliseconds() >= 1000){
                     loops++;
-                    if (loops == 0 && !do_path1){
-                        loops++;
-                    }
-                    if (loops == 1 && !do_path2){
-                        loops++;
-                    }
-                    if (loops == 2 && !do_path3){
-                        loops++;
-                    }
+//                    if (loops == 0 && !do_path1){
+//                        loops++;
+//                    }
+//                    if (loops == 1 && !do_path2){
+//                        loops++;
+//                    }
+//                    if (loops == 2 && !do_path3){
+//                        loops++;
+//                    }
+                    if (loops >= 3){
+                        state = State.park;
+                    } else {
+                        vf.setPath(follow_paths[loops], 0, false);
+                        pathPoints = follow_paths[loops].get_path_points();
 
-                    vf.setPath(follow_paths[loops], 0, false);
-                    pathPoints = follow_paths[loops].get_path_points();
-
-                    shots = 0;
-                    state = State.intakeBatch;
+                        shots = 0;
+                        state = State.intakeBatch;
+                    }
                 }
 
                 break;
 
             case park:
                 flywheel.stop();
-                beltTransfer.stop();
                 intake.motorOff();
 
                 wheelControl.drive_to_point(new Point(40, 40), 0, 1, 0.5, false);

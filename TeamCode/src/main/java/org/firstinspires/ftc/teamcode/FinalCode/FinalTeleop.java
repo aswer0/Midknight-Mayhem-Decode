@@ -80,7 +80,7 @@ public class FinalTeleop extends OpMode {
         currentGamepad1.copy(gamepad1);
         odo.update();
         flywheel.update();
-        //isTransferReady = armTransfer.update();
+        isTransferReady = armTransfer.update();
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
@@ -131,12 +131,11 @@ public class FinalTeleop extends OpMode {
             intake.motorOn();
         } else {
             //transfer
-            if (currentGamepad1.left_bumper) {
-                armTransfer.toTransfer();
-                //beltTransfer.up();
-                intake.motorOff();
+            if (gamepad1.left_bumper) {
+                if (isTransferReady) {
+                    armTransfer.transfer();
+                }
             } else {
-                armTransfer.toIdle();
                 intake.motorOff();
             }
         }
@@ -174,7 +173,7 @@ public class FinalTeleop extends OpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("distance", dist);
-        packet.put("Current RPM", Flywheel.CLOSE_RPM);
+        packet.put("RPM", Flywheel.CLOSE_RPM);
         dashboard.sendTelemetryPacket(packet);
     }
 }

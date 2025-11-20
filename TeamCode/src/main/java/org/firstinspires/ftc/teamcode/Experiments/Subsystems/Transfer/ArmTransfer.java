@@ -11,9 +11,9 @@ import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
 public class ArmTransfer {
     public static double IDLE_POS = 0.5;
     public static double TRANSFER_POS = 0.85;
-    public static int TRANSFER_WAIT_TIME1 = 500;
-    public static int TRANSFER_WAIT_TIME2 = 500;
-    public static int INTAKE_TIME = 100;
+    public static int TRANSFER_WAIT_TIME1 = 400;
+    public static int TRANSFER_WAIT_TIME2 = 150;
+    public static int INTAKE_TIME = 200;
 
     private int transferStage = 5;
     private ElapsedTime timer;

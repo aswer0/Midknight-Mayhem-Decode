@@ -54,11 +54,31 @@ public class Vec3d {
         this.y = vec3d.y;
         this.h = vec3d.h;
     }
+    public double set(int index, double val){
+        if (index == 1){
+            return this.x;
+        }
+        if (index == 2){
+            return this.y;
+        }
+        return this.h;
+
+    }
     public double get(char axis){
         if (axis == 'x'){
             return this.x;
         }
         if (axis == 'y'){
+            return this.y;
+        }
+        return this.h;
+
+    }
+    public double get(int index){
+        if (index == 1){
+            return this.x;
+        }
+        if (index == 2){
             return this.y;
         }
         return this.h;

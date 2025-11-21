@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.FinalCode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.Experiments.Sensors;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake.Intake;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.ArmTransfer;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Transfer.BeltTransfer;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 @TeleOp
@@ -20,13 +21,14 @@ public class FinalTeleop extends OpMode {
     Sensors sensors;
     Intake intake;
     Flywheel flywheel;
-    BeltTransfer beltTransfer;
-    //ArmTransfer armTransfer;
+    ArmTransfer armTransfer;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
 
     public static Point shoot_point = new Point(60, 81);
+    public static Point target_shoot = new Point(11, 134);
+
     public static double target_shoot_heading = 135;
 
     double turnPower = 1;
@@ -38,6 +40,7 @@ public class FinalTeleop extends OpMode {
 
     boolean stopFlywheel = false;
     Alliance alliance;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     enum Alliance{
         red,
@@ -51,9 +54,8 @@ public class FinalTeleop extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
-        beltTransfer = new BeltTransfer(hardwareMap);
         alliance = Alliance.red;
-        //armTransfer = new ArmTransfer(hardwareMap);
+        armTransfer = new ArmTransfer(hardwareMap, intake);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class FinalTeleop extends OpMode {
         currentGamepad1.copy(gamepad1);
         odo.update();
         flywheel.update();
-        //isTransferReady = armTransfer.update();
+        isTransferReady = armTransfer.update();
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
@@ -116,24 +118,20 @@ public class FinalTeleop extends OpMode {
         }
 
         //intake
-        if (currentGamepad1.right_bumper) {
+        if (currentGamepad1.right_bumper) { //in
             intake.motorOn();
-            beltTransfer.down();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
-        } else if (currentGamepad1.right_trigger > 0.3) {
+        } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
-            beltTransfer.down();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
         } else {
-            //transfer
-            if (currentGamepad1.left_bumper) {
-//              if (isTransferReady) armTransfer.transfer();
-                beltTransfer.up();
-                intake.motorOn();
-            } else {
-                beltTransfer.stop();
+            if (gamepad1.left_bumper) { //transfer
+                if (isTransferReady) {
+                    armTransfer.transfer();
+                }
+            } else { //idle
                 intake.motorOff();
             }
         }
@@ -165,5 +163,13 @@ public class FinalTeleop extends OpMode {
 
         telemetry.addData("power", drivePower);
         telemetry.update();
+
+        Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));
+        double dist = Math.sqrt((pos.x-target_shoot.x)*(pos.x-target_shoot.x) + (pos.y-target_shoot.y)*(pos.y-target_shoot.y));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("distance", dist);
+        packet.put("RPM", Flywheel.CLOSE_RPM);
+        dashboard.sendTelemetryPacket(packet);
     }
 }

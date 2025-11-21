@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FinalCode;
+package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -14,56 +14,63 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class FarAuto extends OpMode {
+public class FarAutoPathOnly extends OpMode {
     public static Point start_point = new Point(55, 8);
     public static Point shoot_point = new Point(58, 21);
 
+    /*
+    P_0 = (52.6, 7.6)
+    P_1 = (45.5, 23.4)
+    P_2 = (60, 35)
+    P_3 = (18.4, 34.6)
+
+    P_0 = (52.6, 7.6)
+    P_1 = (45.5, 23.4)
+    P_2 = (63.6, 66.2)
+    P_3 = (10.2, 58.2)
+     */
     BCPath[] follow_paths = {
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(45.5, 23.4),
-                new Point(60, 35),
-                new Point(18.4, 34.6)
-            }
-        }),
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(45.5, 23.4),
-                new Point(63.6, 66.2),
-                new Point(10.2, 58.2)
-            }
-        }),
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(38.3,23.1),
-                new Point(55.8, 23.4),
-                new Point(44.8,83),
-                new Point(19.3,82.3)
-            }
-        })
+            new BCPath(new Point[][] {
+                    {
+                            new Point(58, 21),
+                            new Point(46, 5),
+                            new Point(27.6, 13),
+                            new Point(13, 11)
+                    }
+            }),
+            new BCPath(new Point[][] {
+                    {
+                            new Point(52.6, 7.6),
+                            new Point(45.5, 23.4),
+                            new Point(60, 35),
+                            new Point(18.4, 34.6)
+                    }
+            }),
+            new BCPath(new Point[][] {
+                    {
+                            new Point(52.6, 7.6),
+                            new Point(45.5, 23.4),
+                            new Point(63.6, 66.2),
+                            new Point(19.6,58.6)
+                    }
+            }),
     };
 
     enum State{
         intakeBatch,
         driveToShootPos,
         shootBall,
-        park
     }
 
     State state = State.driveToShootPos;
 
     WheelControl wheelControl;
-    // 67 haha
     Odometry odometry;
     VectorField vf;
     BCPath path;
@@ -71,16 +78,14 @@ public class FarAuto extends OpMode {
 
     Intake intake;
     Flywheel flywheel;
-    BeltTransfer beltTransfer;
     Sensors sensors;
-    ElapsedTime autoTimer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 1.2;
-    public static double shoot_angle = 116;
+    public static double shoot_angle = 113;
     public static double power = 0.8;
     int loops = -1;
 
@@ -93,11 +98,9 @@ public class FarAuto extends OpMode {
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
-        autoTimer = new ElapsedTime();
 
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
-        beltTransfer = new BeltTransfer(hardwareMap);
         flywheel = new Flywheel(hardwareMap);
 
         pathPoints = follow_paths[loops+1].get_path_points();
@@ -114,25 +117,14 @@ public class FarAuto extends OpMode {
 
         switch (state){
             case intakeBatch:
-                flywheel.setTargetRPM(-670);
-                flywheel.update();
-                beltTransfer.down();
-                intake.motorOn();
-
                 vf.move();
 
                 if (vf.at_end(gvf_threshold)){
-                    timer.reset();
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
-                flywheel.shootFar();
-                flywheel.update();
-                beltTransfer.stop();
-
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
                     timer.reset();
                     state = State.shootBall;
@@ -140,39 +132,15 @@ public class FarAuto extends OpMode {
                 break;
 
             case shootBall:
-                flywheel.shootFar();
-                flywheel.update();
-
-                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-                else if (timer.milliseconds() >= 2500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
-
-                if (autoTimer.milliseconds() >= 27000){
-                    state = State.park;
-                }
-
                 if (timer.milliseconds() >= 5000){
                     loops++;
-
                     vf.setPath(follow_paths[loops], 180, false);
                     pathPoints = follow_paths[loops].get_path_points();
 
                     state = State.intakeBatch;
                 }
 
-            case park:
-                flywheel.stop();
-                beltTransfer.stop();
-                intake.motorOff();
-
-                wheelControl.drive_to_point(new Point(10, 10), 0, 1, 0.5, false);
                 break;
         }
 

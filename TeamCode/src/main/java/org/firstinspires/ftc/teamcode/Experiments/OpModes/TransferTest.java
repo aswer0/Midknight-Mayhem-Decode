@@ -1,0 +1,26 @@
+package org.firstinspires.ftc.teamcode.Experiments.OpModes;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+@TeleOp
+public class TransferTest extends OpMode {
+    public CRServo transferServo;
+    public DcMotorEx motor;
+
+    @Override
+    public void init() {
+        transferServo = hardwareMap.get(CRServo.class, "transferServo");
+        motor = hardwareMap.get(DcMotorEx.class, "motor");
+
+    }
+
+    @Override
+    public void loop() {
+        transferServo.setPower(gamepad1.left_stick_y);
+        motor.setPower(gamepad1.right_stick_y);
+        telemetry.addData("Power", gamepad1.left_stick_y);
+    }
+}

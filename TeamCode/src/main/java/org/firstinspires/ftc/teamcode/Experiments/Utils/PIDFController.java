@@ -16,12 +16,15 @@ public class PIDFController {
     private double iSum = 0;
     private ElapsedTime timer;
 
+    public PIDFCoefficients gains;
+
     public PIDFController(double kp, double ki, double kd,double kf) {
         this.kp = kp;
         this.kd = kd;
         this.ki = ki;
         this.kf = kf;
         timer = new ElapsedTime();
+        gains = new PIDFCoefficients(kp, ki, kd, kf);
     }
     public PIDFController(PIDFCoefficients coefficients) {
         this.kp = coefficients.p;
@@ -29,6 +32,7 @@ public class PIDFController {
         this.ki = coefficients.i;
         this.kf = coefficients.f;
         timer = new ElapsedTime();
+        gains = coefficients;
     }
 
     public static double wrapError(double target, double current) {

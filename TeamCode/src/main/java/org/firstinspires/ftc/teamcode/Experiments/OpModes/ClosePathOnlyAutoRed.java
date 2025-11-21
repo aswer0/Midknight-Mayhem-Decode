@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FinalCode;
+package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -7,80 +7,69 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class FarAuto extends OpMode {
-    public static Point start_point = new Point(55, 8);
-    public static Point shoot_point = new Point(58, 21);
+public class ClosePathOnlyAutoRed extends OpMode {
+    public static Point start_point = new Point(117, 126);
+    public static Point shoot_point = new Point(82, 81);
+
 
     BCPath[] follow_paths = {
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(45.5, 23.4),
-                new Point(60, 35),
-                new Point(18.4, 34.6)
-            }
-        }),
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(45.5, 23.4),
-                new Point(63.6, 66.2),
-                new Point(10.2, 58.2)
-            }
-        }),
-        new BCPath(new Point[][] {
-            {
-                new Point(52.6, 7.6),
-                new Point(38.3,23.1),
-                new Point(55.8, 23.4),
-                new Point(44.8,83),
-                new Point(19.3,82.3)
-            }
-        })
+            new BCPath(new Point[][] {
+                    {
+                            new Point(82, 81),
+                            new Point(88, 81.4),
+                            new Point(107.2, 82.6),
+                            new Point(122, 82.5),
+                    }
+            }),
+            new BCPath(new Point[][] {
+                    {
+                            new Point(82, 81),
+                            new Point(96.7, 73),
+                            new Point(79.6, 55.7),
+                            new Point(122, 59),
+                    }
+            }),
+            new BCPath(new Point[][] {
+                    {
+                            new Point(89.4, 102.4),
+                            new Point(91.8, 72),
+                            new Point(79.4, 27.7),
+                            new Point(88.3, 35.7),
+                            new Point(122, 35.2),
+                    }
+            })
     };
+
 
     enum State{
         intakeBatch,
         driveToShootPos,
         shootBall,
-        park
     }
 
     State state = State.driveToShootPos;
 
     WheelControl wheelControl;
-    // 67 haha
     Odometry odometry;
     VectorField vf;
-    BCPath path;
     ElapsedTime timer;
-
-    Intake intake;
-    Flywheel flywheel;
-    BeltTransfer beltTransfer;
-    Sensors sensors;
-    ElapsedTime autoTimer;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
-    public static double pid_threshold = 1.2;
-    public static double shoot_angle = 116;
+    public static double pid_threshold = 0.8;
+    public static double shoot_angle = -135;
     public static double power = 0.8;
     int loops = -1;
 
@@ -88,17 +77,11 @@ public class FarAuto extends OpMode {
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 90);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
-        autoTimer = new ElapsedTime();
-
-        sensors = new Sensors(hardwareMap);
-        intake = new Intake(hardwareMap, sensors);
-        beltTransfer = new BeltTransfer(hardwareMap);
-        flywheel = new Flywheel(hardwareMap);
 
         pathPoints = follow_paths[loops+1].get_path_points();
     }
@@ -114,25 +97,14 @@ public class FarAuto extends OpMode {
 
         switch (state){
             case intakeBatch:
-                flywheel.setTargetRPM(-670);
-                flywheel.update();
-                beltTransfer.down();
-                intake.motorOn();
-
                 vf.move();
 
                 if (vf.at_end(gvf_threshold)){
-                    timer.reset();
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
-                flywheel.shootFar();
-                flywheel.update();
-                beltTransfer.stop();
-
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk)){
                     timer.reset();
                     state = State.shootBall;
@@ -140,39 +112,16 @@ public class FarAuto extends OpMode {
                 break;
 
             case shootBall:
-                flywheel.shootFar();
-                flywheel.update();
-
-                if (timer.milliseconds() >= 500 && timer.milliseconds() <= 1500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-                else if (timer.milliseconds() >= 2500){
-                    intake.motorOn();
-                    beltTransfer.up();
-                }
-
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (autoTimer.milliseconds() >= 27000){
-                    state = State.park;
-                }
-
-                if (timer.milliseconds() >= 5000){
+                if (timer.milliseconds() >= 2000){
                     loops++;
-
-                    vf.setPath(follow_paths[loops], 180, false);
+                    vf.setPath(follow_paths[loops], 180, true);
                     pathPoints = follow_paths[loops].get_path_points();
 
                     state = State.intakeBatch;
                 }
 
-            case park:
-                flywheel.stop();
-                beltTransfer.stop();
-                intake.motorOff();
-
-                wheelControl.drive_to_point(new Point(10, 10), 0, 1, 0.5, false);
                 break;
         }
 
@@ -197,10 +146,9 @@ public class FarAuto extends OpMode {
         }
 
         packet.put("state", state);
-        packet.put("x", odometry.get_x(uk));
-        packet.put("y", odometry.get_y(uk));
-        packet.put("heading", odometry.get_heading(uk));
 
         dashboard.sendTelemetryPacket(packet);
     }
 }
+
+

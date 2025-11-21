@@ -11,6 +11,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 @Config
 public class Flywheel {
     public static boolean outputDebugInfo = false;
@@ -19,16 +23,17 @@ public class Flywheel {
     private double currentRPM = 0;
 
     public static double kp=0.01, ki=0.000, kd=0, kf=0.32;
-    public static int CLOSE_RPM = 3000;
+    public static double CLOSE_RPM = 3000;
     public static int FAR_RPM = 4200;
     public static int THRESHOLD = 100;
+    public static boolean reverseFlywheel = false;
 
     public DcMotorEx flywheel;
     PIDFController flywheelController = new PIDFController(kp, ki, kd, kf);
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        if (reverseFlywheel) flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -51,6 +56,19 @@ public class Flywheel {
     }
     public void shootFar() {
         setTargetRPM(FAR_RPM);
+    }
+
+    public void set_auto_rpm(double dist) {
+        List<Double> coeffs = Arrays.asList(-0.000193287, 0.0514462, -4.78688, 198.33296, -710.1902);
+
+        int n = coeffs.size();
+        double rpm = 0;
+
+        for (int i = 0; i < n; i++) {
+            rpm += coeffs.get(i) * Math.pow(dist, n - 1 - i);
+        }
+
+        CLOSE_RPM = rpm;
     }
 
     public void update() {

@@ -33,9 +33,16 @@ public class CloseAutoBlueSide extends OpMode {
     P_3 = (20,82.5)
 
     P_0 = (60, 81)
-    P_1 = (54.7,71.6)
-    P_2 = (62.4,55.7)
-    P_3 = (28,60)
+    P_1 = (54,81.4)
+    P_2 = (34.8,82.6)
+    P_3 = (25,82.5)
+
+    {
+        new Point(60, 81),
+        new Point(54,81.4),
+        new Point(34.8,82.6),
+        new Point(25,82.5),
+    }
 
      */
 
@@ -43,17 +50,18 @@ public class CloseAutoBlueSide extends OpMode {
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
-                            new Point(54,81.4),
-                            new Point(34.8,82.6),
-                            new Point(32,82.5),
+                            new Point(53.8,84.5),
+                            new Point(35,74.6),
+                            new Point(30,97.6),
+                            new Point(18,74)
                     }
             }),
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
-                            new Point(54.7,71.6),
+                            new Point(55,64.8),
                             new Point(62,61.7),
-                            new Point(19,64.3),
+                            new Point(23.7,59.6),
                     }
             }),
             new BCPath(new Point[][] {
@@ -62,7 +70,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(50.2,72),
                             new Point(62.6,27.7),
                             new Point(53.7,39),
-                            new Point(31.4,38.6),
+                            new Point(25,38.6),
                     }
             })
     };
@@ -98,13 +106,10 @@ public class CloseAutoBlueSide extends OpMode {
     public static double pid_threshold = 0.8;
     public static double shoot_angle = 135;
     public static double power = 0.8;
+    public static double shoot_wait_time = 4000;
+
     int loops = -1;
-    int shots = 0;
-
     int wait_time = 0;
-
-    boolean do_path1 = true;
-    boolean do_path2 = true;
     boolean do_path3 = true;
 
     ArrayList<Point> pathPoints;
@@ -131,12 +136,6 @@ public class CloseAutoBlueSide extends OpMode {
         timer.reset();
         autoTimer.reset();
 
-        if (!previousGamepad1.square && currentGamepad1.square){
-            do_path1 = !do_path1;
-        }
-        if (!previousGamepad1.triangle && currentGamepad1.triangle){
-            do_path2 = !do_path2;
-        }
         if (!previousGamepad1.circle && currentGamepad1.circle){
             do_path3 = !do_path3;
         }
@@ -148,8 +147,6 @@ public class CloseAutoBlueSide extends OpMode {
             wait_time++;
         }
 
-        telemetry.addData("do path 1? (square)", do_path1);
-        telemetry.addData("do path 2? (triangle)", do_path2);
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
@@ -171,6 +168,7 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case intakeBatch:
+                armTransfer.toIdle();
                 flywheel.setTargetRPM(-670);
                 flywheel.update();
                 intake.motorOn();
@@ -184,6 +182,7 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case driveToShootPos:
+                armTransfer.toIdle();
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
@@ -199,34 +198,37 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.update();
                 boolean isTransferReady = armTransfer.update();
 
-                if (flywheel.isReady() && isTransferReady){
-                    armTransfer.transfer();
-                    timer.reset();
-                    shots++;
+                if (timer.milliseconds() >= 500){
+                    if (isTransferReady) {
+                        armTransfer.transfer();
+                    }
                 }
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (shots >= 3 && timer.milliseconds() >= 1000){
+                if (timer.milliseconds() >= shoot_wait_time){
                     loops++;
 
-                    if (loops >= 3){
+                    if (loops >= 2+(do_path3 ? 1 : 0)){
                         state = State.park;
-                    } else {
+                    }
+                    else {
                         vf.setPath(follow_paths[loops], 180, false);
                         pathPoints = follow_paths[loops].get_path_points();
 
-                        shots = 0;
+                        armTransfer.toIdle();
                         state = State.intakeBatch;
                     }
                 }
                 break;
 
             case park:
+                armTransfer.toIdle();
+                flywheel.update();
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(20, 100), 0, 1, 0.5, false);
+                wheelControl.drive_to_point(new Point(35, 81), 90, 1, 0.5, false);
                 break;
         }
 

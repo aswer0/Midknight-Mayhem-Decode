@@ -49,7 +49,7 @@ public class FinalTeleop extends OpMode {
 
     @Override
     public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 0, 0, 0);
+        odo = new Odometry(hardwareMap, telemetry, 8, 8, 90);
         drive = new WheelControl(hardwareMap, odo);
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
@@ -166,6 +166,7 @@ public class FinalTeleop extends OpMode {
 
         Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));
         double dist = Math.sqrt((pos.x-target_shoot.x)*(pos.x-target_shoot.x) + (pos.y-target_shoot.y)*(pos.y-target_shoot.y));
+        flywheel.set_auto_rpm(dist);
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("distance", dist);

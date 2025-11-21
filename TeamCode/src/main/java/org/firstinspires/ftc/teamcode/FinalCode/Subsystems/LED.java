@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake;
+package org.firstinspires.ftc.teamcode.FinalCode.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Experiments.Sensors;
-import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 
 @Config
 public class LED {

@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
@@ -22,6 +24,7 @@ public class FinalTeleop extends OpMode {
     Intake intake;
     Flywheel flywheel;
     ArmTransfer armTransfer;
+    Turret turret;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -56,6 +59,7 @@ public class FinalTeleop extends OpMode {
         flywheel = new Flywheel(hardwareMap);
         alliance = Alliance.red;
         armTransfer = new ArmTransfer(hardwareMap, intake);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), true);
     }
 
     @Override
@@ -160,7 +164,7 @@ public class FinalTeleop extends OpMode {
         if (flywheel.isReady()) {
             gamepad1.rumble(100);
         }
-
+        turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         telemetry.addData("power", drivePower);
         telemetry.update();
 

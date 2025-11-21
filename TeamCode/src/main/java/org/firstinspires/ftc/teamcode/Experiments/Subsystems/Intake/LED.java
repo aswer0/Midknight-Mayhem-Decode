@@ -2,16 +2,20 @@ package org.firstinspires.ftc.teamcode.Experiments.Subsystems.Intake;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Experiments.Sensors;
+import org.firstinspires.ftc.teamcode.Experiments.Subsystems.Outtake.Flywheel;
 
 @Config
 public class LED {
     int num_balls = 0;
-    //    boolean fwheel_speed = false;
     Sensors sensors;
     RevBlinkinLedDriver botLED;
+    Flywheel flywheel;
+    public Gamepad currentGamepad1 = new Gamepad();
+    public Gamepad previousGamepad1 = new Gamepad();
 
     int sensorFront;
     int sensorMid;
@@ -20,12 +24,19 @@ public class LED {
     int sensorMidprev = 0;
     int sensorBackprev = 0;
 
-    public LED(HardwareMap hardwareMap, Sensors sensors) {
+    boolean uptospeed;
+
+    public LED(HardwareMap hardwareMap, Sensors sensors, Flywheel flywheel) {
         this.sensors = sensors;
+        this.flywheel = flywheel;
 
         botLED = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
     }
-//
+
+    public LED(HardwareMap hardwareMap) {
+        botLED = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
+    }
+
     public void ballLED() {
         sensorFront = sensors.getFrontColor();
         sensorMid = sensors.getMidColor();
@@ -67,6 +78,18 @@ public class LED {
             botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         } else {
             botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        }
+    }
+
+    public void speedCheck() {
+        uptospeed = flywheel.isReady();
+
+        // uptospeed = currentGamepad1.dpad_up;
+
+        if (uptospeed) {
+            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        } else {
+            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
         }
     }
 }

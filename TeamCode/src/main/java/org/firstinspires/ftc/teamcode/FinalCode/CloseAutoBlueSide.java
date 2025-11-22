@@ -37,23 +37,29 @@ public class CloseAutoBlueSide extends OpMode {
     P_2 = (34.8,82.6)
     P_3 = (25,82.5)
 
-    {
-        new Point(60, 81),
-        new Point(54,81.4),
-        new Point(34.8,82.6),
-        new Point(25,82.5),
-    }
+    P_0 = (52.6,102.4)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,39)
+    P_4 = (25,38.6)
+
+    new Point,
+    new Point,
+    new Point,
+    new Point,
+    new Point,
 
      */
 
-    BCPath[] follow_paths = {
+    public static BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
                             new Point(53.8,84.5),
                             new Point(35,74.6),
-                            new Point(30,97.6),
-                            new Point(18,74)
+                            new Point(6,98.5),
+                            new Point(29.2,74.5),
+                            new Point(16,71.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -106,7 +112,9 @@ public class CloseAutoBlueSide extends OpMode {
     public static double pid_threshold = 0.8;
     public static double shoot_angle = 135;
     public static double power = 0.8;
-    public static double shoot_wait_time = 4000;
+
+    public static double shoot_wait_time = 3750;
+    public static double gait_wait_time = 750;
 
     int loops = -1;
     int wait_time = 0;
@@ -156,7 +164,7 @@ public class CloseAutoBlueSide extends OpMode {
     public void loop() {
         odometry.update();
 
-        if (autoTimer.milliseconds() >= 28000){
+        if (autoTimer.milliseconds() >= 28500){
             state = State.park;
         }
 
@@ -186,6 +194,12 @@ public class CloseAutoBlueSide extends OpMode {
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
+
+                if (loops == 0){
+                    if (timer.milliseconds() <= gait_wait_time){
+                        break;
+                    }
+                }
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
@@ -217,6 +231,7 @@ public class CloseAutoBlueSide extends OpMode {
                         pathPoints = follow_paths[loops].get_path_points();
 
                         armTransfer.toIdle();
+                        timer.reset();
                         state = State.intakeBatch;
                     }
                 }

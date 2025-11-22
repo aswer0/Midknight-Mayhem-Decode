@@ -170,7 +170,7 @@ public class FinalTeleop extends OpMode {
 
         Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));
         double dist = Math.sqrt((pos.x-target_shoot.x)*(pos.x-target_shoot.x) + (pos.y-target_shoot.y)*(pos.y-target_shoot.y));
-        flywheel.set_auto_rpm(dist);
+        //flywheel.set_auto_rpm(dist);
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("distance", dist);

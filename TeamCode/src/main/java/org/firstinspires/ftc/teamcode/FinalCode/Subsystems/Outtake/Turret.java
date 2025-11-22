@@ -25,14 +25,14 @@ public class Turret {
     private static int TICKS_PER_DEGREE = TICKS_PER_ROTATION/360;
     public DcMotorEx turret;
 
-    public static double kp=0.4, ki=0, kd=0.25, kf=0;
+    public static double kp=0.12, ki=0, kd=0.00005, kf=0.0075;
     public static PIDFCoefficients manualAimCoefficients = new PIDFCoefficients(kp, ki, kd, kf);
     double target_angle;
-    public static boolean autoAiming = true;
+    public static boolean autoAiming = false;
     PIDFController controller;
     Camera camera;
     Alliance alliance;
-    public static boolean outputDebugInfo = false;
+    public static boolean outputDebugInfo = true;
     public Turret(HardwareMap hardwareMap, Camera camera, Alliance alliance, boolean resetEncoder) {
         this.alliance = alliance;
         this.camera = camera;
@@ -88,9 +88,15 @@ public class Turret {
                 return 0;
             }
             power = controller.calculate(0, -angle);
+            power = Math.min(power, 0.5);
+            power = Math.max(power, -0.5);
+
             turret.setPower(power);
         } else {
             power = controller.calculate(target_angle, getAngle());
+            power = Math.min(power, 0.5);
+            power = Math.max(power, -0.5);
+
             turret.setPower(power);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();

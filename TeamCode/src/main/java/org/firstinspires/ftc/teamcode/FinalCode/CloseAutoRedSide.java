@@ -98,13 +98,12 @@ public class CloseAutoRedSide extends OpMode {
     public static double pid_threshold = 0.8;
     public static double shoot_angle = 45;
     public static double power = 0.8;
+
+    public static double shoot_wait_time = 3750;
+    public static double gait_wait_time = 750;
+
     int loops = -1;
-    int shots = 0;
-
     int wait_time = 0;
-
-    boolean do_path1 = true;
-    boolean do_path2 = true;
     boolean do_path3 = true;
 
     ArrayList<Point> pathPoints;
@@ -131,12 +130,6 @@ public class CloseAutoRedSide extends OpMode {
         timer.reset();
         autoTimer.reset();
 
-        if (!previousGamepad1.square && currentGamepad1.square){
-            do_path1 = !do_path1;
-        }
-        if (!previousGamepad1.triangle && currentGamepad1.triangle){
-            do_path2 = !do_path2;
-        }
         if (!previousGamepad1.circle && currentGamepad1.circle){
             do_path3 = !do_path3;
         }
@@ -148,8 +141,6 @@ public class CloseAutoRedSide extends OpMode {
             wait_time++;
         }
 
-        telemetry.addData("do path 1? (square)", do_path1);
-        telemetry.addData("do path 2? (triangle)", do_path2);
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
@@ -159,7 +150,7 @@ public class CloseAutoRedSide extends OpMode {
     public void loop() {
         odometry.update();
 
-        if (autoTimer.milliseconds() >= 27000){
+        if (autoTimer.milliseconds() >= 28500){
             state = State.park;
         }
 
@@ -171,6 +162,7 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case intakeBatch:
+                armTransfer.toIdle();
                 flywheel.setTargetRPM(-670);
                 flywheel.update();
                 intake.motorOn();
@@ -184,9 +176,16 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case driveToShootPos:
+                armTransfer.toIdle();
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
+
+                if (loops == 0){
+                    if (timer.milliseconds() <= gait_wait_time){
+                        break;
+                    }
+                }
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
@@ -199,39 +198,34 @@ public class CloseAutoRedSide extends OpMode {
                 flywheel.update();
                 boolean isTransferReady = armTransfer.update();
 
-                if (flywheel.isReady() && isTransferReady) {
-                    armTransfer.transfer();
-                    timer.reset();
-                    shots++;
+                if (timer.milliseconds() >= 500){
+                    if (isTransferReady) {
+                        armTransfer.transfer();
+                    }
                 }
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (shots >= 3 && timer.milliseconds() >= 1000){
+                if (timer.milliseconds() >= shoot_wait_time){
                     loops++;
-//                    if (loops == 0 && !do_path1){
-//                        loops++;
-//                    }
-//                    if (loops == 1 && !do_path2){
-//                        loops++;
-//                    }
-//                    if (loops == 2 && !do_path3){
-//                        loops++;
-//                    }
-                    if (loops >= 3){
+
+                    if (loops >= 2+(do_path3 ? 1 : 0)){
                         state = State.park;
-                    } else {
+                    }
+                    else {
                         vf.setPath(follow_paths[loops], 0, false);
                         pathPoints = follow_paths[loops].get_path_points();
 
-                        shots = 0;
+                        armTransfer.toIdle();
+                        timer.reset();
                         state = State.intakeBatch;
                     }
                 }
-
                 break;
 
             case park:
+                armTransfer.toIdle();
+                flywheel.update();
                 flywheel.stop();
                 intake.motorOff();
 

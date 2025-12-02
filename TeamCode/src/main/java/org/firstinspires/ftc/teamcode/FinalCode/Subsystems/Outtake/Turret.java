@@ -21,7 +21,7 @@ public class Turret {
         RED,
         BLUE
     }
-    private static int TICKS_PER_ROTATION = 1260; //28*15*3
+    private static int TICKS_PER_ROTATION = 1260*50/45; //28*15*3
     private static int TICKS_PER_DEGREE = TICKS_PER_ROTATION/360;
     public DcMotorEx turret;
 

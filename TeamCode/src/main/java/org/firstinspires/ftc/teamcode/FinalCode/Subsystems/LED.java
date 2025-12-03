@@ -125,7 +125,7 @@ public class LED {
 //                case 3:
 //                    break;
 //            }
-////            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//           botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
 //        } else {
 //            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
 //            ledStage = 0;

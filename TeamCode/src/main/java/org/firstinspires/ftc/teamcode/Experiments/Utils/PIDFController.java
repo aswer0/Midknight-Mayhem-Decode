@@ -44,26 +44,29 @@ public class PIDFController {
         double s = timer.seconds();
 
         e = wrapError(tar, act);
-        p = kp * (e);
-        i = ki * iSum;
-        d = kd * ((e - e_last) / s);
+        p = gains.p * (e);
+        i = gains.i * iSum;
+        d = gains.d * ((e - e_last) / s);
 
         iSum += s * e;
         e_last = e;
         timer.reset();
-        return p + d + kf;
+        return p + d + gains.f;
     }
 
-    public double calculate(double tar, double act) {
+    public double calculate(double tar, double act, double fOverride) {
         double s = timer.seconds();
         e = tar - act;
-        p = kp * (e);
-        i = ki * iSum;
-        d = kd * ((e - e_last) / s);
+        p = gains.p * (e);
+        i = gains.i * iSum;
+        d = gains.d * ((e - e_last) / s);
 
         iSum += s * e;
         e_last = e;
         timer.reset();
-        return p + i + d + kf;
+        return p + i + d + fOverride;
+    }
+    public double calculate(double tar, double act) {
+        return calculate(tar, act, gains.f);
     }
 }

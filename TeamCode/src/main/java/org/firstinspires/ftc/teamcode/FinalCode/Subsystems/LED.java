@@ -88,39 +88,48 @@ public class LED {
     public void speedCheck() {
         uptospeed = flywheel.isReady();
 
-        if (uptospeed) {
-            switch (ledStage) {
-
-                case 0:
-                    botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                    ledTimer.reset();
-                    ledStage = 1;
-                    break;
-
-                case 1:
-                    if (ledTimer.seconds() > 0.5) {
-                        botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                        ledTimer.reset();
-                        ledStage = 2;
-                    }
-                    break;
-
-                case 2:
-                    if (ledTimer.seconds() > 0.5) {
-                        botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                        ledStage = 3;
-                    }
-                    break;
-
-                case 3:
-                    break;
-            }
-//            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        if(uptospeed) {
+            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         } else {
             botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-            ledStage = 0;
         }
     }
+//    public void speedCheck() {
+//        uptospeed = flywheel.isReady();
+//
+//        if (uptospeed) {
+//            switch (ledStage) {
+//
+//                case 0:
+//                    botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//                    ledTimer.reset();
+//                    ledStage = 1;
+//                    break;
+//
+//                case 1:
+//                    if (ledTimer.seconds() > 0.5) {
+//                        botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//                        ledTimer.reset();
+//                        ledStage = 2;
+//                    }
+//                    break;
+//
+//                case 2:
+//                    if (ledTimer.seconds() > 0.5) {
+//                        botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//                        ledStage = 3;
+//                    }
+//                    break;
+//
+//                case 3:
+//                    break;
+//            }
+////            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//        } else {
+//            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+//            ledStage = 0;
+//        }
+//    }
 
 //    public void ballCheck() {
 //        sensorLeft = sensors.getFrontColor();

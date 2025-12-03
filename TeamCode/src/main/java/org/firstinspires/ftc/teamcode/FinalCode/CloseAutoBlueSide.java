@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
@@ -37,23 +39,48 @@ public class CloseAutoBlueSide extends OpMode {
     P_2 = (34.8,82.6)
     P_3 = (25,82.5)
 
-    {
-        new Point(60, 81),
-        new Point(54,81.4),
-        new Point(34.8,82.6),
-        new Point(25,82.5),
-    }
+    P_0 = (52.6,102.4)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,39)
+    P_4 = (25,38.6)
+
+       ++++++++++++++++++
+
+    P_0 = (60, 81)
+    P_1 = (53.8,84.5)
+    P_2 = (35,74.6)
+    P_3 = (6,98.5)
+    P_4 = (29.2,74.5)
+    P_5 = (16,71.3)
+
+    P_0 = (60, 81)
+    P_1 = (55,64.8)
+    P_2 = (62,61.7)
+    P_3 = (23.7,59.6)
+
+    P_0 = (52.6,102.4)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,39)
+    P_4 = (25,34)
+
+    new Point(60, 81),
+    new Point(55,64.8),
+    new Point(62,61.7),
+    new Point(23.7,59.6),
 
      */
 
-    BCPath[] follow_paths = {
+    public static BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
                             new Point(53.8,84.5),
                             new Point(35,74.6),
-                            new Point(30,97.6),
-                            new Point(18,74)
+                            new Point(6,98.5),
+                            new Point(29.2,74.5),
+                            new Point(16,71.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -70,7 +97,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(50.2,72),
                             new Point(62.6,27.7),
                             new Point(53.7,39),
-                            new Point(25,38.6),
+                            new Point(25,34),
                     }
             })
     };
@@ -88,7 +115,6 @@ public class CloseAutoBlueSide extends OpMode {
     WheelControl wheelControl;
     Odometry odometry;
     VectorField vf;
-    BCPath path;
     ElapsedTime timer;
     ElapsedTime autoTimer;
 
@@ -96,6 +122,7 @@ public class CloseAutoBlueSide extends OpMode {
     Flywheel flywheel;
     Sensors sensors;
     ArmTransfer armTransfer;
+    Turret turret;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
@@ -103,10 +130,13 @@ public class CloseAutoBlueSide extends OpMode {
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.5;
-    public static double pid_threshold = 0.8;
-    public static double shoot_angle = 135;
+    public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double shoot_wait_time = 4000;
+    public static double turret_angle = 53.67;
+    public double shoot_angle = 135;
+
+    public static double shoot_wait_time = 3750;
+    public static double gate_wait_time = 750;
 
     int loops = -1;
     int wait_time = 0;
@@ -129,6 +159,8 @@ public class CloseAutoBlueSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
+        turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
+
     }
 
     @Override
@@ -155,8 +187,9 @@ public class CloseAutoBlueSide extends OpMode {
     @Override
     public void loop() {
         odometry.update();
+        turret.update();
 
-        if (autoTimer.milliseconds() >= 28000){
+        if (autoTimer.milliseconds() >= 29500){
             state = State.park;
         }
 
@@ -168,6 +201,7 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case intakeBatch:
+                turret.setAngle(turret_angle);
                 armTransfer.toIdle();
                 flywheel.setTargetRPM(-670);
                 flywheel.update();
@@ -186,6 +220,13 @@ public class CloseAutoBlueSide extends OpMode {
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
+
+                if (loops == 0){
+                    if (timer.milliseconds() <= gate_wait_time){
+                        wheelControl.stop();
+                        break;
+                    }
+                }
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
@@ -214,9 +255,15 @@ public class CloseAutoBlueSide extends OpMode {
                     }
                     else {
                         vf.setPath(follow_paths[loops], 180, false);
+                        if (loops >= 2){
+                            //vf.setPath(follow_paths[loops], 180, true);
+                        }
                         pathPoints = follow_paths[loops].get_path_points();
 
                         armTransfer.toIdle();
+                        armTransfer.current_shots = 0;
+                        shoot_angle = 180;
+                        timer.reset();
                         state = State.intakeBatch;
                     }
                 }
@@ -228,7 +275,7 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(35, 81), 90, 1, 0.5, false);
+                wheelControl.drive_to_point(new Point(35, 81), 180, 1, 0.5, false);
                 break;
         }
 

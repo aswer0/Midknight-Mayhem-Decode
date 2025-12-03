@@ -22,13 +22,14 @@ public class LED {
 
     int sensorLeft;
     int sensorRight;
-//    int sensorBack;
+    //    int sensorBack;
     int sensorLeftprev = 0;
     int sensorRightprev = 0;
-//    int sensorBackprev = 0;
+    //    int sensorBackprev = 0;
 //
     boolean uptospeed;
-//
+
+    //
     public LED(HardwareMap hardwareMap, Sensors sensors, Flywheel flywheel) {
         this.sensors = sensors;
         this.flywheel = flywheel;
@@ -88,7 +89,7 @@ public class LED {
         uptospeed = flywheel.isReady();
 
         if (uptospeed) {
-            switch  (ledStage) {
+            switch (ledStage) {
 
                 case 0:
                     botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
@@ -117,19 +118,19 @@ public class LED {
 //            botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
         } else {
             botLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-            ledStage = 0
+            ledStage = 0;
         }
     }
 
-    public void ballCheck() {
-        sensorLeft = sensors.getFrontColor();
-        sensorRight = sensors.getFrontColor();
-
-        if (sensorLeft != 0 && sensorRight != 0) {
-            num_balls++;
-        } else if (sensorLeft = 0 &&  ) {
-
-        }
-    }
+//    public void ballCheck() {
+//        sensorLeft = sensors.getFrontColor();
+//        sensorRight = sensors.getFrontColor();
+//
+//        if (sensorLeft != 0 && sensorRight != 0) {
+//            num_balls++;
+//        } else if (sensorLeft = 0 &&  ) {
+//
+//        }
+//    }
 }
 

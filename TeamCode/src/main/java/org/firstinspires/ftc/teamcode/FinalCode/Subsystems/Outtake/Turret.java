@@ -67,12 +67,10 @@ public class Turret {
             }
             for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
                 if(alliance == Alliance.RED && tag.getFiducialId() == 24) {
-                    Pose3D pose = tag.getCameraPoseTargetSpace();
-                    angle = Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
+                    angle = tag.getTargetXDegrees(); //Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
                     break;
                 } else if (tag.getFiducialId() == 20) {// blue
-                    Pose3D pose = tag.getCameraPoseTargetSpace();
-                    angle = Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
+                    angle = tag.getTargetXDegrees();
                     break;
                 }
             }

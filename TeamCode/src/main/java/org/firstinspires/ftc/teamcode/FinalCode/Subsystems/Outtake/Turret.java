@@ -25,8 +25,8 @@ public class Turret {
     private static int TICKS_PER_DEGREE = TICKS_PER_ROTATION/360;
     public DcMotorEx turret;
 
-    public static double kp=0.12, ki=0, kd=0.00005, kf=0.0075;
-    public static PIDFCoefficients manualAimCoefficients = new PIDFCoefficients(kp, ki, kd, kf);
+    public static PIDFCoefficients manualAimCoefficients = new PIDFCoefficients(0.12, 0, 0.00005, 0.0075);
+    // auto aim: f = 0.43, p = 0.015
     double target_angle;
     public static boolean autoAiming = false;
     PIDFController controller;
@@ -69,7 +69,7 @@ public class Turret {
                 if(alliance == Alliance.RED && tag.getFiducialId() == 24) {
                     angle = tag.getTargetXDegrees(); //Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
                     break;
-                } else if (tag.getFiducialId() == 20) {// blue
+                } else if (tag.getFiducialId() == 20 && alliance == Alliance.BLUE) {// blue
                     angle = tag.getTargetXDegrees();
                     break;
                 }
@@ -78,18 +78,21 @@ public class Turret {
                 turret.setPower(0);
                 return 0;
             }
+
+            power = controller.calculate(0, -angle, controller.gains.f * Math.signum(angle));
+            power = Math.min(power, 0.8);
+            power = Math.max(power, -0.8);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Tag Angle", angle);
+                packet.put("Power", power);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
-                turret.setPower(0);
-                return 0;
+//                turret.setPower(0);
+//                return 0;
             }
-            power = controller.calculate(0, -angle);
-            power = Math.min(power, 0.5);
-            power = Math.max(power, -0.5);
 
             turret.setPower(power);
+            return power;
         } else {
             power = controller.calculate(target_angle, getAngle());
             power = Math.min(power, 0.5);

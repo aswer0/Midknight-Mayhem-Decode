@@ -12,6 +12,7 @@ public class Intake {
     public DcMotorEx intakeMotor;
     //public Servo intakeDoor;
     //public Sensors sensors;
+    public static double INTAKE_POWER = 0.82;
 
     public double v;
     public double v_last;
@@ -23,9 +24,9 @@ public class Intake {
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intakeMotor");
 //        intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
-    public void motorOn() {intakeMotor.setPower(1);}
+    public void motorOn() {intakeMotor.setPower(INTAKE_POWER);}
     public void motorOff() {intakeMotor.setPower(0);}
-    public void motorReverse() {intakeMotor.setPower(-1);}
+    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER);}
     public void motorSlow() {intakeMotor.setPower(slowSpeed);}
 
     public void runIntake() {

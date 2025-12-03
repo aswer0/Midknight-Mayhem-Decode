@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
@@ -25,6 +26,7 @@ public class FinalTeleop extends OpMode {
     Flywheel flywheel;
     ArmTransfer armTransfer;
     Turret turret;
+    LED led;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -60,6 +62,7 @@ public class FinalTeleop extends OpMode {
         alliance = Alliance.red;
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, new Camera(hardwareMap), true);
+        led = new LED(hardwareMap, sensors, flywheel);
     }
 
     @Override
@@ -84,6 +87,7 @@ public class FinalTeleop extends OpMode {
         odo.update();
         flywheel.update();
         isTransferReady = armTransfer.update();
+        led.speedCheck();
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0

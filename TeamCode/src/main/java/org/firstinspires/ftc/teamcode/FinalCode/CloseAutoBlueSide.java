@@ -65,10 +65,10 @@ public class CloseAutoBlueSide extends OpMode {
     P_3 = (53.7,39)
     P_4 = (25,34)
 
-    new Point(60, 81),
-    new Point(55,64.8),
-    new Point(62,61.7),
-    new Point(23.7,59.6),
+    P_0 = (60, 81)
+    P_1 = (55,64.8)
+    P_2 = (62,61.7)
+    P_3 = (23.7,59.6)
 
      */
 
@@ -86,9 +86,9 @@ public class CloseAutoBlueSide extends OpMode {
             new BCPath(new Point[][] {
                     {
                             new Point(60, 81),
-                            new Point(55,64.8),
+                            new Point(55,61.6),
                             new Point(62,61.7),
-                            new Point(23.7,59.6),
+                            new Point(24,57.5),
                     }
             }),
             new BCPath(new Point[][] {
@@ -132,7 +132,7 @@ public class CloseAutoBlueSide extends OpMode {
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = 53.67;
+    public static double turret_angle = 50;
     public double shoot_angle = 135;
 
     public static double shoot_wait_time = 3750;
@@ -303,6 +303,7 @@ public class CloseAutoBlueSide extends OpMode {
         packet.put("x", odometry.get_x(uk));
         packet.put("y", odometry.get_y(uk));
         packet.put("heading", odometry.get_heading(uk));
+        packet.put("RPM", flywheel.getCurrentRPM());
 
         dashboard.sendTelemetryPacket(packet);
     }

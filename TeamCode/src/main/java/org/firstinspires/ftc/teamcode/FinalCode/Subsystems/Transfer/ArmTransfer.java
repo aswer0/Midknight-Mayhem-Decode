@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 
 @Config
 public class ArmTransfer {
-    public static double IDLE_POS = 0.5;
-    public static double TRANSFER_POS = 0.85;
+    public static double IDLE_POS = 0.06;
+    public static double TRANSFER_POS = 0.55;
     public static int TRANSFER_WAIT_TIME1 = 400;
     public static int TRANSFER_WAIT_TIME2 = 150;
     public static int INTAKE_TIME = 400;

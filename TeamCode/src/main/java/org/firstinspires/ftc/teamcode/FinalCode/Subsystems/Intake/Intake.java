@@ -12,7 +12,7 @@ public class Intake {
     public DcMotorEx intakeMotor;
     //public Servo intakeDoor;
     //public Sensors sensors;
-    public static double INTAKE_POWER = 0.82;
+    public static double INTAKE_POWER = 1;
 
     public double v;
     public double v_last;

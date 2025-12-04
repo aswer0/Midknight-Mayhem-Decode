@@ -188,6 +188,7 @@ public class CloseAutoBlueSide extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
+        boolean isTransferReady = armTransfer.update();
 
         if (autoTimer.milliseconds() >= 29500){
             state = State.park;
@@ -237,7 +238,6 @@ public class CloseAutoBlueSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
-                boolean isTransferReady = armTransfer.update();
 
                 if (timer.milliseconds() >= 500){
                     if (isTransferReady) {

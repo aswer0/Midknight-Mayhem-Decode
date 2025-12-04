@@ -54,7 +54,7 @@ public class FinalTeleop extends OpMode {
 
     @Override
     public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 8, 8, 90);
+        odo = new Odometry(hardwareMap, telemetry, 8, 8, 0);
         drive = new WheelControl(hardwareMap, odo);
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
@@ -170,6 +170,7 @@ public class FinalTeleop extends OpMode {
         }
         turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         telemetry.addData("power", drivePower);
+        telemetry.addData("transferStage", armTransfer.transferStage);
         telemetry.update();
 
         Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));

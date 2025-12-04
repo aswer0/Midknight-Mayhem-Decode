@@ -16,7 +16,7 @@ public class ArmTransfer {
     public static int INTAKE_TIME = 400;
     public int current_shots = 0;
 
-    private int transferStage = 5;
+    public int transferStage = 5;
     private ElapsedTime timer;
 
     public Servo transferServo;
@@ -76,6 +76,7 @@ public class ArmTransfer {
                 }
                 return false;
             case 5: //idle ready
+                toIdle();
                 current_shots++;
                 return true;
         }

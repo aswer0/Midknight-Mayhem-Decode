@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FinalCode.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -15,6 +16,10 @@ public class Sensors {
     RevColorSensorV3 leftSensor2;
     RevColorSensorV3 rightSensor1;
     RevColorSensorV3 rightSensor2;
+
+    // sensors for LED
+    RevColorSensorV3 leftLEDSensor;
+    RevColorSensorV3 rightLEDSensor;
 
     // sensor color values
     double fS1_red;
@@ -39,6 +44,13 @@ public class Sensors {
     double rS2_green;
     double rS2_blue;
 
+    // sensor values for LED
+    double l_red;
+    double l_green;
+    double l_blue;
+    double r_red;
+    double r_green;
+    double r_blue;
 
     public Sensors(HardwareMap hardwareMap) {
 //        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
@@ -48,6 +60,8 @@ public class Sensors {
 //        leftSensor2 = hardwareMap.get(RevColorSensorV3.class,"lS2");
 //        rightSensor1 = hardwareMap.get(RevColorSensorV3.class,"rS1");
 //        rightSensor2 = hardwareMap.get(RevColorSensorV3.class,"rS2");
+        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
+        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
     }
 
     public int getFrontColor() {
@@ -141,6 +155,44 @@ public class Sensors {
             if (rS2_blue > rS2_red && rS2_blue > rS2_green) {
                 return 1;
             } else if (rS2_green > rS2_blue && rS2_green > rS2_red) {
+                return 2;
+            }
+        }
+        return 0;
+    }
+
+    public int getLeftColorLED() {
+
+        l_red = leftLEDSensor.red();
+        l_green = leftLEDSensor.green();
+        l_blue = leftLEDSensor.blue();
+
+        // 0 is no ball
+        // 1 purple
+        // 2 is green
+        if (l_red + l_green + l_blue >= 900) {
+            if (l_blue > l_red && l_blue > l_green) {
+                return 1;
+            } else if (l_green > l_blue && l_green > l_red) {
+                return 2;
+            }
+        }
+        return 0;
+    }
+
+    public int getRightColorLED() {
+
+        r_red = rightLEDSensor.red();
+        r_green = rightLEDSensor.green();
+        r_blue = rightLEDSensor.blue();
+
+        // 0 is no ball
+        // 1 purple
+        // 2 is green
+        if (r_red + r_green + r_blue >= 900) {
+            if (r_blue > r_red && r_blue > r_green) {
+                return 1;
+            } else if (r_green > r_blue && r_green > r_red) {
                 return 2;
             }
         }

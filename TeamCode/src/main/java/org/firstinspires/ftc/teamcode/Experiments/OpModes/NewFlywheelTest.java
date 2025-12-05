@@ -44,5 +44,7 @@ public class NewFlywheelTest extends OpMode {
         flywheel.setTargetRPM(target);
 
         telemetry.addData("target RPM", target);
+        telemetry.addData("is ready", flywheel.isReady());
+        telemetry.update();
     }
 }

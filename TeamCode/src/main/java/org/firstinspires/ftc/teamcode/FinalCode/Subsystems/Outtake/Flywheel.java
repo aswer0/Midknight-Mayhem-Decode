@@ -23,9 +23,10 @@ public class Flywheel {
     private double currentRPM = 0;
 
     public static double kp=0.01, ki=0.000, kd=0, kf=0.32;
-    public static double CLOSE_RPM = 3000;
+    public static int CLOSE_RPM = 3000;
     public static int FAR_RPM = 3750;
-    public static int THRESHOLD = 100;
+    public static double AUTO_RPM = 3000;
+    public static int THRESHOLD = 300;
     public static boolean reverseFlywheel = false;
 
     public DcMotorEx flywheel;
@@ -57,6 +58,9 @@ public class Flywheel {
     public void shootFar() {
         setTargetRPM(FAR_RPM);
     }
+    public void shootAutoDist() {
+        setTargetRPM(AUTO_RPM);
+    }
 
     public void set_auto_rpm(double dist) {
         List<Double> coeffs = Arrays.asList(-0.000193287, 0.0514462, -4.78688, 198.33296, -710.1902);
@@ -68,7 +72,7 @@ public class Flywheel {
             rpm += coeffs.get(i) * Math.pow(dist, n - 1 - i);
         }
 
-        CLOSE_RPM = rpm;
+        AUTO_RPM = rpm;
     }
 
     public void update() {

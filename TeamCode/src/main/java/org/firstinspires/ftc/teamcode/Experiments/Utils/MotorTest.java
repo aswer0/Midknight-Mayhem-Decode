@@ -16,7 +16,9 @@ import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 public class MotorTest extends OpMode {
     DcMotorEx motor;
     FtcDashboard dashboard;
-    static public double power = 1d;
+    static public double power = 0;
+    static public boolean STOP = false;
+    static public String config = "FR";
     PIDFController controller;
     static public PIDFCoefficients coefficients = new PIDFCoefficients(0.01,0,0,0);
 
@@ -24,19 +26,17 @@ public class MotorTest extends OpMode {
     public void init() {
         controller = new PIDFController(coefficients);
         dashboard = FtcDashboard.getInstance();
-        motor = hardwareMap.get(DcMotorEx.class, "flywheel");
+        motor = hardwareMap.get(DcMotorEx.class, config);
         //motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
     public void loop() {
-        //motor.setVelocity(power, AngleUnit.DEGREES);
-
-        //motor.setPower(controller.calculate((motor.getVelocity()/28 * 60), power));
-        //motor.setPower(power);
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("RPM", motor.getVelocity()/28 * 60); // REV HD hex has 28 counts per revolution
-        dashboard.sendTelemetryPacket(packet);
+        motor.setPower(power);
+        if (STOP){
+            power = 0;
+            STOP = false;
+        }
     }
 
 

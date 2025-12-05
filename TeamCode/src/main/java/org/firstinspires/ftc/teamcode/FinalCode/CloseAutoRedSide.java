@@ -141,6 +141,8 @@ public class CloseAutoRedSide extends OpMode {
     int loops = -1;
     int wait_time = 0;
     boolean do_path3 = true;
+    int shotCounter = 0;
+    boolean prevFlywheelReady = false;
 
     ArrayList<Point> pathPoints;
 
@@ -160,7 +162,7 @@ public class CloseAutoRedSide extends OpMode {
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
-
+        FinalTeleop.alliance = FinalTeleop.Alliance.red;
     }
 
     @Override
@@ -211,7 +213,7 @@ public class CloseAutoRedSide extends OpMode {
                 vf.move();
 
                 if (loops == 0){
-                    if (timer.milliseconds() >= 3000){
+                    if (timer.milliseconds() >= 2867){
                         timer.reset();
                         state = State.driveToShootPos;
                     }
@@ -237,6 +239,7 @@ public class CloseAutoRedSide extends OpMode {
 
                 if (wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
+                    shotCounter = 0;
                     state = State.shootBall;
                 }
                 break;
@@ -251,9 +254,14 @@ public class CloseAutoRedSide extends OpMode {
                     }
                 }
 
+                if (flywheel.isReady() && !prevFlywheelReady) {
+                    shotCounter++;
+                }
+                prevFlywheelReady = flywheel.isReady();
+
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (timer.milliseconds() >= shoot_wait_time){
+                if (shotCounter > 3 || timer.milliseconds() >= shoot_wait_time){
                     loops++;
 
                     if (loops >= 2+(do_path3 ? 1 : 0)){

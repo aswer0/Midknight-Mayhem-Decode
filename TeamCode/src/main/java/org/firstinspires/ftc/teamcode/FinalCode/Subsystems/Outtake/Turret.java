@@ -8,42 +8,181 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
+import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop.Alliance;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 
 @Config
 public class Turret {
 
-    public enum Alliance {
-        RED,
-        BLUE
-    }
     private static int TICKS_PER_ROTATION = 1260*50/45; //28*15*3
     private static int TICKS_PER_DEGREE = TICKS_PER_ROTATION/360;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients manualAimCoefficients = new PIDFCoefficients(0.12, 0, 0.00005, 0.0075);
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);;
+            //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
+            //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
     double target_angle;
-    public static boolean autoAiming = false;
+    public boolean autoAiming = false;
     PIDFController controller;
     Camera camera;
-    Alliance alliance;
+    public Alliance alliance;
     public static boolean outputDebugInfo = true;
-    public Turret(HardwareMap hardwareMap, Camera camera, Alliance alliance, boolean resetEncoder) {
+
+    double pastEncoder = 0;
+    double estimatedTagAngle = Double.POSITIVE_INFINITY;
+    double lastResultTime = Double.POSITIVE_INFINITY;
+    ElapsedTime lastSeenAt = new ElapsedTime();
+    Odometry odometry;
+    public static double[] redShootPoint = {144,144};
+    public static double[] blueShootPoint = {0,144};
+
+    public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
         this.alliance = alliance;
         this.camera = camera;
+        this.odometry = odometry;
         turret = hardwareMap.get(DcMotorEx.class, "turret");
+//        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         if (resetEncoder) turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        controller = new PIDFController(manualAimCoefficients);
+        controller = new PIDFController(autoAimCoefficients);
 
     }
     public Turret(HardwareMap hardwareMap, Camera camera, boolean resetEncoder) {
-        this(hardwareMap, camera, Alliance.RED, resetEncoder);
+        this(hardwareMap, camera, new Odometry(hardwareMap, new Telemetry() {
+            @Override
+            public Item addData(String caption, String format, Object... args) {
+                return null;
+            }
+
+            @Override
+            public Item addData(String caption, Object value) {
+                return null;
+            }
+
+            @Override
+            public <T> Item addData(String caption, Func<T> valueProducer) {
+                return null;
+            }
+
+            @Override
+            public <T> Item addData(String caption, String format, Func<T> valueProducer) {
+                return null;
+            }
+
+            @Override
+            public boolean removeItem(Item item) {
+                return false;
+            }
+
+            @Override
+            public void clear() {
+
+            }
+
+            @Override
+            public void clearAll() {
+
+            }
+
+            @Override
+            public Object addAction(Runnable action) {
+                return null;
+            }
+
+            @Override
+            public boolean removeAction(Object token) {
+                return false;
+            }
+
+            @Override
+            public void speak(String text) {
+
+            }
+
+            @Override
+            public void speak(String text, String languageCode, String countryCode) {
+
+            }
+
+            @Override
+            public boolean update() {
+                return false;
+            }
+
+            @Override
+            public Line addLine() {
+                return null;
+            }
+
+            @Override
+            public Line addLine(String lineCaption) {
+                return null;
+            }
+
+            @Override
+            public boolean removeLine(Line line) {
+                return false;
+            }
+
+            @Override
+            public boolean isAutoClear() {
+                return false;
+            }
+
+            @Override
+            public void setAutoClear(boolean autoClear) {
+
+            }
+
+            @Override
+            public int getMsTransmissionInterval() {
+                return 0;
+            }
+
+            @Override
+            public void setMsTransmissionInterval(int msTransmissionInterval) {
+
+            }
+
+            @Override
+            public String getItemSeparator() {
+                return "";
+            }
+
+            @Override
+            public void setItemSeparator(String itemSeparator) {
+
+            }
+
+            @Override
+            public String getCaptionValueSeparator() {
+                return "";
+            }
+
+            @Override
+            public void setCaptionValueSeparator(String captionValueSeparator) {
+
+            }
+
+            @Override
+            public void setDisplayFormat(DisplayFormat displayFormat) {
+
+            }
+
+            @Override
+            public Log log() {
+                return null;
+            }
+        }, 72,72,0), Alliance.red, resetEncoder);
     }
     public double getAngle(){
         return (double)turret.getCurrentPosition()/TICKS_PER_DEGREE;
@@ -57,46 +196,64 @@ public class Turret {
     }
 
     public double update(){
-        double power;
+        double power = 0;
+//        boolean shouldAutoAim = true;
+//        double angle = Double.POSITIVE_INFINITY;
+//        LLResult result = camera.limelight.getLatestResult();
+//        boolean interpolating = false;
+//        if(result != null && lastResultTime != result.getTimestamp()) {
+//            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+//                if (alliance == Alliance.red && tag.getFiducialId() == 24) {
+//                    angle = tag.getTargetXDegrees(); //Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
+//                    estimatedTagAngle = angle;
+//                    pastEncoder = turret.getCurrentPosition();
+//                    lastSeenAt = new ElapsedTime();
+//                    break;
+//                } else if (tag.getFiducialId() == 20 && alliance == Alliance.blue) {// blue
+//                    angle = tag.getTargetXDegrees();
+//                    estimatedTagAngle = angle;
+//                    pastEncoder = turret.getCurrentPosition();
+//                    lastSeenAt = new ElapsedTime();
+//                    break;
+//                }
+//            }
+//            lastResultTime = result.getTimestamp();
+//
+//        }
+//        if (angle == Double.POSITIVE_INFINITY) { // no tag detected
+//            interpolating = true;
+//            angle = (estimatedTagAngle + (pastEncoder - turret.getCurrentPosition())/TICKS_PER_DEGREE);
+//        }
+//        if(angle == Double.POSITIVE_INFINITY) {
+//            shouldAutoAim = false;
+//        }
+//        if(lastSeenAt.seconds() > 2) { // lose the angle when havent seen tag for a while.
+//            estimatedTagAngle = Double.POSITIVE_INFINITY;
+//        }
         if(autoAiming) {
-            double angle = Double.POSITIVE_INFINITY;
-            LLResult result = camera.limelight.getLatestResult();
-            if(result == null) { // no tag detected
-                turret.setPower(0);
-                return 0;
-            }
-            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
-                if(alliance == Alliance.RED && tag.getFiducialId() == 24) {
-                    angle = tag.getTargetXDegrees(); //Math.toDegrees(Math.atan(-pose.getPosition().x/pose.getPosition().z));
-                    break;
-                } else if (tag.getFiducialId() == 20 && alliance == Alliance.BLUE) {// blue
-                    angle = tag.getTargetXDegrees();
-                    break;
-                }
-            }
-            if(angle == Double.POSITIVE_INFINITY) { // no tag detected
-                turret.setPower(0);
-                return 0;
-            }
+//            odometry.update();
 
-            power = controller.calculate(0, -angle, controller.gains.f * Math.signum(angle));
-            power = Math.min(power, 0.8);
-            power = Math.max(power, -0.8);
-            if(outputDebugInfo) {
+            double actual = getAngle() - odometry.get_heading(false);
+            double target = 0;
+            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-odometry.get_y(false)),(blueShootPoint[0]-odometry.get_x(false))));
+            else target = -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false))));
+            power = controller.calculate_heading(
+                    target,
+                    actual, -controller.gains.f * Math.signum(target_angle - getAngle()));
+            if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Tag Angle", angle);
-                packet.put("Power", power);
+                packet.put("Target", target);
+                packet.put("Actual", actual);
+                packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
+                //packet.put("LLResult", result.getTimestamp() - lastResultTime);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
 //                turret.setPower(0);
 //                return 0;
             }
-
-            turret.setPower(power);
-            return power;
         } else {
-            power = controller.calculate(target_angle, getAngle());
-            power = Math.min(power, 0.5);
-            power = Math.max(power, -0.5);
+            power = controller.calculate(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+            power = Math.min(power, 1);
+            power = Math.max(power, -1);
 
             turret.setPower(power);
             if(outputDebugInfo) {
@@ -106,6 +263,7 @@ public class Turret {
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }
+        turret.setPower(power);
         return power;
     }
 

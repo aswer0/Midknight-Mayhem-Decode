@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.Experiments.Utils;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
+@Config
 public class PIDFController {
+    public static double iClamp = 3;
     private double kp;
     private double kd;
     private double ki;
@@ -40,18 +43,32 @@ public class PIDFController {
         if (error < 0) error += 360;
         return error - 180;
     }
-    public double calculate_heading(double tar, double act) {
-        double s = timer.seconds();
+    public double calculate_heading(double tar, double act, double fOverride) {
+//        double s = timer.seconds();
+//
+//        e = wrapError(tar, act);
+//        p = gains.p * (e);
+//        i = gains.i * iSum;
+//        d = gains.d * ((e - e_last) / s);
+//
+//        iSum += s * e;
+//        e_last = e;
+//        timer.reset();
+//        return p + d + gains.f;
 
+        double s = timer.seconds();
         e = wrapError(tar, act);
         p = gains.p * (e);
         i = gains.i * iSum;
         d = gains.d * ((e - e_last) / s);
 
-        iSum += s * e;
+        iSum = Math.max(Math.min(iSum + s * e, iClamp),-iClamp);
         e_last = e;
         timer.reset();
-        return p + d + gains.f;
+        return p + i + d + fOverride;
+    }
+    public double calculate_heading(double tar, double act) {
+        return calculate_heading(tar, act, gains.f);
     }
 
     public double calculate(double tar, double act, double fOverride) {
@@ -61,7 +78,7 @@ public class PIDFController {
         i = gains.i * iSum;
         d = gains.d * ((e - e_last) / s);
 
-        iSum += s * e;
+        iSum = Math.max(Math.min(iSum + s * e, iClamp),-iClamp);
         e_last = e;
         timer.reset();
         return p + i + d + fOverride;

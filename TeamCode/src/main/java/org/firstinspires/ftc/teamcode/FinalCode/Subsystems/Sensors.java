@@ -60,8 +60,8 @@ public class Sensors {
 //        leftSensor2 = hardwareMap.get(RevColorSensorV3.class,"lS2");
 //        rightSensor1 = hardwareMap.get(RevColorSensorV3.class,"rS1");
 //        rightSensor2 = hardwareMap.get(RevColorSensorV3.class,"rS2");
-        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
-        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
+//        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
+//        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
     }
 
     public int getFrontColor() {

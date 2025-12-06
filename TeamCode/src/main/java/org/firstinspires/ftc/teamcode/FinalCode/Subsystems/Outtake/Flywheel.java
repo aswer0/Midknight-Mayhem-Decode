@@ -64,6 +64,7 @@ public class Flywheel {
 
     public void set_auto_rpm(double dist) {
         List<Double> coeffs = Arrays.asList(-0.000193287, 0.0514462, -4.78688, 198.33296, -710.1902);
+        //-0.000233344x^{4}+0.0791499x^{3}-9.85582x^{2}+546.54941x-8603.33051
 
         int n = coeffs.size();
         double rpm = 0;

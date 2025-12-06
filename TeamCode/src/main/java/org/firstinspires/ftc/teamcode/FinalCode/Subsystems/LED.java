@@ -37,7 +37,7 @@ public class LED {
         this.flywheel = flywheel;
 
         botLED = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
-        ballStorageLED = hardwareMap.get(RevBlinkinLedDriver.class, "storageLED")
+        ballStorageLED = hardwareMap.get(RevBlinkinLedDriver.class, "storageLED");
     }
 
     public LED(HardwareMap hardwareMap) {

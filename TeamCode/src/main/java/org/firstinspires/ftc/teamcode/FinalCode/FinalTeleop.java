@@ -212,7 +212,8 @@ public class FinalTeleop extends OpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("distance", dist);
-        packet.put("RPM", Flywheel.AUTO_RPM);
+        packet.put("Auto RPM", Flywheel.AUTO_RPM);
+        packet.put("RPM", Flywheel.CLOSE_RPM);
         dashboard.sendTelemetryPacket(packet);
     }
 }

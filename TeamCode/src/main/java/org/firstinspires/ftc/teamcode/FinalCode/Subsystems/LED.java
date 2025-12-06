@@ -12,8 +12,10 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 @Config
 public class LED {
     int num_balls = 0;
+    int ball_color = 0;
     Sensors sensors;
     RevBlinkinLedDriver botLED;
+    RevBlinkinLedDriver ballStorageLED;
     Flywheel flywheel;
     public Gamepad currentGamepad1 = new Gamepad();
     public Gamepad previousGamepad1 = new Gamepad();
@@ -35,6 +37,7 @@ public class LED {
         this.flywheel = flywheel;
 
         botLED = hardwareMap.get(RevBlinkinLedDriver.class, "LED");
+        ballStorageLED = hardwareMap.get(RevBlinkinLedDriver.class, "storageLED")
     }
 
     public LED(HardwareMap hardwareMap) {
@@ -132,15 +135,21 @@ public class LED {
 //        }
 //    }
 
-//    public void ballCheck() {
-//        sensorLeft = sensors.getFrontColor();
-//        sensorRight = sensors.getFrontColor();
-//
-//        if (sensorLeft != 0 && sensorRight != 0) {
-//            num_balls++;
-//        } else if (sensorLeft = 0 &&  ) {
-//
-//        }
-//    }
+    public boolean ballCheckLED() {
+
+        sensorLeft = sensors.getLeftColorLED();
+        sensorRight = sensors.getRightColorLED();
+
+        return (sensorLeft != 0 && sensorRight != 0);
+        }
+
+    public void ballLEDSet() {
+
+        if (ballCheckLED()) {
+            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        } else {
+            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        }
+    }
 }
 

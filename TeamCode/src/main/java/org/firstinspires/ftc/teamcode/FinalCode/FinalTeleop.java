@@ -113,7 +113,7 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.options && !previousGamepad1.options) {
             if (alliance == Alliance.red){
                 odo.set_heading(0);
-                odo.set_x(142-15);
+                odo.set_x(125);
                 odo.set_y(78);
             }
             else if (alliance == Alliance.blue){
@@ -188,7 +188,7 @@ public class FinalTeleop extends OpMode {
             flywheel.shootFar();
             turret.autoAiming = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-            useAutoRPM = true;
+            //useAutoRPM = true;
             turret.autoAiming = true;
         }
 
@@ -196,7 +196,7 @@ public class FinalTeleop extends OpMode {
         if (flywheel.isReady()) {
             gamepad1.rumble(100);
         }
-        if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
+        //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         telemetry.addData("power", drivePower);
         telemetry.addData("transferStage", armTransfer.transferStage);
         telemetry.addData("Correction Drive?", useDriveCorrecton);
@@ -212,6 +212,8 @@ public class FinalTeleop extends OpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("distance", dist);
+        packet.put("x", odo.get_x(false));
+        packet.put("y", odo.get_y(false));
         packet.put("Auto RPM", Flywheel.AUTO_RPM);
         packet.put("RPM", Flywheel.CLOSE_RPM);
         dashboard.sendTelemetryPacket(packet);

@@ -22,11 +22,11 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 @Config
 public class Turret {
 
-    private static int TICKS_PER_ROTATION = 1260*50/45; //28*15*3
-    private static int TICKS_PER_DEGREE = TICKS_PER_ROTATION/360;
+    public static int TICKS_PER_ROTATION = 1572; //28*15*3
+    public static double TICKS_PER_DEGREE = 3.5;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);;
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.075, 0.0075, 0.0003, 0.3);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
@@ -42,8 +42,8 @@ public class Turret {
     double lastResultTime = Double.POSITIVE_INFINITY;
     ElapsedTime lastSeenAt = new ElapsedTime();
     Odometry odometry;
-    public static double[] redShootPoint = {144,144};
-    public static double[] blueShootPoint = {0,144};
+    public static double[] redShootPoint = {134,136};
+    public static double[] blueShootPoint = {10,136};
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
         this.alliance = alliance;
@@ -233,13 +233,13 @@ public class Turret {
         if(autoAiming) {
 //            odometry.update();
 
-            double actual = getAngle() - odometry.get_heading(false);
+            double actual = getAngle(); //- odometry.get_heading(false);
             double target = 0;
             if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-odometry.get_y(false)),(blueShootPoint[0]-odometry.get_x(false))));
-            else target = -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false))));
-            power = controller.calculate_heading(
+            else target = -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
+            power = controller.calculate(
                     target,
-                    actual, -controller.gains.f * Math.signum(target_angle - getAngle()));
+                    actual, controller.gains.f * Math.signum(target_angle - getAngle()));
             if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Target", target);

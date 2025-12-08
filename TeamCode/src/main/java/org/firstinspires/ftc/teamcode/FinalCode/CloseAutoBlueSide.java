@@ -139,7 +139,7 @@ public class CloseAutoBlueSide extends OpMode {
     public static double gate_wait_time = 750;
 
     int loops = -1;
-    int wait_time = 0;
+    public static int wait_time = 0;
     boolean do_path3 = true;
     int shotCounter = 0;
     boolean prevFlywheelReady = false;
@@ -161,7 +161,7 @@ public class CloseAutoBlueSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
     }
 

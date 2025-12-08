@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FinalCode;
+package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 @Autonomous
 @Config
-public class FarAuto extends OpMode {
+public class TestFarAuto extends OpMode {
     public static Point start_point = new Point(55, 8);
     public static Point shoot_point = new Point(58, 21);
 

@@ -132,7 +132,7 @@ public class CloseAutoBlueSide extends OpMode {
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = 50;
+    public static double turret_angle = 46;
     public double shoot_angle = 135;
 
     public static double shoot_wait_time = 3750;
@@ -290,7 +290,7 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(35, 81), 180, 1, 0.5, false);
+                wheelControl.drive_to_point(new Point(20, 81), 180, 1, 0.5, false);
                 break;
         }
 

@@ -24,9 +24,10 @@ public class Turret {
 
     public static int TICKS_PER_ROTATION = 1572; //28*15*3
     public static double TICKS_PER_DEGREE = 3.5;
+    public static double MAX_DEGREES = 100;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.075, 0.0075, 0.0003, 0.3);;
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.075, 0.0075, 0.0003, 0.2);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
@@ -34,6 +35,7 @@ public class Turret {
     public boolean autoAiming = false;
     PIDFController controller;
     Camera camera;
+    HardwareMap hardwareMap;
     public Alliance alliance;
     public static boolean outputDebugInfo = true;
 
@@ -49,10 +51,13 @@ public class Turret {
         this.alliance = alliance;
         this.camera = camera;
         this.odometry = odometry;
+        this.hardwareMap = hardwareMap;
         turret = hardwareMap.get(DcMotorEx.class, "turret");
 //        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        if (resetEncoder) turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if (resetEncoder) {
+            turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
         controller = new PIDFController(autoAimCoefficients);
 
     }
@@ -194,6 +199,14 @@ public class Turret {
     public void setAngle(double target_angle){
         this.target_angle = target_angle;
     }
+    public double v_compensate(double power){
+        double nominalVoltage = 12.467;
+        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double voltageComp = nominalVoltage / currentVoltage;
+        double compensatedPower = power * voltageComp;
+        compensatedPower = Math.min(compensatedPower, 1.0);
+        return Math.max(compensatedPower, -1.0);
+    }
 
     public double update(){
         double power = 0;
@@ -230,16 +243,18 @@ public class Turret {
 //        if(lastSeenAt.seconds() > 2) { // lose the angle when havent seen tag for a while.
 //            estimatedTagAngle = Double.POSITIVE_INFINITY;
 //        }
+
         if(autoAiming) {
 //            odometry.update();
 
             double actual = getAngle(); //- odometry.get_heading(false);
             double target = 0;
-            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-odometry.get_y(false)),(blueShootPoint[0]-odometry.get_x(false))));
-            else target = -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
-            power = controller.calculate(
+            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-odometry.get_y(false)),(blueShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
+            else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
+            power = controller.calculate_heading(
                     target,
                     actual, controller.gains.f * Math.signum(target_angle - getAngle()));
+            power = v_compensate(power);
             if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Target", target);
@@ -251,11 +266,12 @@ public class Turret {
 //                return 0;
             }
         } else {
-            power = controller.calculate(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+            power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
             power = Math.min(power, 1);
             power = Math.max(power, -1);
+            power = v_compensate(power);
 
-            turret.setPower(power);
+            //turret.setPower(power);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Actual Angle", getAngle());
@@ -263,7 +279,15 @@ public class Turret {
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }
-        turret.setPower(power);
+        if (getAngle() < MAX_DEGREES && getAngle() > -MAX_DEGREES) {
+            turret.setPower(power);
+        } else {
+            power = controller.calculate_heading(0, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+            power = Math.min(power, 1);
+            power = Math.max(power, -1);
+            power = v_compensate(power);
+            turret.setPower(power);
+        }
         return power;
     }
 

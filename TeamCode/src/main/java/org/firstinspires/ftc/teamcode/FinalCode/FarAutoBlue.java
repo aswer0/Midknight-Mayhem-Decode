@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.FinalCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -50,10 +51,10 @@ public class FarAutoBlue extends OpMode {
     public static boolean uk = false;
     public static double pidf_threshold = 0.5;
     public static double power = 0.8;
-    public static double turret_angle = 70;
+    public static double turret_angle = 67.7;
     public static double bot_angle = 180;
 
-    public static double shoot_wait_time = 3750;
+    public static double shoot_wait_time = 6000;
 
     int wait_time = 0;
     int shotCounter = 0;
@@ -71,7 +72,7 @@ public class FarAutoBlue extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
     }
 
@@ -114,7 +115,7 @@ public class FarAutoBlue extends OpMode {
                 flywheel.shootFar();
                 flywheel.update();
 
-                if (timer.milliseconds() >= 500) {
+                if (timer.milliseconds() >= 1500) {
                     if (isTransferReady) armTransfer.transfer();
                 }
 
@@ -131,7 +132,14 @@ public class FarAutoBlue extends OpMode {
                 intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, bot_angle, 1, pidf_threshold, false);
+
+                FinalTeleop.startX = park_point.x;
+                FinalTeleop.startY = park_point.y;
+                FinalTeleop.startHeading = bot_angle;
                 break;
         }
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("turret angle (actual)", turret.getAngle());
     }
 }

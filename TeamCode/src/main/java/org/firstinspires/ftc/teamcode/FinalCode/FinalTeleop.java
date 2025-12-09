@@ -44,12 +44,15 @@ public class FinalTeleop extends OpMode {
     boolean useDriveCorrecton = true;
     boolean pidToPoint = false;
     boolean useAutoRPM = false;
+    boolean stopFlywheel = false;
 
     int x_sign;
     int y_sign;
 
-    boolean stopFlywheel = false;
     public static Alliance alliance = Alliance.red;
+    public static double startX = 8;
+    public static double startY = 8;
+    public static double startHeading = 0;
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public enum Alliance{
@@ -59,13 +62,13 @@ public class FinalTeleop extends OpMode {
 
     @Override
     public void init() {
-        odo = new Odometry(hardwareMap, telemetry, 8, 8, 0);
+        odo = new Odometry(hardwareMap, telemetry, startX, startY, startHeading);
         drive = new WheelControl(hardwareMap, odo);
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), false);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), odo, alliance, false);
         led = new LED(hardwareMap, sensors, flywheel);
     }
 
@@ -188,7 +191,7 @@ public class FinalTeleop extends OpMode {
             flywheel.shootFar();
             turret.autoAiming = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-            //useAutoRPM = true;
+            useAutoRPM = true;
             turret.autoAiming = true;
         }
 

@@ -161,7 +161,7 @@ public class CloseAutoRedSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
     }
 

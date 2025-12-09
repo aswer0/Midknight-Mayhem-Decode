@@ -50,10 +50,10 @@ public class FarAutoRed extends OpMode {
     public static boolean uk = false;
     public static double pidf_threshold = 0.5;
     public static double power = 0.8;
-    public static double turret_angle = -70;
+    public static double turret_angle = -67.67;
     public static double bot_angle = 0;
 
-    public static double shoot_wait_time = 3750;
+    public static double shoot_wait_time = 6000;
 
     int wait_time = 0;
     int shotCounter = 0;
@@ -71,7 +71,7 @@ public class FarAutoRed extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap,  new Camera(hardwareMap), true);
+        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
     }
 
@@ -114,7 +114,7 @@ public class FarAutoRed extends OpMode {
                 flywheel.shootFar();
                 flywheel.update();
 
-                if (timer.milliseconds() >= 500) {
+                if (timer.milliseconds() >= 1500) {
                     if (isTransferReady) armTransfer.transfer();
                 }
 
@@ -131,6 +131,10 @@ public class FarAutoRed extends OpMode {
                 intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, bot_angle, 1, pidf_threshold, false);
+
+                FinalTeleop.startX = park_point.x;
+                FinalTeleop.startY = park_point.y;
+                FinalTeleop.startHeading = bot_angle;
                 break;
         }
     }

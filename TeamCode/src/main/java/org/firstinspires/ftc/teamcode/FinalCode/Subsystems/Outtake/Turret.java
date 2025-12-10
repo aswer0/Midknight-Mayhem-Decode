@@ -27,7 +27,7 @@ public class Turret {
     public static double MAX_DEGREES = 100;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.075, 0.0075, 0.0003, 0.2);;
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
@@ -276,6 +276,7 @@ public class Turret {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Actual Angle", getAngle());
                 packet.put("Target Angle", target_angle);
+                packet.put("Power", power);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }

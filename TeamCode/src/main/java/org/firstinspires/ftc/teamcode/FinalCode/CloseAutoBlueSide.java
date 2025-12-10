@@ -132,7 +132,7 @@ public class CloseAutoBlueSide extends OpMode {
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = 46;
+    public static double turret_angle = 44;
     public double shoot_angle = 135;
 
     public static double shoot_wait_time = 3750;
@@ -206,7 +206,7 @@ public class CloseAutoBlueSide extends OpMode {
             case intakeBatch:
                 turret.setAngle(turret_angle);
                 armTransfer.toIdle();
-                flywheel.setTargetRPM(-670);
+                flywheel.setTargetRPM(0);
                 flywheel.update();
                 intake.motorOn();
 
@@ -247,8 +247,7 @@ public class CloseAutoBlueSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
-
-                if (timer.milliseconds() >= 500){
+                if (flywheel.isReady()){
                     if (isTransferReady) {
                         armTransfer.transfer();
                         //shotCounter++;

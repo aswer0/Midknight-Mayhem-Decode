@@ -19,12 +19,6 @@ public class VectorField {
     public WheelControl drive;
     public BCPath path;
 
-    public static double x_sign = 1;
-    public static double y_sign = 1;
-    public static double h_sign = -1;
-    public static double r_sign = -1;
-    public static double oh_sign = -1;
-
     // Motion profiling
     double velocity_update_rate = 0.1;
     double p_to_v = 68;
@@ -291,7 +285,7 @@ public class VectorField {
         // Error
         error = Utils.dist(get_pos(), path.forward(T));
 
-        double nominalVoltage = 13.0;
+        double nominalVoltage = 12.467;
         double currentVoltage = drive.hardwareMap.voltageSensor.iterator().next().getVoltage();
         double compensatedPower = nominalVoltage / currentVoltage;
         compensatedPower = Math.min(compensatedPower, 1.0);

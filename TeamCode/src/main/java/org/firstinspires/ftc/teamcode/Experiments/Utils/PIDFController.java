@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class PIDFController {
-    public static double iClamp = 3;
+    public static double iClamp = 2.7;
     private double kp;
     private double kd;
     private double ki;

@@ -15,8 +15,8 @@ import org.opencv.core.Point;
 //
 @Config
 public class WheelControl {
-    public static double xp = 0.25, xi = 0, xd = 0.01, xf = 0;
-    public static double yp = 0.3, yi = 0, yd = 0.01, yf = 0;
+    public static double xp = 0.25, xi = 0, xd = 0.04, xf = 0;
+    public static double yp = 0.3, yi = 0, yd = 0.04, yf = 0;
     public static double hp = 0.03, hi = 0, hd = 0.003, hF = 0;
 
     PIDFController x_controller;

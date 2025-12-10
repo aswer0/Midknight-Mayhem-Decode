@@ -60,15 +60,17 @@ public class CloseAutoRedSide extends OpMode {
     P_3 = (23.7,59.6)
 
     P_0 = (52.6,102.4)
-    P_1 = (50.2,72)
-    P_2 = (62.6,27.7)
-    P_3 = (53.7,39)
+    P_1 = (51.5,71.7)
+    P_2 = (58,26.1)
+    P_3 = (55.5,34)
     P_4 = (25,34)
 
     P_0 = (60, 81)
     P_1 = (55,64.8)
     P_2 = (62,61.7)
     P_3 = (23.7,59.6)
+
+
 
      */
 
@@ -132,7 +134,7 @@ public class CloseAutoRedSide extends OpMode {
     public static double gvf_threshold = 0.5;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = -46;
+    public static double turret_angle = -44;
     public double shoot_angle = 180-135;
 
     public static double shoot_wait_time = 3750;
@@ -206,7 +208,7 @@ public class CloseAutoRedSide extends OpMode {
             case intakeBatch:
                 turret.setAngle(turret_angle);
                 armTransfer.toIdle();
-                flywheel.setTargetRPM(-670);
+                flywheel.setTargetRPM(0);
                 flywheel.update();
                 intake.motorOn();
 
@@ -248,7 +250,7 @@ public class CloseAutoRedSide extends OpMode {
                 flywheel.shootClose();
                 flywheel.update();
 
-                if (timer.milliseconds() >= 500){
+                if (flywheel.isReady()){
                     if (isTransferReady) {
                         armTransfer.transfer();
                     }

@@ -18,38 +18,39 @@ import java.util.ArrayList;
 @Autonomous
 @Config
 public class ClosePathOnlyAutoRed extends OpMode {
-    public static Point start_point = new Point(117, 126);
-    public static Point shoot_point = new Point(82, 81);
+    public static Point start_point = new Point(142-25, 126);
+    public static Point shoot_point = new Point(142-60, 81);
 
 
-    BCPath[] follow_paths = {
+    public static BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
-                            new Point(82, 81),
-                            new Point(88, 81.4),
-                            new Point(107.2, 82.6),
-                            new Point(122, 82.5),
+                            new Point(142-60, 81),
+                            new Point(142-53.8,84.5),
+                            new Point(142-35,74.6),
+                            new Point(142-6,98.5),
+                            new Point(142-29.2,74.5),
+                            new Point(142-16,71.3),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(82, 81),
-                            new Point(96.7, 73),
-                            new Point(79.6, 55.7),
-                            new Point(122, 59),
+                            new Point(142-60, 81),
+                            new Point(142-55,61.6),
+                            new Point(142-62,61.7),
+                            new Point(142-24,57.5),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(89.4, 102.4),
-                            new Point(91.8, 72),
-                            new Point(79.4, 27.7),
-                            new Point(88.3, 35.7),
-                            new Point(122, 35.2),
+                            new Point(142-52.6,102.4),
+                            new Point(142-51.5,71.7),
+                            new Point(142-58,26.1),
+                            new Point(142-55.5,34),
+                            new Point(142-25,34),
                     }
             })
     };
-
 
     enum State{
         intakeBatch,
@@ -77,7 +78,7 @@ public class ClosePathOnlyAutoRed extends OpMode {
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 180-135);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);
@@ -116,7 +117,7 @@ public class ClosePathOnlyAutoRed extends OpMode {
 
                 if (timer.milliseconds() >= 2000){
                     loops++;
-                    vf.setPath(follow_paths[loops], 180, true);
+                    vf.setPath(follow_paths[loops], 0, true);
                     pathPoints = follow_paths[loops].get_path_points();
 
                     state = State.intakeBatch;

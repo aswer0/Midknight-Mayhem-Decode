@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FinalCode.Subsystems;
+package org.firstinspires.ftc.teamcode.FinalCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -8,13 +8,13 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
-import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 

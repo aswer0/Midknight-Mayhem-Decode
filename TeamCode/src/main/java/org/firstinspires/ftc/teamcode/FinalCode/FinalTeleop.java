@@ -94,12 +94,16 @@ public class FinalTeleop extends OpMode {
             y_sign = 1;
             odo.set_heading(0);
             target_shoot = new Point(142-11, 134);
+            odo.set_x(122);
+            odo.set_y(81);
         }
         else if (alliance == Alliance.blue){
             x_sign = -1;
             y_sign = -1;
             odo.set_heading(180);
             target_shoot = new Point(11, 134);
+            odo.set_x(20);
+            odo.set_y(81);
         }
         turret.alliance = alliance;
     }
@@ -116,13 +120,13 @@ public class FinalTeleop extends OpMode {
         if (currentGamepad1.options && !previousGamepad1.options) {
             if (alliance == Alliance.red){
                 odo.set_heading(0);
-                odo.set_x(125);
-                odo.set_y(78);
+                odo.set_x(122);
+                odo.set_y(81);
             }
             else if (alliance == Alliance.blue){
                 odo.set_heading(180);
-                odo.set_x(15);
-                odo.set_y(78);
+                odo.set_x(20);
+                odo.set_y(81);
             }
         }
         if (currentGamepad1.share && !previousGamepad1.share) {

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Experiments.Utils;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -20,6 +22,7 @@ public class PIDFController {
     private ElapsedTime timer;
 
     public PIDFCoefficients gains;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public PIDFController(double kp, double ki, double kd,double kf) {
         this.kp = kp;
@@ -63,6 +66,7 @@ public class PIDFController {
         d = gains.d * ((e - e_last) / s);
 
         iSum = Math.max(Math.min(iSum + s * e, iClamp),-iClamp);
+        TelemetryPacket packet = new TelemetryPacket(); packet.put("Sum", iSum); dashboard.sendTelemetryPacket(packet);
         e_last = e;
         timer.reset();
         return p + i + d + fOverride;

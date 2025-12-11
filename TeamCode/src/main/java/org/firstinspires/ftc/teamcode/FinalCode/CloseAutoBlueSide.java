@@ -167,6 +167,9 @@ public class CloseAutoBlueSide extends OpMode {
 
     @Override
     public void init_loop(){
+        previousGamepad1.copy(currentGamepad1);
+        currentGamepad1.copy(gamepad1);
+
         timer.reset();
         autoTimer.reset();
 

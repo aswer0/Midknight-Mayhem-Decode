@@ -70,6 +70,7 @@ public class FinalTeleop extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, new Camera(hardwareMap), odo, alliance, false);
         led = new LED(hardwareMap, sensors, flywheel);
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override

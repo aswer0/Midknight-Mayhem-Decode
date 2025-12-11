@@ -25,9 +25,11 @@ public class Turret {
     public static int TICKS_PER_ROTATION = 1572; //28*15*3
     public static double TICKS_PER_DEGREE = 3.5;
     public static double MAX_DEGREES = 100;
+    public static double STOP_THRESHOLD = 0;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0);
+    //public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
@@ -38,6 +40,7 @@ public class Turret {
     HardwareMap hardwareMap;
     public Alliance alliance;
     public static boolean outputDebugInfo = true;
+    public double CURRENT_VOLTAGE;
 
     double pastEncoder = 0;
     double estimatedTagAngle = Double.POSITIVE_INFINITY;
@@ -200,9 +203,8 @@ public class Turret {
         this.target_angle = target_angle;
     }
     public double v_compensate(double power){
-        double nominalVoltage = 12.467;
-        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
-        double voltageComp = nominalVoltage / currentVoltage;
+        double nominalVoltage = 12;
+        double voltageComp = nominalVoltage / CURRENT_VOLTAGE;
         double compensatedPower = power * voltageComp;
         compensatedPower = Math.min(compensatedPower, 1.0);
         return Math.max(compensatedPower, -1.0);
@@ -255,10 +257,15 @@ public class Turret {
                     target,
                     actual, controller.gains.f * Math.signum(target_angle - getAngle()));
             power = v_compensate(power);
+            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+                power = 0;
+            }
             if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Target", target);
-                packet.put("Actual", actual);
+                packet.put("Auto Target", target);
+                packet.put("Auto Actual", actual);
+                packet.put("Turret Power", power);
+                packet.put("Turret F", controller.gains.f * Math.signum(target_angle - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
                 //packet.put("LLResult", result.getTimestamp() - lastResultTime);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
@@ -269,14 +276,17 @@ public class Turret {
             power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
             power = Math.min(power, 1);
             power = Math.max(power, -1);
+
             power = v_compensate(power);
+            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+                power = 0;
+            }
 
             //turret.setPower(power);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Actual Angle", getAngle());
-                packet.put("Target Angle", target_angle);
-                packet.put("Power", power);
+                packet.put("Single Actual Angle", getAngle());
+                packet.put("Single Target Angle", target_angle);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }

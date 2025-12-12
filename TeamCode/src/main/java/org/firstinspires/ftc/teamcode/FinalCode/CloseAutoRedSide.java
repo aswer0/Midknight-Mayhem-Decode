@@ -165,6 +165,7 @@ public class CloseAutoRedSide extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override
@@ -203,7 +204,7 @@ public class CloseAutoRedSide extends OpMode {
 
         switch (state){
             case wait:
-                if (timer.milliseconds() >= wait_time){
+                if (timer.seconds() >= wait_time){
                     state = State.driveToShootPos;
                 }
                 break;

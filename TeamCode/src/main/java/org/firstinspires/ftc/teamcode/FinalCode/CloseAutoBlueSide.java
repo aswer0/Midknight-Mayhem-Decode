@@ -187,6 +187,7 @@ public class CloseAutoBlueSide extends OpMode {
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override
@@ -201,7 +202,7 @@ public class CloseAutoBlueSide extends OpMode {
 
         switch (state){
             case wait:
-                if (timer.milliseconds() >= wait_time){
+                if (timer.seconds() >= wait_time){
                     state = State.driveToShootPos;
                 }
                 break;
@@ -293,6 +294,8 @@ public class CloseAutoBlueSide extends OpMode {
                 intake.motorOff();
 
                 wheelControl.drive_to_point(new Point(20, 81), 180, 1, 0.5, false);
+
+
                 break;
         }
 

@@ -74,10 +74,14 @@ public class FarAutoBlue extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override
     public void init_loop() {
+        previousGamepad1.copy(currentGamepad1);
+        currentGamepad1.copy(gamepad1);
+
         timer.reset();
 
         if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
@@ -105,7 +109,7 @@ public class FarAutoBlue extends OpMode {
 
         switch (state) {
             case wait:
-                if (timer.milliseconds() >= wait_time) {
+                if (timer.seconds() >= wait_time) {
                     timer.reset();
                     state = State.shootBall;
                 }

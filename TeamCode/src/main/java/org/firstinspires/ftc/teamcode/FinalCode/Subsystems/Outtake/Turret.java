@@ -28,7 +28,7 @@ public class Turret {
     public static double STOP_THRESHOLD = 0;
     public DcMotorEx turret;
 
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0);
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0.2);
     //public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);

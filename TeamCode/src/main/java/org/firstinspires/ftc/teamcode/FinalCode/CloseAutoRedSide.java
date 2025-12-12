@@ -82,7 +82,7 @@ public class CloseAutoRedSide extends OpMode {
                             new Point(142-35,74.6),
                             new Point(142-6,98.5),
                             new Point(142-29.2,74.5),
-                            new Point(142-16,71.3),
+                            new Point(142-15,71.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -99,7 +99,7 @@ public class CloseAutoRedSide extends OpMode {
                             new Point(142-50.2,72),
                             new Point(142-62.6,27.7),
                             new Point(142-53.7,39),
-                            new Point(142-25,34),
+                            new Point(142-24,34),
                     }
             })
     };
@@ -267,7 +267,7 @@ public class CloseAutoRedSide extends OpMode {
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (shotCounter > 3 || timer.milliseconds() >= shoot_wait_time){
+                if (timer.milliseconds() >= shoot_wait_time){ //shotCounter > 3 ||
                     loops++;
 
                     if (loops >= 2+(do_path3 ? 1 : 0)){

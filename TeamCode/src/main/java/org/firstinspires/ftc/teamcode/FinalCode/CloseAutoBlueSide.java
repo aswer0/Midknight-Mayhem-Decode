@@ -70,6 +70,13 @@ public class CloseAutoBlueSide extends OpMode {
     P_2 = (62,61.7)
     P_3 = (23.7,59.6)
 
+    P_0 = (60, 81)
+    P_1 = (53.8,84.5)
+    P_2 = (35,74.6)
+    P_3 = (6,98.5)
+    P_4 = (29.2,74.5)
+    P_5 = (16,71.3)
+
      */
 
     public static BCPath[] follow_paths = {
@@ -80,7 +87,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(35,74.6),
                             new Point(6,98.5),
                             new Point(29.2,74.5),
-                            new Point(16,71.3),
+                            new Point(15,71.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -97,7 +104,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(50.2,72),
                             new Point(62.6,27.7),
                             new Point(53.7,39),
-                            new Point(25,34),
+                            new Point(24,34),
                     }
             })
     };
@@ -265,7 +272,7 @@ public class CloseAutoBlueSide extends OpMode {
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (shotCounter > 3 || timer.milliseconds() >= shoot_wait_time){
+                if (timer.milliseconds() >= shoot_wait_time){ //shotCounter > 3 ||
                     loops++;
 
                     if (loops >= 2+(do_path3 ? 1 : 0)){

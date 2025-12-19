@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FinalCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 @TeleOp
+@Config
 public class FinalTeleop extends OpMode {
     Odometry odo;
     WheelControl drive;
@@ -53,6 +55,7 @@ public class FinalTeleop extends OpMode {
     public static double startX = 8;
     public static double startY = 8;
     public static double startHeading = 0;
+    public static boolean outputDebugInfo = true;
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public enum Alliance{
@@ -210,20 +213,24 @@ public class FinalTeleop extends OpMode {
         telemetry.addData("Correction Drive?", useDriveCorrecton);
         telemetry.update();
 
-        Point pos = new Point(odo.get_x(useKalmanOdo), odo.get_y(useKalmanOdo));
-        double dist = Math.sqrt((pos.x-target_shoot.x)*(pos.x-target_shoot.x) + (pos.y-target_shoot.y)*(pos.y-target_shoot.y));
+        double future_x = odo.get_x_predicted(false);
+        double future_y = odo.get_y_predicted(false);
+
+        double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
 
         if (useAutoRPM){
             flywheel.shootAutoDist();
             flywheel.set_auto_rpm(dist);
         }
 
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("distance", dist);
-        packet.put("x", odo.get_x(false));
-        packet.put("y", odo.get_y(false));
-        packet.put("Auto RPM", Flywheel.AUTO_RPM);
-        packet.put("RPM", Flywheel.CLOSE_RPM);
-        dashboard.sendTelemetryPacket(packet);
+        if (outputDebugInfo) {
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("distance", dist);
+            packet.put("x", odo.get_x(false));
+            packet.put("y", odo.get_y(false));
+            packet.put("Auto RPM", Flywheel.AUTO_RPM);
+            packet.put("RPM", flywheel.getCurrentRPM());
+            dashboard.sendTelemetryPacket(packet);
+        }
     }
 }

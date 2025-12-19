@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.PIDdrive.Pathing;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Autonomous
 @Config
@@ -114,6 +116,11 @@ public class CloseAutoBlueSide extends OpMode {
             })
     };
 
+    public static ArrayList<Point> thirdPath = new ArrayList<>(List.of(
+            new Point(43.80173283594432,36.0),
+            new Point(19.6,35.37290537531175)
+    ));
+
     enum State{
         intakeBatch,
         driveToShootPos,
@@ -135,13 +142,14 @@ public class CloseAutoBlueSide extends OpMode {
     Sensors sensors;
     ArmTransfer armTransfer;
     Turret turret;
+    Pathing pid_drive;
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
 
     public static boolean uk = false;
-    public static double gvf_threshold = 0.5;
+    public static double gvf_threshold = 0.67;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
     public static double turret_angle = 44;
@@ -164,6 +172,8 @@ public class CloseAutoBlueSide extends OpMode {
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);
+        pid_drive = new Pathing(odometry, wheelControl);
+        pid_drive.set_path(thirdPath);
         timer = new ElapsedTime();
         autoTimer = new ElapsedTime();
 
@@ -226,7 +236,13 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.update();
                 intake.motorOn();
 
-                vf.move();
+                boolean at_point = false;
+                if (loops != 2){
+                    vf.move();
+                }
+                else{
+                    at_point = pid_drive.pointDriver(180, 0.7, pid_threshold, -1, uk, false);
+                }
 
                 if (loops == 0){
                     if (timer.milliseconds() >= 2867){
@@ -234,7 +250,7 @@ public class CloseAutoBlueSide extends OpMode {
                         state = State.driveToShootPos;
                     }
                 }
-                if (vf.at_end(gvf_threshold)){
+                if (vf.at_end(gvf_threshold) || (at_point && loops == 2)){
                     timer.reset();
                     state = State.driveToShootPos;
                 }
@@ -305,8 +321,7 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(20, 81), 180, 1, 0.5, false);
-
+                wheelControl.drive_to_point(new Point(142-120, 81), 180, 1, 0.5, false);
 
                 break;
         }

@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -36,6 +37,8 @@ public class Odometry {
 
     public static double offset_x = 5;
     public static double offset_y = -4.5;
+    public static double mX = 0.8;
+    public static double mY = 0.8;
 
     public static double xyVariance = 25;
     public static double headingVariance = 100;
@@ -128,6 +131,12 @@ public class Odometry {
             return xEstimate.get(1, 0)[0] / 0.9144 * 36;
         }
         return pinpoint.getPosY(DistanceUnit.INCH);
+    }
+    public double get_x_predicted(boolean use_kalman){
+        return (get_x(use_kalman) + mX*get_x_velocity());
+    }
+    public double get_y_predicted(boolean use_kalman){
+        return (get_y(use_kalman) + mY*get_y_velocity());
     }
 
     public void set_heading(double heading){

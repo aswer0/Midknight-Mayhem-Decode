@@ -64,7 +64,7 @@ public class Flywheel {
 
     public void set_auto_rpm(double dist) {
         //List<Double> coeffs = Arrays.asList(-0.000193287, 0.0514462, -4.78688, 198.33296, -710.1902);
-        List<Double> coeffs = Arrays.asList(-0.000233344, 0.0791499, -9.85582, 546.54941, -8603.33051);
+        List<Double> coeffs = Arrays.asList(0.0392969, 10.62242, 1834.59959);
         //-0.000233344x^{4}+0.0791499x^{3}-9.85582x^{2}+546.54941x-8603.33051
 
         int n = coeffs.size();
@@ -81,6 +81,7 @@ public class Flywheel {
         currentRPM = getCurrentRPM();
         double power = 0;
         if (targetRPM != 0) power = flywheelController.calculate(targetRPM, currentRPM);
+        power = Math.max(power, 0);
         flywheel.setPower(power);
 
         if (outputDebugInfo) {

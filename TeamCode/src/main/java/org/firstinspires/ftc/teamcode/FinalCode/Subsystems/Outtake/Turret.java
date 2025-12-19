@@ -41,6 +41,7 @@ public class Turret {
     public Alliance alliance;
     public static boolean outputDebugInfo = true;
     public double CURRENT_VOLTAGE;
+    ElapsedTime looptimes;
 
     double pastEncoder = 0;
     double estimatedTagAngle = Double.POSITIVE_INFINITY;
@@ -62,6 +63,7 @@ public class Turret {
             turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
         controller = new PIDFController(autoAimCoefficients);
+        looptimes = new ElapsedTime();
 
     }
     public Turret(HardwareMap hardwareMap, Camera camera, boolean resetEncoder) {
@@ -249,10 +251,16 @@ public class Turret {
         if(autoAiming) {
 //            odometry.update();
 
+            //===================== FUTURE VEL PREDICTION =====================
+            double future_x = odometry.get_x_predicted(false);
+            double future_y = odometry.get_y_predicted(false);
+
+            //==========================================
+
             double actual = getAngle(); //- odometry.get_heading(false);
             double target = 0;
-            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-odometry.get_y(false)),(blueShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
-            else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-odometry.get_y(false)),(redShootPoint[0]-odometry.get_x(false)))) + odometry.get_heading(false);
+            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-future_y),(blueShootPoint[0]-future_x))) +  odometry.get_heading(false);
+            else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) +  odometry.get_heading(false);
             power = controller.calculate_heading(
                     target,
                     actual, controller.gains.f * Math.signum(target_angle - getAngle()));

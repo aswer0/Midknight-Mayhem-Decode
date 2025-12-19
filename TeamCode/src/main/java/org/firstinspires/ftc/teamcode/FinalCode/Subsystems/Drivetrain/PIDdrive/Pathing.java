@@ -38,12 +38,19 @@ public class Pathing {
         return wheelControl.drive_to_point(p, targete_h, power, dist_tresh, use_kalman);
     }
 
-    public boolean pointDriver(double end_heading, double power, double dist_tresh, int stop_point, boolean use_kalman) {
+    public boolean pointDriver(double end_heading, double power, double dist_tresh, int stop_point, boolean use_kalman, boolean follow_path) {
         if (stop_point == -1){
             stop_point = path.size() - 1;
         }
 
-        double rotation = Math.atan2(path.get(current_point).y - odometry.get_y(use_kalman), path.get(current_point).x - odometry.get_x(use_kalman));
+        double rotation;
+        if (follow_path) {
+            rotation = Math.atan2(path.get(current_point).y - odometry.get_y(use_kalman), path.get(current_point).x - odometry.get_x(use_kalman));
+        }
+        else{
+            rotation = end_heading;
+        }
+
 
         if (current_point == stop_point) {
             if (wheelControl.drive_to_point(path.get(current_point), end_heading, power, dist_tresh, use_kalman)){

@@ -98,16 +98,16 @@ public class FinalTeleop extends OpMode {
             y_sign = 1;
             odo.set_heading(0);
             target_shoot = new Point(142-11, 134);
-            odo.set_x(122);
-            odo.set_y(81);
+            odo.set_x(CloseAutoRedSide.park_point.x); //used to be 122
+            odo.set_y(CloseAutoRedSide.park_point.y); //81
         }
         else if (alliance == Alliance.blue){
             x_sign = -1;
             y_sign = -1;
-            odo.set_heading(180);
+            odo.set_heading(startHeading);
             target_shoot = new Point(11, 134);
-            odo.set_x(20);
-            odo.set_y(81);
+            odo.set_x(startX); //used to be 20
+            odo.set_y(startY); //81
         }
         turret.alliance = alliance;
     }
@@ -149,12 +149,7 @@ public class FinalTeleop extends OpMode {
             drive.drive_to_point(new Point(127, 14), -45, 1, 0.5, false);
         }
 
-        if (currentGamepad1.left_trigger > 0.3){
-            pidToPoint = true;
-        }
-        else{
-            pidToPoint = false;
-        }
+        pidToPoint = currentGamepad1.left_trigger > 0.3;
 
         //intake
         if (currentGamepad1.right_bumper) { //in
@@ -213,8 +208,8 @@ public class FinalTeleop extends OpMode {
         telemetry.addData("Correction Drive?", useDriveCorrecton);
         telemetry.update();
 
-        double future_x = odo.get_x_predicted(false);
-        double future_y = odo.get_y_predicted(false);
+        double future_x = odo.get_x_predicted(false, false);
+        double future_y = odo.get_y_predicted(false, false);
 
         double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
 

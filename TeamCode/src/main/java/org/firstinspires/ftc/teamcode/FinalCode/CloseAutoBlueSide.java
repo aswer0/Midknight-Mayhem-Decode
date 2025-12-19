@@ -29,6 +29,7 @@ import java.util.List;
 public class CloseAutoBlueSide extends OpMode {
     public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
+    public static Point park_point = new Point(142-120, 81);
 
     /*
     P_0 = (60, 81)
@@ -241,7 +242,7 @@ public class CloseAutoBlueSide extends OpMode {
                     vf.move();
                 }
                 else{
-                    at_point = pid_drive.pointDriver(180, 0.7, pid_threshold, -1, uk, false);
+                    at_point = pid_drive.pointDriver(180, 0.7, 1, pid_threshold, -1, uk, false);
                 }
 
                 if (loops == 0){
@@ -321,7 +322,10 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(new Point(142-120, 81), 180, 1, 0.5, false);
+                wheelControl.drive_to_point(park_point, 180, 1, 0.5, false);
+                FinalTeleop.startX = odometry.get_x(false);
+                FinalTeleop.startY = odometry.get_y(false);
+                FinalTeleop.startHeading = odometry.get_heading(false);
 
                 break;
         }

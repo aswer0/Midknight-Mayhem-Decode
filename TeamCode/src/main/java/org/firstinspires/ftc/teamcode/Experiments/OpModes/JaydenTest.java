@@ -64,7 +64,7 @@ public class JaydenTest extends OpMode {
         telemetry.addData("X position", odometry.get_x(uk));
         telemetry.addData("Y position", odometry.get_y(uk));
         telemetry.addData("Direction", odometry.get_heading(uk));
-        telemetry.addData("Is at end", pid_drive.pointDriver(180, 0.7, 1, -1, uk, false));
+        telemetry.addData("Is at end", pid_drive.pointDriver(180, 0.7, 1, 1, -1, uk, false));
 
         TelemetryPacket packet = new TelemetryPacket();
 

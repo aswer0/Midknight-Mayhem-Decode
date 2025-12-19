@@ -38,7 +38,7 @@ public class Pathing {
         return wheelControl.drive_to_point(p, targete_h, power, dist_tresh, use_kalman);
     }
 
-    public boolean pointDriver(double end_heading, double power, double dist_tresh, int stop_point, boolean use_kalman, boolean follow_path) {
+    public boolean pointDriver(double end_heading, double power, double dist_tresh, double stop_thresh, int stop_point, boolean use_kalman, boolean follow_path) {
         if (stop_point == -1){
             stop_point = path.size() - 1;
         }
@@ -53,7 +53,7 @@ public class Pathing {
 
 
         if (current_point == stop_point) {
-            if (wheelControl.drive_to_point(path.get(current_point), end_heading, power, dist_tresh, use_kalman)){
+            if (wheelControl.drive_to_point(path.get(current_point), end_heading, power, stop_thresh, use_kalman)){
                 return true;
             }
         } else if (wheelControl.drive_to_point(path.get(current_point), rotation, power, dist_tresh, use_kalman)){

@@ -37,8 +37,10 @@ public class Odometry {
 
     public static double offset_x = 5;
     public static double offset_y = -4.5;
-    public static double mX = 0.8;
-    public static double mY = 0.8;
+    public static double mXDist = 0.8;
+    public static double mYDist = 0.8;
+    public static double mXTurret = 0.8;
+    public static double mYTurret = 0.8;
 
     public static double xyVariance = 25;
     public static double headingVariance = 100;
@@ -132,12 +134,19 @@ public class Odometry {
         }
         return pinpoint.getPosY(DistanceUnit.INCH);
     }
-    public double get_x_predicted(boolean use_kalman){
-        return (get_x(use_kalman) + mX*get_x_velocity());
+    public double get_x_predicted(boolean use_kalman, boolean forTurret){
+        if (forTurret) {
+            return (get_x(use_kalman) + mXTurret * get_x_velocity());
+        } else {
+            return (get_x(use_kalman) + mXDist * get_x_velocity());
+        }
     }
-    public double get_y_predicted(boolean use_kalman){
-        return (get_y(use_kalman) + mY*get_y_velocity());
-    }
+    public double get_y_predicted(boolean use_kalman, boolean forTurret){
+        if (forTurret) {
+            return (get_y(use_kalman) + mYTurret * get_y_velocity());
+        } else {
+            return (get_y(use_kalman) + mYDist * get_y_velocity());
+        }    }
 
     public void set_heading(double heading){
         pinpoint.setHeading(heading, AngleUnit.DEGREES);

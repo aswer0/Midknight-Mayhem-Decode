@@ -252,8 +252,8 @@ public class Turret {
 //            odometry.update();
 
             //===================== FUTURE VEL PREDICTION =====================
-            double future_x = odometry.get_x_predicted(false);
-            double future_y = odometry.get_y_predicted(false);
+            double future_x = odometry.get_x_predicted(false, true);
+            double future_y = odometry.get_y_predicted(false, true);
 
             //==========================================
 

@@ -16,7 +16,8 @@ public class TurretTest extends OpMode {
     @Override
     public void init() {
 
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), true);
+        turret = new Turret(hardwareMap, /*new Camera(hardwareMap)*/ null, true);
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override

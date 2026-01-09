@@ -27,8 +27,8 @@ public class Turret {
     public static double MAX_DEGREES = 100;
     public static double STOP_THRESHOLD = 0;
     public DcMotorEx turret;
-
-    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0.2);
+    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.01,0,0,0.25);
+//    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0.2);
     //public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
             //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
             //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
@@ -263,7 +263,7 @@ public class Turret {
             else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) +  odometry.get_heading(false);
             power = controller.calculate_heading(
                     target,
-                    actual, controller.gains.f * Math.signum(target_angle - getAngle()));
+                    actual, controller.gains.f * Math.signum(target - getAngle()));
             power = v_compensate(power);
             if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
                 power = 0;
@@ -273,7 +273,7 @@ public class Turret {
                 packet.put("Auto Target", target);
                 packet.put("Auto Actual", actual);
                 packet.put("Turret Power", power);
-                packet.put("Turret F", controller.gains.f * Math.signum(target_angle - getAngle()));
+                packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
                 //packet.put("LLResult", result.getTimestamp() - lastResultTime);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
@@ -295,6 +295,7 @@ public class Turret {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Single Actual Angle", getAngle());
                 packet.put("Single Target Angle", target_angle);
+                packet.put("Turret Power", power);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }

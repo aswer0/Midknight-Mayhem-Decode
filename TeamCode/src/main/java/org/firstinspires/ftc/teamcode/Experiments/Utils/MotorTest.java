@@ -24,7 +24,7 @@ public class MotorTest extends OpMode {
     public void init() {
         controller = new PIDFController(coefficients);
         dashboard = FtcDashboard.getInstance();
-        motor = hardwareMap.get(DcMotorEx.class, "flywheel");
+        motor = hardwareMap.get(DcMotorEx.class, "BL");
         //motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 

@@ -26,8 +26,8 @@ public class Sensors {
 
     // sensor color values
     RGB front1 = new RGB(); RGB front2 = new RGB();
-    RGB mid1; RGB mid2;
-    RGB back1; RGB back2;
+    RGB mid1 = new RGB(); RGB mid2 = new RGB();
+    RGB back1 = new RGB(); RGB back2 = new RGB();
 
     // sensor values for LED
     RGB left_LED;
@@ -36,6 +36,10 @@ public class Sensors {
     public Sensors(HardwareMap hardwareMap) {
         frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
         frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"RightSensor");
+        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "MidSensor1");
+        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "MidSensor2");
+        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "BackSensor1");
+        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "BackSensor2");
 //        midSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS3");
 //        midSensor2 = hardwareMap.get(RevColorSensorV3.class,"mS1");
 //        backSensor1 = hardwareMap.get(RevColorSensorV3.class,"mS2");
@@ -63,6 +67,56 @@ public class Sensors {
             return 1;
         } else {
             if (front2.r + front2.g + front2.b >= 900) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public int getMidColor() {
+        mid1.set(
+            midSensor1.red(),
+            midSensor1.green(),
+            midSensor1.blue()
+        );
+        mid2.set(
+          midSensor2.red(),
+          midSensor2.green(),
+          midSensor2.blue()
+        );
+
+        // 0 -> no ball
+        // 1 -> ball
+        if (mid1.r + mid1.g + mid1.b >= 900) {
+            return 1;
+        } else {
+            if (mid2.r + mid2.g + mid2.b >= 900) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public int getBackColor() {
+        back1.set(
+                backSensor1.red(),
+                backSensor1.green(),
+                backSensor1.blue()
+        );
+        back2.set(
+                backSensor2.red(),
+                backSensor2.green(),
+                backSensor2.blue()
+        );
+
+        // 0 -> no ball
+        // 1 -> ball
+        if (back1.r + back1.g + back1.b >= 900) {
+            return 1;
+        } else {
+            if (back2.r + back2.g + back2.b >= 900) {
                 return 1;
             } else {
                 return 0;

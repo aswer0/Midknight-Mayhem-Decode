@@ -313,6 +313,10 @@ public class CloseAutoRedSide extends OpMode {
                 intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, 0, 1, 0.5, false);
+                FinalTeleop.startX = odometry.get_x(false);
+                FinalTeleop.startY = odometry.get_y(false);
+                FinalTeleop.startHeading = odometry.get_heading(false);
+
                 break;
         }
 

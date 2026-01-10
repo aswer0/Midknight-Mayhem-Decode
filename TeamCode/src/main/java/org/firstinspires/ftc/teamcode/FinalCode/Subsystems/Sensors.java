@@ -34,17 +34,13 @@ public class Sensors {
     RGB right_LED;
 
     public Sensors(HardwareMap hardwareMap) {
-        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
-        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"RightSensor");
-        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "MidSensor1");
-        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "MidSensor2");
-        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "BackSensor1");
-        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "BackSensor2");
-//        midSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS3");
-//        midSensor2 = hardwareMap.get(RevColorSensorV3.class,"mS1");
-//        backSensor1 = hardwareMap.get(RevColorSensorV3.class,"mS2");
-//        backSensor2 = hardwareMap.get(RevColorSensorV3.class,"bS1");
-//
+        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
+        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
+        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "mS1");
+        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "mS2");
+        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "bS1");
+        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "bS2");
+
 //        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class, "LeftSensor");
 //        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
     }

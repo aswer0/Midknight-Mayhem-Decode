@@ -134,22 +134,22 @@ public class LED {
 //            ledStage = 0;
 //        }
 //    }
-
-    public boolean ballCheckLED() {
-
-        sensorLeft = sensors.getLeftColorLED();
-        sensorRight = sensors.getRightColorLED();
-
-        return (sensorLeft != 0 && sensorRight != 0);
-        }
-
-    public void ballLEDSet() {
-
-        if (ballCheckLED()) {
-            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-        } else {
-            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
-        }
-    }
+//
+//    public boolean ballCheckLED() {
+//
+//        sensorLeft = sensors.getLeftColorLED();
+//        sensorRight = sensors.getRightColorLED();
+//
+//        return (sensorLeft != 0 && sensorRight != 0);
+//        }
+//
+//    public void ballLEDSet() {
+//
+//        if (ballCheckLED()) {
+//            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+//        } else {
+//            ballStorageLED.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+//        }
+//    }
 }
 

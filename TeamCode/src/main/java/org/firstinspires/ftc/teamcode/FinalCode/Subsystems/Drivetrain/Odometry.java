@@ -80,6 +80,7 @@ public class Odometry {
 
         pinpoint.setOffsets(offset_x, offset_y, DistanceUnit.INCH);
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, start_x, start_y, AngleUnit.DEGREES, start_h));
+
         pinpoint.recalibrateIMU();
 
         xEstimate.put(0, 0, start_x/0.9144*36);

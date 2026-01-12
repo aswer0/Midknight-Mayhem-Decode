@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 public class Intake {
 
     public DcMotorEx intakeMotor;
+    public DcMotorEx intakeMotorTwo;
     //public Servo intakeDoor;
     //public Sensors sensors;
     public static double INTAKE_POWER = 1;
@@ -49,16 +50,17 @@ public class Intake {
         this.sensors = sensors;
 
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intakeMotor");
+        intakeMotorTwo = hardwareMap.get(DcMotorEx.class, "intakeMotorTwo");
         intakeDoor = hardwareMap.get(Servo.class, "llServo");
 
         intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         transfer_pid = new PIDFController(kp, ki, kd, kf);
 //        intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
-    public void motorOn() {intakeMotor.setPower(INTAKE_POWER);}
-    public void motorOff() {intakeMotor.setPower(0);}
-    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER);}
-    public void motorSlow() {intakeMotor.setPower(slowSpeed);}
+    public void motorOn() {intakeMotor.setPower(INTAKE_POWER); intakeMotorTwo.setPower(-INTAKE_POWER);}
+    public void motorOff() {intakeMotor.setPower(0); intakeMotorTwo.setPower(0);}
+    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER); intakeMotorTwo.setPower(INTAKE_POWER);}
+    public void motorSlow() {intakeMotor.setPower(slowSpeed); intakeMotorTwo.setPower(-slowSpeed);}
     public void doorOpen(){
         intakeDoor.setPosition(DOOR_OPEN_POSITION);
         doorOpen = true;
@@ -79,10 +81,12 @@ public class Intake {
     }
     public void continuousTransfer() {
         intakeMotor.setPower(motorSpeed);
+        intakeMotorTwo.setPower(-motorSpeed);
     }
     public void intervalTransfer() {
         if (timer.milliseconds() >= motorInterval) {
             intakeMotor.setPower(motorSpeed);
+            intakeMotorTwo.setPower(-motorSpeed);
 
             timer.reset();
         }
@@ -98,6 +102,7 @@ public class Intake {
         }
 
         intakeMotor.setPower(speed);
+        intakeMotorTwo.setPower(-speed);
     }
 
     public void runIntake() {

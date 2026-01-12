@@ -19,7 +19,8 @@ public class Intake {
     //public Servo intakeDoor;
     //public Sensors sensors;
     public static double INTAKE_POWER = 1;
-    public static double DOOR_POSITION = 1;
+    public static double DOOR_OPEN_POSITION = 0.9;
+    public static double DOOR_CLOSE_POSITION = 1;
     public static double slowSpeed = 0.4;
 
     public double v;
@@ -35,6 +36,7 @@ public class Intake {
     public static double ki = 1.0;
     public static double kd = 1.0;
     public static double kf = 1.0;
+    public boolean doorOpen = false;
 
     PIDFController transfer_pid;
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -57,11 +59,13 @@ public class Intake {
     public void motorOff() {intakeMotor.setPower(0);}
     public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER);}
     public void motorSlow() {intakeMotor.setPower(slowSpeed);}
-    public void doorUp(){
-        intakeDoor.setPosition(DOOR_POSITION);
+    public void doorOpen(){
+        intakeDoor.setPosition(DOOR_OPEN_POSITION);
+        doorOpen = true;
     }
-    public void doorDown(){
-        intakeDoor.setPosition(0.95);
+    public void doorClose(){
+        intakeDoor.setPosition(DOOR_CLOSE_POSITION);
+        doorOpen = false;
     }
     public void colorSensor(){
         TelemetryPacket packet = new TelemetryPacket();

@@ -146,7 +146,7 @@ public class CloseAutoRedSide extends OpMode {
     public static double turret_angle = -44;
     public double shoot_angle = 180-135;
 
-    public static double shoot_wait_time = 3750;
+    public static double shoot_wait_time = 1750;
     public static double gate_wait_time = 760;
 
     int loops = -1;
@@ -207,7 +207,7 @@ public class CloseAutoRedSide extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = armTransfer.update();
+        boolean isTransferReady = true; //armTransfer.update();
 
         if (autoTimer.milliseconds() >= 29500){
             state = State.park;
@@ -222,7 +222,8 @@ public class CloseAutoRedSide extends OpMode {
 
             case intakeBatch:
                 turret.setAngle(turret_angle);
-                armTransfer.toIdle();
+//                armTransfer.toIdle();
+                intake.doorClose();
                 flywheel.setTargetRPM(0);
                 flywheel.update();
                 intake.motorOn();
@@ -248,7 +249,7 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case driveToShootPos:
-                armTransfer.toIdle();
+//                armTransfer.toIdle();
                 intake.motorOff();
                 flywheel.shootClose();
                 flywheel.update();
@@ -273,7 +274,9 @@ public class CloseAutoRedSide extends OpMode {
 
                 if (flywheel.isReady()){
                     if (isTransferReady) {
-                        armTransfer.transfer();
+//                        armTransfer.transfer();
+                        intake.doorOpen();
+                        intake.motorOn();
                     }
                 }
 
@@ -297,8 +300,8 @@ public class CloseAutoRedSide extends OpMode {
                         }
                         pathPoints = follow_paths[loops].get_path_points();
 
-                        armTransfer.toIdle();
-                        armTransfer.current_shots = 0;
+//                        armTransfer.toIdle();
+//                        armTransfer.current_shots = 0;
                         shoot_angle = 0;
                         timer.reset();
                         state = State.intakeBatch;
@@ -307,7 +310,7 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case park:
-                armTransfer.toIdle();
+//                armTransfer.toIdle();
                 flywheel.update();
                 flywheel.stop();
                 intake.motorOff();

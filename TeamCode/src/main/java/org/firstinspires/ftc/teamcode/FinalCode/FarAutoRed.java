@@ -130,7 +130,7 @@ public class FarAutoRed extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = armTransfer.update();
+        boolean isTransferReady = true; armTransfer.update();
 
         switch (state) {
             case wait:
@@ -147,7 +147,11 @@ public class FarAutoRed extends OpMode {
                 flywheel.update();
 
                 if (flywheel.isReady()) {
-                    if (isTransferReady) armTransfer.transfer();
+                    if (isTransferReady) {
+                        intake.doorOpen();
+                        intake.motorOn();
+//                        armTransfer.transfer();
+                    }
                 }
 
                 wheelControl.drive_to_point(start_point, bot_angle, power, pidf_threshold, uk);
@@ -160,8 +164,8 @@ public class FarAutoRed extends OpMode {
                     } else {
                         vf.setPath(follow_paths[loops-1], 0, false);
                         pathPoints = follow_paths[loops-1].get_path_points();
-                        armTransfer.toIdle();
-                        armTransfer.current_shots = 0;
+//                        armTransfer.toIdle();
+//                        armTransfer.current_shots = 0;
                         timer.reset();
                         state = State.intakeBatch;
                     }
@@ -195,7 +199,7 @@ public class FarAutoRed extends OpMode {
                 break;
 
             case park:
-                armTransfer.toIdle();
+//                armTransfer.toIdle();
                 flywheel.stop();
                 flywheel.update();
                 intake.motorOn();

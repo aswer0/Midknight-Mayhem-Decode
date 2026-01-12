@@ -25,10 +25,10 @@ public class inakeTest extends OpMode {
     @Override
     public void loop() {
         if (DOOR_UP){
-            intake.doorUp();
+            intake.doorOpen();
         }
         else{
-            intake.doorDown();
+            intake.doorClose();
         }
         intake.colorSensor();
     }

@@ -3,13 +3,17 @@ package org.firstinspires.ftc.teamcode.FinalCode.Subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.RGB;
 
 @Config
 public class Sensors {
 
+    public DcMotorEx intakeMotor;
     // sensors
     RevColorSensorV3 frontSensor1;
     RevColorSensorV3 frontSensor2;
@@ -25,49 +29,63 @@ public class Sensors {
     RGB rgb;
 
     // sensor color values
-    RGB front1 = new RGB(); RGB front2 = new RGB();
-    RGB mid1 = new RGB(); RGB mid2 = new RGB();
-    RGB back1 = new RGB(); RGB back2 = new RGB();
+    public RGB front1 = new RGB();public  RGB front2 = new RGB();
+    public RGB mid1 = new RGB();public  RGB mid2 = new RGB();
+    public RGB back1 = new RGB();public RGB back2 = new RGB();
+
+    public double back1D;
+    public double back2D;
+    public double mid1D;
+    public double mid2D;
 
     // sensor values for LED
     RGB left_LED;
     RGB right_LED;
 
     public Sensors(HardwareMap hardwareMap) {
+//        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
+//        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"RightSensor");
+//        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "MidSensor1");
+//        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "MidSensor2");
+//        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "BackSensor1");
+//        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "BackSensor2");
         frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
         frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
-        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "mS1");
-        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "mS2");
-        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "bS1");
-        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "bS2");
+        midSensor1 = hardwareMap.get(RevColorSensorV3.class,"mS1");
+        midSensor2 = hardwareMap.get(RevColorSensorV3.class,"mS2");
+        backSensor1 = hardwareMap.get(RevColorSensorV3.class,"bS1");
+        backSensor2 = hardwareMap.get(RevColorSensorV3.class,"bS2");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
 
 //        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class, "LeftSensor");
 //        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
     }
 
     public int getFrontColor() {
-        front1.set(
-            frontSensor1.red(),
-            frontSensor1.green(),
-            frontSensor1.blue()
-        );
-        front2.set(
-                frontSensor2.red(),
-                frontSensor2.green(),
-                frontSensor2.blue()
-        );
-
-        // 0 -> no ball
-        // 1 -> ball
-        if (front1.r + front1.g + front1.b >= 900) {
-            return 1;
-        } else {
-            if (front2.r + front2.g + front2.b >= 900) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
+        if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.7) return 1;
+        else return 0;
+//        front1.set(
+//            frontSensor1.red(),
+//            frontSensor1.green(),
+//            frontSensor1.blue()
+//        );
+//        front2.set(
+//                frontSensor2.red(),
+//                frontSensor2.green(),
+//                frontSensor2.blue()
+//        );
+//
+//        // 0 -> no ball
+//        // 1 -> ball
+//        if (front1.r + front1.g + front1.b >= 900) {
+//            return 1;
+//        } else {
+//            if (front2.r + front2.g + front2.b >= 900) {
+//                return 1;
+//            } else {
+//                return 0;
+//            }
+//        }
     }
 
     public int getMidColor() {
@@ -81,7 +99,8 @@ public class Sensors {
           midSensor2.green(),
           midSensor2.blue()
         );
-
+        mid1D = midSensor1.getDistance(DistanceUnit.INCH);
+        mid2D = midSensor2.getDistance(DistanceUnit.INCH);
         // 0 -> no ball
         // 1 -> ball
         if (mid1.r + mid1.g + mid1.b >= 900) {
@@ -106,18 +125,21 @@ public class Sensors {
                 backSensor2.green(),
                 backSensor2.blue()
         );
-
+        back1D = backSensor1.getDistance(DistanceUnit.INCH);
+        back2D = backSensor2.getDistance(DistanceUnit.INCH);
         // 0 -> no ball
         // 1 -> ball
-        if (back1.r + back1.g + back1.b >= 900) {
-            return 1;
-        } else {
-            if (back2.r + back2.g + back2.b >= 900) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
+//        if (back1.r + back1.g + back1.b >= 900) {
+//            return 1;
+//        } else {
+//            if (back2.r + back2.g + back2.b >= 900) {
+//                return 1;
+//            } else {
+//                return 0;
+//            }
+//        }
+        if(back1D < 1.467 || back2D < 1.467) return 1;
+        return 0;
     }
 
 //    public int getMidColor() {

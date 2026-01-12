@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
@@ -29,6 +30,8 @@ public class FinalTeleop extends OpMode {
     ArmTransfer armTransfer;
     Turret turret;
     LED led;
+    /** Transfer opens first, then shoots */
+    ElapsedTime transferDelay = new ElapsedTime();
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -47,7 +50,6 @@ public class FinalTeleop extends OpMode {
     boolean pidToPoint = false;
     boolean useAutoRPM = false;
     boolean stopFlywheel = false;
-    boolean doorClose = true;
 
     int x_sign;
     int y_sign;
@@ -56,6 +58,7 @@ public class FinalTeleop extends OpMode {
     public static double startX = 8;
     public static double startY = 8;
     public static boolean outputDebugInfo = true;
+    public static boolean shouldStopIntake = false;
     public static double startHeading = 0.0;
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -78,6 +81,11 @@ public class FinalTeleop extends OpMode {
     }
 
     @Override
+    public void start() {
+        intake.doorOpen();
+    }
+
+    @Override
     public void init_loop(){
         telemetry.addData("Alliance", alliance);
         telemetry.update();
@@ -97,6 +105,7 @@ public class FinalTeleop extends OpMode {
         if (alliance == Alliance.red){
             x_sign = 1;
             y_sign = 1;
+            odo.set_heading(0);
             target_shoot = new Point(142-11, 134);
             odo.set_x(CloseAutoRedSide.park_point.x); //used to be 122
             odo.set_y(CloseAutoRedSide.park_point.y); //81
@@ -117,7 +126,7 @@ public class FinalTeleop extends OpMode {
         currentGamepad1.copy(gamepad1);
         odo.update();
         flywheel.update();
-        isTransferReady = armTransfer.update();
+//        isTransferReady = armTransfer.update();
         led.speedCheck();
         turret.update();
         if (currentGamepad1.options && !previousGamepad1.options) {
@@ -152,29 +161,38 @@ public class FinalTeleop extends OpMode {
 
         //intake
         if (currentGamepad1.right_bumper) { //in
-            intake.motorOn();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
+            // If we have 3 balls, auto stop intake
+            if(shouldStopIntake || sensors.getBackColor() == 1 && sensors.getMidColor() == 1 && sensors.getFrontColor() == 1) {
+                intake.doorOpen();
+                intake.motorOff();
+                gamepad1.rumble(500);
+                shouldStopIntake = true;
+            } else {
+                intake.motorOn();
+                intake.doorClose();
+            }
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
         } else {
             if (gamepad1.left_bumper) { //transfer
-                intake.motorOn();
-                doorClose = false;
+//                if (isTransferReady) {
+//                    armTransfer.transfer();
+                    intake.doorOpen();
+//                }
+                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
+                    intake.motorOn();
+                } else intake.motorOff();
             } else { //idle
                 intake.motorOff();
-                doorClose = true;
             }
         }
-        if (doorClose){
-            intake.doorUp();
-        }
-        else{
-            intake.doorDown();
-        }
-
+        if(!gamepad1.left_bumper)
+            transferDelay.reset();
+        if(!currentGamepad1.right_bumper) shouldStopIntake = false;
         //flywheel
         //blue close
         //red far
@@ -204,7 +222,7 @@ public class FinalTeleop extends OpMode {
         }
 
 
-        if (flywheel.isReady()) {
+        if (flywheel.isReady() && flywheel.getCurrentRPM() > 200) {
             gamepad1.rumble(100);
         }
         //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));

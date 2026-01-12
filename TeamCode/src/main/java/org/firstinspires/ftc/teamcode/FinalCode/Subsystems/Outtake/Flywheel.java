@@ -23,8 +23,8 @@ public class Flywheel {
     private double currentRPM = 0;
 
     public static double kp=0.01, ki=0.000, kd=0, kf=0.32;
-    public static int CLOSE_RPM = 3000;
-    public static int FAR_RPM = 3767;
+    public static int CLOSE_RPM = 2720;
+    public static int FAR_RPM = 3350;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 300;
     public static boolean reverseFlywheel = false;
@@ -64,7 +64,8 @@ public class Flywheel {
 
     public void set_auto_rpm(double dist) {
         //List<Double> coeffs = Arrays.asList(-0.000193287, 0.0514462, -4.78688, 198.33296, -710.1902);
-        List<Double> coeffs = Arrays.asList(0.0392969, 10.62242, 1834.59959);
+//        List<Double> coeffs = Arrays.asList(0.0392969, 10.62242, 1776.67);
+        List<Double> coeffs = Arrays.asList(-0.314286, 58.2, 147.71429); //-0.314286x^{2}+58.2x+147.71429
         //-0.000233344x^{4}+0.0791499x^{3}-9.85582x^{2}+546.54941x-8603.33051
 
         int n = coeffs.size();

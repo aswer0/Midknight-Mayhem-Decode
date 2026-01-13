@@ -156,6 +156,7 @@ public class CloseAutoBlueSide extends OpMode {
     public static double turret_angle = 44;
     public double shoot_angle = 135;
 
+    public static double first_shoot_wait_time = 1750;
     public static double shoot_wait_time = 1750;
     public static double gate_wait_time = 750;
 
@@ -299,7 +300,7 @@ public class CloseAutoBlueSide extends OpMode {
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (timer.milliseconds() >= shoot_wait_time){ //shotCounter > 3 ||
+                if (timer.milliseconds() >= shoot_wait_time && loops != 0 || timer.milliseconds() >= first_shoot_wait_time){ //shotCounter > 3 ||
                     loops++;
 
                     if (loops >= 2+(do_path3 ? 1 : 0)){

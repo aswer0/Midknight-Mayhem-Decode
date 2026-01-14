@@ -115,16 +115,16 @@ public class Sensors {
     }
 
     public int getBackColor() {
-        back1.set(
-                backSensor1.red(),
-                backSensor1.green(),
-                backSensor1.blue()
-        );
-        back2.set(
-                backSensor2.red(),
-                backSensor2.green(),
-                backSensor2.blue()
-        );
+//        back1.set(
+//                backSensor1.red(),
+//                backSensor1.green(),
+//                backSensor1.blue()
+//        );
+//        back2.set(
+//                backSensor2.red(),
+//                backSensor2.green(),
+//                backSensor2.blue()
+//        );
         back1D = backSensor1.getDistance(DistanceUnit.INCH);
         back2D = backSensor2.getDistance(DistanceUnit.INCH);
         // 0 -> no ball

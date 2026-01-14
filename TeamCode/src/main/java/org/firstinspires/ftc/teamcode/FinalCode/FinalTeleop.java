@@ -61,6 +61,7 @@ public class FinalTeleop extends OpMode {
     public static boolean shouldStopIntake = false;
     public static double startHeading = 0.0;
     FtcDashboard dashboard = FtcDashboard.getInstance();
+    public static int idleRpm = 2000;
 
     public enum Alliance{
         red,
@@ -129,6 +130,7 @@ public class FinalTeleop extends OpMode {
 //        isTransferReady = armTransfer.update();
         led.speedCheck();
         turret.update();
+
         if (currentGamepad1.options && !previousGamepad1.options) {
             if (alliance == Alliance.red){
                 odo.set_heading(0);
@@ -198,16 +200,16 @@ public class FinalTeleop extends OpMode {
         //red far
         //green stop
         if (stopFlywheel && currentGamepad1.right_trigger <= 0.3){
-            flywheel.stop();
+            flywheel.setTargetRPM(idleRpm);
             stopFlywheel = false;
         }
         else if (stopFlywheel && !currentGamepad1.right_bumper){
-            flywheel.stop();
+            flywheel.setTargetRPM(idleRpm);
             stopFlywheel = false;
         }
 
         if (currentGamepad1.cross && !previousGamepad1.cross) {
-            flywheel.stop();
+            flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
             turret.autoAiming = false;
             turret.setAngle(0);

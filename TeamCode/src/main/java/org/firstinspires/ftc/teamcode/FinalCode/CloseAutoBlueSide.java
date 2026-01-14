@@ -121,6 +121,7 @@ public class CloseAutoBlueSide extends OpMode {
             new Point(43.80173283594432,36.0),
             new Point(19.6,35.37290537531175)
     ));
+    private ElapsedTime shotTimer = null;
 
     enum State{
         intakeBatch,
@@ -156,15 +157,15 @@ public class CloseAutoBlueSide extends OpMode {
     public static double turret_angle = 44;
     public double shoot_angle = 135;
 
-    public static double first_shoot_wait_time = 1750;
-    public static double shoot_wait_time = 1750;
+    public static double first_shoot_wait_time = 5000;
+    public static double shoot_wait_time = 3000;
     public static double gate_wait_time = 750;
 
     int loops = -1;
     public static int wait_time = 0;
     boolean do_path3 = true;
     int shotCounter = 0;
-    boolean prevFlywheelReady = false;
+    double prevRpm = 0;
 
     ArrayList<Point> pathPoints;
 
@@ -293,16 +294,19 @@ public class CloseAutoBlueSide extends OpMode {
                     }
                 }
 
-                if (flywheel.isReady() && !prevFlywheelReady) {
-                    shotCounter++;
-                }
-                prevFlywheelReady = flywheel.isReady();
+//                if (flywheel.getCurrentRPM() - prevRpm < -100) {
+//                    shotCounter++;
+//                }
+//                if(sensors.getBackColor() == 0 && shotTimer == null) {
+//                    shotTimer = new ElapsedTime();
+//                } else shotTimer = null;
+                prevRpm = flywheel.getCurrentRPM();
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (timer.milliseconds() >= shoot_wait_time && loops != 0 || timer.milliseconds() >= first_shoot_wait_time){ //shotCounter > 3 ||
+                if (timer.milliseconds() >= shoot_wait_time /* (shotTimer != null && shotTimer.milliseconds() > 500)*/){ //shotCounter > 3 ||
                     loops++;
-
+                    shotTimer = null;
                     if (loops >= 2+(do_path3 ? 1 : 0)){
                         state = State.park;
                     }

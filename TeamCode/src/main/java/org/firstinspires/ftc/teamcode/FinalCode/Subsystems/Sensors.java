@@ -49,8 +49,8 @@ public class Sensors {
 //        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "MidSensor2");
 //        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "BackSensor1");
 //        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "BackSensor2");
-        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
-        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
+//        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
+//        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
         midSensor1 = hardwareMap.get(RevColorSensorV3.class,"mS1");
         midSensor2 = hardwareMap.get(RevColorSensorV3.class,"mS2");
         backSensor1 = hardwareMap.get(RevColorSensorV3.class,"bS1");
@@ -62,8 +62,7 @@ public class Sensors {
     }
 
     public int getFrontColor() {
-        if(intakeMotor.getCurrent(CurrentUnit.AMPS) > 6.7) return 1;
-        else return 0;
+
 //        front1.set(
 //            frontSensor1.red(),
 //            frontSensor1.green(),
@@ -74,9 +73,11 @@ public class Sensors {
 //                frontSensor2.green(),
 //                frontSensor2.blue()
 //        );
-//
-//        // 0 -> no ball
-//        // 1 -> ball
+
+        return 1;
+
+        // 0 -> no ball
+        // 1 -> ball
 //        if (front1.r + front1.g + front1.b >= 900) {
 //            return 1;
 //        } else {

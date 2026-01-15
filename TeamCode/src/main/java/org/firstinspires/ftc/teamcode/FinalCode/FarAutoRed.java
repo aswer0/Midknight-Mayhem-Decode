@@ -97,7 +97,7 @@ public class FarAutoRed extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.red, true);
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }

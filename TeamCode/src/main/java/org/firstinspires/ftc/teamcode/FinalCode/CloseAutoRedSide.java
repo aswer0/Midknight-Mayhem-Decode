@@ -63,9 +63,9 @@ public class CloseAutoRedSide extends OpMode {
     P_3 = (23.7,59.6)
 
     P_0 = (52.6,102.4)
-    P_1 = (51.5,71.7)
-    P_2 = (58,26.1)
-    P_3 = (55.5,34)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,39)
     P_4 = (25,34)
 
     P_0 = (60, 81)
@@ -73,7 +73,17 @@ public class CloseAutoRedSide extends OpMode {
     P_2 = (62,61.7)
     P_3 = (23.7,59.6)
 
+    P_0 = (52.6,102.4)
+    P_1 = (50.2,72)
+    P_2 = (62.6,27.7)
+    P_3 = (53.7,39)
+    P_4 = (24,34)
 
+    new Point(52.6,102.4),
+    new Point(50.2,72),
+    new Point(62.6,27.7),
+    new Point(53.7,39),
+    new Point(24,34),
 
      */
 
@@ -111,6 +121,7 @@ public class CloseAutoRedSide extends OpMode {
             new Point(142-43.80173283594432,36.0),
             new Point(142-19.6,35.37290537531175)
     ));
+    private ElapsedTime shotTimer = null;
 
     enum State{
         intakeBatch,
@@ -140,20 +151,21 @@ public class CloseAutoRedSide extends OpMode {
     Gamepad previousGamepad1 = new Gamepad();
 
     public static boolean uk = false;
-    public static double gvf_threshold = 0.5;
+    public static double gvf_threshold = 0.67;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = -44;
+    public static double turret_angle = 180-44;
     public double shoot_angle = 180-135;
 
-    public static double shoot_wait_time = 1750;
-    public static double gate_wait_time = 760;
+    public static double first_shoot_wait_time = 5000;
+    public static double shoot_wait_time = 3000;
+    public static double gate_wait_time = 750;
 
     int loops = -1;
-    int wait_time = 0;
+    public static int wait_time = 0;
     boolean do_path3 = true;
     int shotCounter = 0;
-    boolean prevFlywheelReady = false;
+    double prevRpm = 0;
 
     ArrayList<Point> pathPoints;
 
@@ -174,9 +186,8 @@ public class CloseAutoRedSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.red, true);
-        FinalTeleop.alliance = FinalTeleop.Alliance.red;
-        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
+        FinalTeleop.alliance = FinalTeleop.Alliance.blue;
     }
 
     @Override
@@ -201,13 +212,13 @@ public class CloseAutoRedSide extends OpMode {
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = true; //armTransfer.update();
 
         if (autoTimer.milliseconds() >= 29500){
             state = State.park;
@@ -222,7 +233,6 @@ public class CloseAutoRedSide extends OpMode {
 
             case intakeBatch:
                 turret.setAngle(turret_angle);
-//                armTransfer.toIdle();
                 intake.doorClose();
                 flywheel.setTargetRPM(0);
                 flywheel.update();
@@ -242,15 +252,15 @@ public class CloseAutoRedSide extends OpMode {
                         state = State.driveToShootPos;
                     }
                 }
-                if (vf.at_end(gvf_threshold)  || (at_point && loops == 2)){
+                if (vf.at_end(gvf_threshold) || (at_point && loops == 2)){
                     timer.reset();
                     state = State.driveToShootPos;
                 }
                 break;
 
             case driveToShootPos:
-//                armTransfer.toIdle();
                 intake.motorOff();
+                intake.doorOpen();
                 flywheel.shootClose();
                 flywheel.update();
 
@@ -271,37 +281,32 @@ public class CloseAutoRedSide extends OpMode {
             case shootBall:
                 flywheel.shootClose();
                 flywheel.update();
-
                 if (flywheel.isReady()){
-                    if (isTransferReady) {
-//                        armTransfer.transfer();
-                        intake.doorOpen();
-                        intake.motorOn();
-                    }
+                    intake.doorOpen();
+                    intake.motorOn();
+                    //shotCounter++;
                 }
 
-                if (flywheel.isReady() && !prevFlywheelReady) {
-                    shotCounter++;
-                }
-                prevFlywheelReady = flywheel.isReady();
+//                if (flywheel.getCurrentRPM() - prevRpm < -100) {
+//                    shotCounter++;
+//                }
+//                if(sensors.getBackColor() == 0 && shotTimer == null) {
+//                    shotTimer = new ElapsedTime();
+//                } else shotTimer = null;
+                prevRpm = flywheel.getCurrentRPM();
 
                 wheelControl.drive_to_point(shoot_point, shoot_angle, power, pid_threshold, uk);
 
-                if (timer.milliseconds() >= shoot_wait_time){ //shotCounter > 3 ||
+                if (timer.milliseconds() >= shoot_wait_time /* (shotTimer != null && shotTimer.milliseconds() > 500)*/){ //shotCounter > 3 ||
                     loops++;
-
+                    shotTimer = null;
                     if (loops >= 2+(do_path3 ? 1 : 0)){
                         state = State.park;
                     }
                     else {
                         vf.setPath(follow_paths[loops], 0, false);
-                        if (loops >= 2){
-                            //vf.setPath(follow_paths[loops], 180, true);
-                        }
                         pathPoints = follow_paths[loops].get_path_points();
 
-//                        armTransfer.toIdle();
-//                        armTransfer.current_shots = 0;
                         shoot_angle = 0;
                         timer.reset();
                         state = State.intakeBatch;
@@ -310,18 +315,17 @@ public class CloseAutoRedSide extends OpMode {
                 break;
 
             case park:
-//                armTransfer.toIdle();
                 flywheel.update();
                 flywheel.stop();
                 intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, 0, 1, 0.5, false);
-                FinalTeleop.startX = odometry.get_x(false);
-                FinalTeleop.startY = odometry.get_y(false);
-                FinalTeleop.startHeading = odometry.get_heading(false);
-
                 break;
         }
+
+        FinalTeleop.startX = odometry.get_x(false);
+        FinalTeleop.startY = odometry.get_y(false);
+        FinalTeleop.startHeading = odometry.get_heading(false);
 
         TelemetryPacket packet = new TelemetryPacket();
 
@@ -350,5 +354,6 @@ public class CloseAutoRedSide extends OpMode {
         packet.put("RPM", flywheel.getCurrentRPM());
 
         dashboard.sendTelemetryPacket(packet);
+        telemetry.addData("shot counter", shotCounter);
     }
 }

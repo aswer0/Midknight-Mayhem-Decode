@@ -79,11 +79,12 @@ public class CloseAutoBlueSide extends OpMode {
     P_3 = (53.7,39)
     P_4 = (24,34)
 
-    new Point(52.6,102.4),
-    new Point(50.2,72),
-    new Point(62.6,27.7),
-    new Point(53.7,39),
-    new Point(24,34),
+    P_0 = (60, 81)
+    P_1 = (53.8,84.5)
+    P_2 = (35,74.6)
+    P_3 = (6,98.5)
+    P_4 = (29.2,74.5)
+    P_5 = (15,71.3)
 
      */
 
@@ -93,9 +94,9 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(60, 81),
                             new Point(53.8,84.5),
                             new Point(35,74.6),
-                            new Point(6,98.5),
+                            new Point(10,98.5),
                             new Point(29.2,74.5),
-                            new Point(15,71.3),
+                            new Point(17.2,71.3),
                     }
             }),
             new BCPath(new Point[][] {
@@ -103,7 +104,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(60, 81),
                             new Point(55,61.6),
                             new Point(62,61.7),
-                            new Point(24,57.5),
+                            new Point(20,57.5),
                     }
             }),
             new BCPath(new Point[][] {
@@ -119,7 +120,7 @@ public class CloseAutoBlueSide extends OpMode {
 
     public static ArrayList<Point> thirdPath = new ArrayList<>(List.of(
             new Point(43.80173283594432,36.0),
-            new Point(19.6,35.37290537531175)
+            new Point(17.6,35.37290537531175)
     ));
     private ElapsedTime shotTimer = null;
 
@@ -186,7 +187,7 @@ public class CloseAutoBlueSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.blue, true);
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
     }
 
@@ -219,7 +220,6 @@ public class CloseAutoBlueSide extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = true; //armTransfer.update();
 
         if (autoTimer.milliseconds() >= 29500){
             state = State.park;
@@ -234,7 +234,6 @@ public class CloseAutoBlueSide extends OpMode {
 
             case intakeBatch:
                 turret.setAngle(turret_angle);
-//                armTransfer.toIdle();
                 intake.doorClose();
                 flywheel.setTargetRPM(0);
                 flywheel.update();
@@ -261,7 +260,6 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case driveToShootPos:
-                //armTransfer.toIdle();
                 intake.motorOff();
                 intake.doorOpen();
                 flywheel.shootClose();
@@ -285,13 +283,9 @@ public class CloseAutoBlueSide extends OpMode {
                 flywheel.shootClose();
                 flywheel.update();
                 if (flywheel.isReady()){
-                    if (isTransferReady) {
-
-                        intake.doorOpen();
-                        intake.motorOn();
-//                        armTransfer.transfer();
-                        //shotCounter++;
-                    }
+                    intake.doorOpen();
+                    intake.motorOn();
+                    //shotCounter++;
                 }
 
 //                if (flywheel.getCurrentRPM() - prevRpm < -100) {
@@ -312,13 +306,8 @@ public class CloseAutoBlueSide extends OpMode {
                     }
                     else {
                         vf.setPath(follow_paths[loops], 180, false);
-                        if (loops >= 2){
-                            //vf.setPath(follow_paths[loops], 180, true);
-                        }
                         pathPoints = follow_paths[loops].get_path_points();
 
-//                        armTransfer.toIdle();
-//                        armTransfer.current_shots = 0;
                         shoot_angle = 180;
                         timer.reset();
                         state = State.intakeBatch;
@@ -327,18 +316,17 @@ public class CloseAutoBlueSide extends OpMode {
                 break;
 
             case park:
-//                armTransfer.toIdle();
                 flywheel.update();
                 flywheel.stop();
                 intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, 180, 1, 0.5, false);
-                FinalTeleop.startX = odometry.get_x(false);
-                FinalTeleop.startY = odometry.get_y(false);
-                FinalTeleop.startHeading = odometry.get_heading(false);
-
                 break;
         }
+
+        FinalTeleop.startX = odometry.get_x(false);
+        FinalTeleop.startY = odometry.get_y(false);
+        FinalTeleop.startHeading = odometry.get_heading(false);
 
         TelemetryPacket packet = new TelemetryPacket();
 

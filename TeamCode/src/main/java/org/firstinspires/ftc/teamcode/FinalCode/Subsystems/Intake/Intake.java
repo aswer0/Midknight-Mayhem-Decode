@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 
@@ -78,6 +79,11 @@ public class Intake {
 
     public void resetTransferTimer(){
         timer.reset();
+    }
+    public int intakeCurrentThreshold(double threshold){
+        //6.7 threshold
+        if(intakeMotor.getCurrent(CurrentUnit.AMPS) > threshold) return 1;
+        else return 0;
     }
     public void continuousTransfer() {
         intakeMotor.setPower(motorSpeed);

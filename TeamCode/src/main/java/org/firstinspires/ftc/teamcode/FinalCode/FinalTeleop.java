@@ -61,7 +61,7 @@ public class FinalTeleop extends OpMode {
     public static boolean shouldStopIntake = false;
     public static double startHeading = 0.0;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    public static int idleRpm = 2000;
+    public static int idleRpm = 2467;
 
     public enum Alliance{
         red,
@@ -76,7 +76,7 @@ public class FinalTeleop extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), odo, alliance, false);
+        turret = new Turret(hardwareMap, null, odo, alliance, false);
         led = new LED(hardwareMap, sensors, flywheel);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
@@ -166,7 +166,7 @@ public class FinalTeleop extends OpMode {
             flywheel.setTargetRPM(-670);
             stopFlywheel = true;
             // If we have 3 balls, auto stop intake
-            if(shouldStopIntake || sensors.getBackColor() == 1 && sensors.getMidColor() == 1 && sensors.getFrontColor() == 1) {
+            if(shouldStopIntake || sensors.getBackColor() == 1 && sensors.getMidColor() == 1 && intake.intakeCurrentThreshold(6.7) == 1) {
                 intake.doorOpen();
                 intake.motorOff();
                 gamepad1.rumble(500);
@@ -250,6 +250,7 @@ public class FinalTeleop extends OpMode {
             packet.put("y", odo.get_y(false));
             packet.put("Auto RPM", Flywheel.AUTO_RPM);
             packet.put("RPM", flywheel.getCurrentRPM());
+            packet.put("Turret Heading Reggin", turret.getAngle());
             dashboard.sendTelemetryPacket(packet);
         }
     }

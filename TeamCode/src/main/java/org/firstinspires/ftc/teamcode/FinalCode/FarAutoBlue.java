@@ -28,6 +28,18 @@ public class FarAutoBlue extends OpMode {
     public static Point start_point = new Point(56, 8);
     public static Point park_point = new Point(30, 10);
 
+    /*
+
+    P_0 = (56, 8)
+    P_1 = (22, 9)
+    P_2 = (8, 1.3)
+    P_3 = (17.4,15.3)
+    P_4 = (18.5,13)
+    P_5 = (30, 18)
+    P_6 = (8,8)
+
+    */
+
     public static BCPath[] follow_paths = {
             new BCPath(new Point[][]{
                     {
@@ -37,7 +49,7 @@ public class FarAutoBlue extends OpMode {
                             new Point(17.4,15.3),
                             new Point(18.5,13),
                             new Point(30, 18),
-                            new Point(8,8),
+                            new Point(6.5,8),
                     }
             })
     };
@@ -97,7 +109,7 @@ public class FarAutoBlue extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, new Camera(hardwareMap), odometry, FinalTeleop.Alliance.blue, true);
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
@@ -130,7 +142,6 @@ public class FarAutoBlue extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = true;// armTransfer.update();
 
         switch (state) {
             case wait:
@@ -147,12 +158,8 @@ public class FarAutoBlue extends OpMode {
                 flywheel.update();
 
                 if (flywheel.isReady()) {
-                    if (isTransferReady) {
-                        //armTransfer.transfer();
-
-                        intake.doorOpen();
-                        intake.motorOn();
-                    }
+                    intake.doorOpen();
+                    intake.motorOn();
                 }
 
                 wheelControl.drive_to_point(start_point, bot_angle, power, pidf_threshold, uk);
@@ -165,8 +172,6 @@ public class FarAutoBlue extends OpMode {
                     } else {
                         vf.setPath(follow_paths[loops-1], 180, false);
                         pathPoints = follow_paths[loops-1].get_path_points();
-//                        armTransfer.toIdle();
-//                        armTransfer.current_shots = 0;
                         timer.reset();
                         state = State.intakeBatch;
                     }
@@ -178,6 +183,7 @@ public class FarAutoBlue extends OpMode {
                 flywheel.shootFar();
                 flywheel.update();
                 intake.motorOn();
+                intake.doorClose();
 
                 vf.move();
 

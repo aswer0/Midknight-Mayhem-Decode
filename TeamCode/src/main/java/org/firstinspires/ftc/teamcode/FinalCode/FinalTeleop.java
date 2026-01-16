@@ -167,7 +167,6 @@ public class FinalTeleop extends OpMode {
             stopFlywheel = true;
             // If we have 3 balls, auto stop intake
             if(shouldStopIntake || sensors.getBackColor() == 1 && sensors.getMidColor() == 1 && intake.intakeCurrentThreshold(6.7) == 1) {
-                intake.doorOpen();
                 intake.motorOff();
                 gamepad1.rumble(500);
                 shouldStopIntake = true;
@@ -214,8 +213,10 @@ public class FinalTeleop extends OpMode {
             turret.autoAiming = false;
             turret.setAngle(0);
         } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close
+            intake.doorOpen();
             flywheel.shootClose();
         } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far
+            intake.doorOpen();
             flywheel.shootFar();
             turret.autoAiming = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close

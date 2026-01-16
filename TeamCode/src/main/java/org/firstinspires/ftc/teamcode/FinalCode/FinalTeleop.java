@@ -208,17 +208,17 @@ public class FinalTeleop extends OpMode {
             stopFlywheel = false;
         }
 
-        if (currentGamepad1.cross && !previousGamepad1.cross) {
+        if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
             turret.autoAiming = false;
             turret.setAngle(0);
-        } else if (currentGamepad1.square && !previousGamepad1.square) {
+        } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close
             flywheel.shootClose();
-        } else if (currentGamepad1.circle && !previousGamepad1.circle) {
+        } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far
             flywheel.shootFar();
             turret.autoAiming = true;
-        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close
             useAutoRPM = true;
             turret.autoAiming = true;
         }
@@ -251,6 +251,7 @@ public class FinalTeleop extends OpMode {
             packet.put("Auto RPM", Flywheel.AUTO_RPM);
             packet.put("RPM", flywheel.getCurrentRPM());
             packet.put("Turret Heading Reggin", turret.getAngle());
+            packet.put("Odo heading", odo.get_heading(false));
             dashboard.sendTelemetryPacket(packet);
         }
     }

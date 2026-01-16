@@ -154,7 +154,7 @@ public class CloseAutoRedSide extends OpMode {
     public static double gvf_threshold = 0.67;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = 180-44;
+    public static double turret_angle = -44;
     public double shoot_angle = 180-135;
 
     public static double first_shoot_wait_time = 5000;

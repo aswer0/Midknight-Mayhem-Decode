@@ -29,7 +29,7 @@ import java.util.List;
 public class CloseAutoBlueSide extends OpMode {
     public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
-    public static Point park_point = new Point(142-120, 81);
+    public static Point park_point = new Point(20, 81);
 
     /*
     P_0 = (60, 81)
@@ -96,7 +96,7 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(35,74.6),
                             new Point(10,98.5),
                             new Point(29.2,74.5),
-                            new Point(17.2,71.3),
+                            new Point(15,71.3),
                     }
             }),
             new BCPath(new Point[][] {

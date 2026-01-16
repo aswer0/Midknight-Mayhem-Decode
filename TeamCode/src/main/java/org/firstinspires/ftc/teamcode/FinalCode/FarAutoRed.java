@@ -28,16 +28,18 @@ public class FarAutoRed extends OpMode {
     public static Point start_point = new Point(88, 8);
     public static Point park_point = new Point(110, 10);
 
+    public static double adjusted = 146;
+
     public static BCPath[] follow_paths = {
             new BCPath(new Point[][]{
                     {
-                            new Point(144-56, 8),
-                            new Point(144-22, 9),
-                            new Point(144-8, 1.3),
-                            new Point(144-17.4,15.3),
-                            new Point(144-18.5,13),
-                            new Point(144-30, 18),
-                            new Point(144-8,8),
+                            new Point(adjusted-56, 8),
+                            new Point(adjusted-22, 9),
+                            new Point(adjusted-8, 1.3),
+                            new Point(adjusted-17.4,15.3),
+                            new Point(adjusted-18.5,13),
+                            new Point(adjusted-30, 18),
+                            new Point(adjusted-8,8),
                     }
             })
     };

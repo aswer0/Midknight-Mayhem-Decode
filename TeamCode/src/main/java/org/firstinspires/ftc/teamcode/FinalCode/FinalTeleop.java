@@ -163,7 +163,7 @@ public class FinalTeleop extends OpMode {
 
         //intake
         if (currentGamepad1.right_bumper) { //in
-            flywheel.setTargetRPM(-670);
+            //flywheel.setTargetRPM(-670);
             stopFlywheel = true;
             // If we have 3 balls, auto stop intake
             if(shouldStopIntake || sensors.getBackColor() == 1 && sensors.getMidColor() == 1 && intake.intakeCurrentThreshold(6.7) == 1) {
@@ -176,7 +176,7 @@ public class FinalTeleop extends OpMode {
             }
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
-            flywheel.setTargetRPM(-670);
+            //flywheel.setTargetRPM(-670);
             stopFlywheel = true;
         } else {
             if (gamepad1.left_bumper) { //transfer
@@ -220,6 +220,7 @@ public class FinalTeleop extends OpMode {
             flywheel.shootFar();
             turret.autoAiming = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close
+            intake.doorOpen(); //NEW LINE MIGHT NOT WORK
             useAutoRPM = true;
             turret.autoAiming = true;
         }
@@ -229,8 +230,9 @@ public class FinalTeleop extends OpMode {
             gamepad1.rumble(100);
         }
         //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
-        telemetry.addData("power", drivePower);
-        telemetry.addData("transferStage", armTransfer.transferStage);
+        //telemetry.addData("power", drivePower);
+        //telemetry.addData("transferStage", armTransfer.transferStage);
+        telemetry.addData("Alliance", alliance);
         telemetry.addData("Correction Drive?", useDriveCorrecton);
         telemetry.update();
 

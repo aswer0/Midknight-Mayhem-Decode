@@ -94,9 +94,9 @@ public class CloseAutoBlueSide extends OpMode {
                             new Point(60, 81),
                             new Point(53.8,84.5),
                             new Point(35,74.6),
-                            new Point(10,98.5),
+                            new Point(10.67,98.5),
                             new Point(29.2,74.5),
-                            new Point(15,71.3),
+                            new Point(14.6,71.3),
                     }
             }),
             new BCPath(new Point[][] {

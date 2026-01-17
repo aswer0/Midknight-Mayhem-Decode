@@ -209,7 +209,7 @@ public class FarAutoBlue extends OpMode {
 //                armTransfer.toIdle();
                 flywheel.stop();
                 flywheel.update();
-                intake.motorOn();
+                intake.motorOff();
 
                 wheelControl.drive_to_point(park_point, bot_angle, 1, pidf_threshold, false);
 

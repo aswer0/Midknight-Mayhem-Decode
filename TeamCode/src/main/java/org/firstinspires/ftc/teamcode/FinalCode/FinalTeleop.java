@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
@@ -39,6 +40,7 @@ public class FinalTeleop extends OpMode {
     public static Point shoot_point = new Point(60, 81);
 
     public static Point target_shoot = new Point(11, 134);
+    public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
     public static double target_shoot_heading = 135;
 
@@ -76,7 +78,7 @@ public class FinalTeleop extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, null, odo, alliance, false);
+        turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
@@ -93,7 +95,7 @@ public class FinalTeleop extends OpMode {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
 
-        if (currentGamepad1.triangle && !previousGamepad1.triangle){
+        if (currentGamepad1.square && !previousGamepad1.square){
             if (alliance == Alliance.blue){
                 alliance = Alliance.red;
 
@@ -207,19 +209,19 @@ public class FinalTeleop extends OpMode {
             stopFlywheel = false;
         }
 
-        if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter
+        if (currentGamepad1.circle && !previousGamepad1.circle) { //stop shooter
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
             turret.autoAiming = false;
             turret.setAngle(0);
-        } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close
+        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //manual shoot close
             intake.doorOpen();
             flywheel.shootClose();
-        } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far
+        } else if (currentGamepad1.cross && !previousGamepad1.cross) { // shoot far
             intake.doorOpen();
             flywheel.shootFar();
             turret.autoAiming = true;
-        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close
+        } else if (currentGamepad1.square && !previousGamepad1.square) { //auto shoot close
             useAutoRPM = true;
             turret.autoAiming = true;
         }

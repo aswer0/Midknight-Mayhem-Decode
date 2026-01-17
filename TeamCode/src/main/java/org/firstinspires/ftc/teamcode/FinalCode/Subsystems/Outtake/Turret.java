@@ -47,14 +47,16 @@ public class Turret {
     double estimatedTagAngle = Double.POSITIVE_INFINITY;
     double lastResultTime = Double.POSITIVE_INFINITY;
     ElapsedTime lastSeenAt = new ElapsedTime();
+    PIDFCoefficients coefficients = null;
     public Odometry odometry;
     public static double[] redShootPoint = {134,136};
     public static double[] blueShootPoint = {10,136};
 
-    public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
+    public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
         this.alliance = alliance;
         this.camera = camera;
         this.odometry = odometry;
+        this.coefficients = coefficients;
         this.hardwareMap = hardwareMap;
         turret = hardwareMap.get(DcMotorEx.class, "turret");
 //        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -62,9 +64,12 @@ public class Turret {
             turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
-        controller = new PIDFController(autoAimCoefficients);
+        controller = new PIDFController(coefficients);
         looptimes = new ElapsedTime();
 
+    }
+    public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
+        this(hardwareMap,camera,odometry,alliance,resetEncoder, autoAimCoefficients);
     }
     public Turret(HardwareMap hardwareMap, Camera camera, boolean resetEncoder) {
         this(hardwareMap, camera, new Odometry(hardwareMap, new Telemetry() {
@@ -263,7 +268,7 @@ public class Turret {
             else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) +  odometry.get_heading(false);
             power = controller.calculate_heading(
                     target,
-                    actual, controller.gains.f * Math.signum(target - getAngle()));
+                    actual, controller.gains.f * Math.signum(PIDFController.wrapError(target, getAngle())));
             power = v_compensate(power);
             if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
                 power = 0;
@@ -272,6 +277,7 @@ public class Turret {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Auto Target", target);
                 packet.put("Auto Actual", actual);
+                packet.put("Auto Error", PIDFController.wrapError(target, actual));
                 packet.put("Turret Power", power);
                 packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});

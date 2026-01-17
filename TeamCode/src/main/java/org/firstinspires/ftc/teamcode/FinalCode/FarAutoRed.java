@@ -179,6 +179,7 @@ public class FarAutoRed extends OpMode {
                 flywheel.shootFar();
                 flywheel.update();
                 intake.motorOn();
+                intake.doorClose();
 
                 vf.move();
 

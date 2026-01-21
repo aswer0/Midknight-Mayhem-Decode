@@ -37,6 +37,15 @@ public class GateAutoBlue extends OpMode {
 
     public static double turretAngle = 44;
 
+    /*
+    P_0 = (60, 81)
+    P_1 = (48,69)
+    P_2 = (43,38.3)
+    P_3 = (20,75)
+    P_4 = (10,59)
+
+    * */
+
     BCPath gatePath = new BCPath(new Point[][] {
             {
                     new Point(60, 81),
@@ -44,7 +53,7 @@ public class GateAutoBlue extends OpMode {
                     new Point(43,38.3),
 //                    new Point(20.3, 69.5),
 //                    new Point(8.3,56.1),
-                    new Point(20,75),
+                    new Point(20,68.7),
                     new Point(10,59),
 
 //                    new Point (50.5,59.6),

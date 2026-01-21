@@ -49,8 +49,8 @@ public class Turret {
     ElapsedTime lastSeenAt = new ElapsedTime();
     PIDFCoefficients coefficients = null;
     public Odometry odometry;
-    public static double[] redShootPoint = {134,136};
-    public static double[] blueShootPoint = {10,136};
+    public static double[] redShootPoint = {136,136};
+    public static double[] blueShootPoint = {8,136};
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
         this.alliance = alliance;

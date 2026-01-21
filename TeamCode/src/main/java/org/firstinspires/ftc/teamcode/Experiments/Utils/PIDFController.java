@@ -22,6 +22,8 @@ public class PIDFController {
     private ElapsedTime timer;
     private double e_norm;
 
+    public static double n_thresh=1.3;
+
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -94,13 +96,24 @@ public class PIDFController {
 
     public double calculate_gain_schedule(double tar, double act, double fOverride) {
         e = tar - act;
-        e_norm  = e / tar;
+        e_norm  = Math.abs(e / tar);
 
         p = gains.p * (e);
         i = gains.i * iSum;
-        d = gains.d * ((e - e_last));
-        d = Math.pow(d, 1+(1 - e_norm));
 
-        return p + i + d + fOverride;
+        d = ((e - e_last));
+        double magnitude = Math.abs(d);
+        double sign = Math.signum(d);
+        double D = gains.d * sign * Math.pow(magnitude, n_thresh+(1 - e_norm));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("Derivative", D);
+        packet.put("Error norm", e_norm);
+        dashboard.sendTelemetryPacket(packet);
+
+        e_last = e;
+        timer.reset();
+
+        return p + i + D + fOverride;
     }
 }

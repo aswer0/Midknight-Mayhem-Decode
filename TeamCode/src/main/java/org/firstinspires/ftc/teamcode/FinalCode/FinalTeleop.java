@@ -38,7 +38,7 @@ public class FinalTeleop extends OpMode {
     Gamepad previousGamepad1 = new Gamepad();
 
     public static Point shoot_point = new Point(60, 81);
-
+    public static boolean use_gain_schedule = true;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
@@ -81,6 +81,7 @@ public class FinalTeleop extends OpMode {
         turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        flywheel.use_gained_schedule = use_gain_schedule;
     }
 
     @Override

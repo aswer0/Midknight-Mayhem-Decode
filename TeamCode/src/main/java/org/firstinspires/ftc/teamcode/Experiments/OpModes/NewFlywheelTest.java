@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -8,16 +10,18 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
 
 @TeleOp
 public class NewFlywheelTest extends OpMode {
-    int target = 0;
+    public static int target = 0;
 
     Flywheel flywheel;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
+    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     @Override
     public void init() {
         flywheel = new Flywheel(hardwareMap);
+        flywheel.use_gained_schedule = true;
     }
 
     @Override
@@ -46,5 +50,11 @@ public class NewFlywheelTest extends OpMode {
         telemetry.addData("target RPM", target);
         telemetry.addData("is ready", flywheel.isReady());
         telemetry.update();
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("Target RPM", target);
+        packet.put("Actual RPM", flywheel.getCurrentRPM());
+        dashboard.sendTelemetryPacket(packet);
+
     }
 }

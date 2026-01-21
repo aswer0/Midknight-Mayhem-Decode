@@ -20,6 +20,7 @@ public class PIDFController {
     private double e_last;
     private double iSum = 0;
     private ElapsedTime timer;
+    private double e_norm;
 
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -89,5 +90,17 @@ public class PIDFController {
     }
     public double calculate(double tar, double act) {
         return calculate(tar, act, gains.f);
+    }
+
+    public double calculate_gain_schedule(double tar, double act, double fOverride) {
+        e = tar - act;
+        e_norm  = e / tar;
+
+        p = gains.p * (e);
+        i = gains.i * iSum;
+        d = gains.d * ((e - e_last));
+        d = Math.pow(d, 1+(1 - e_norm));
+
+        return p + i + d + fOverride;
     }
 }

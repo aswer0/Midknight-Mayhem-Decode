@@ -209,27 +209,27 @@ public class FinalTeleop extends OpMode {
             stopFlywheel = false;
         }
 
-        if (currentGamepad1.circle && !previousGamepad1.circle) { //stop shooter
+        if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
             turret.autoAiming = false;
             turret.setAngle(0);
-        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //manual shoot close
+        } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close triangle
             intake.doorOpen();
             flywheel.shootClose();
-        } else if (currentGamepad1.cross && !previousGamepad1.cross) { // shoot far
+        } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far cross
             intake.doorOpen();
             flywheel.shootFar();
             turret.autoAiming = true;
-        } else if (currentGamepad1.square && !previousGamepad1.square) { //auto shoot close
+        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close square
             useAutoRPM = true;
             turret.autoAiming = true;
         }
 
 
-        if (flywheel.isReady() && flywheel.getCurrentRPM() > 200) {
-            gamepad1.rumble(100);
-        }
+//        if (flywheel.isReady() && flywheel.targetRPM != idleRpm) {
+//            gamepad1.rumble(100);
+//        }
         //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         telemetry.addData("power", drivePower);
         telemetry.addData("transferStage", armTransfer.transferStage);

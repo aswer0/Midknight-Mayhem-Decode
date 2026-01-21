@@ -23,14 +23,17 @@ public class Flywheel {
     private double currentRPM = 0;
 
     public static double kp=0.0095, ki=0, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
+    public double kp_new = 0.001, ki_new = 0, kd_new = 0.075, kf_new = 0;
     public static int CLOSE_RPM = 2690;
     public static int FAR_RPM = 3350;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
     public static boolean reverseFlywheel = false;
+    public boolean use_gained_schedule = false;
 
     public DcMotorEx flywheel;
     PIDFController flywheelController = new PIDFController(kp, ki, kd, kf);
+    PIDFController testFlywheelController = new PIDFController(kp_new, ki_new, kd_new, kf_new);
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -81,7 +84,14 @@ public class Flywheel {
     public void update() {
         currentRPM = getCurrentRPM();
         double power = 0;
-        if (targetRPM != 0) power = flywheelController.calculate(targetRPM, currentRPM);
+        if (targetRPM != 0){
+            if (use_gained_schedule) {
+                power = testFlywheelController.calculate_gain_schedule(targetRPM, currentRPM, 0);
+            }
+            else {
+                power = flywheelController.calculate(targetRPM, currentRPM);
+            }
+        }
         power = Math.max(power, 0);
         flywheel.setPower(power);
 

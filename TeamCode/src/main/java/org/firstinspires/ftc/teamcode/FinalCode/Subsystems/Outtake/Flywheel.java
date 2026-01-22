@@ -19,17 +19,21 @@ import java.util.List;
 public class Flywheel {
     public static boolean outputDebugInfo = false;
 
-    private double targetRPM = 0;
+    public double targetRPM = 0;
+//    private double targetTicks = 0;
     private double currentRPM = 0;
+//    private double curentTicks = 0;
 
     public static double kp=0.0095, ki=0, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
-    public static double kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0;
+    //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
+    public static double kp_new = 0.004, ki_new = 0, kd_new = 0.00011, kf_new = 0.08;
     public static int CLOSE_RPM = 2690;
     public static int FAR_RPM = 3350;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
+//    public static double TICKS_THRESHOLD = 16.7;
     public static boolean reverseFlywheel = false;
-    public boolean use_gained_schedule = false;
+    public boolean use_gained_schedule = true;
 
     public DcMotorEx flywheel;
     PIDFController flywheelController = new PIDFController(kp, ki, kd, kf);
@@ -42,10 +46,19 @@ public class Flywheel {
     }
 
     public void setTargetRPM(double target) {
+        //targetTicks = RPMToTicks(target);
         targetRPM = target;
     }
     public double getCurrentRPM() {
         return (flywheel.getVelocity() / 28 * 60);
+    }
+
+    public double getTicks() {
+        return flywheel.getVelocity();
+    }
+
+    public double RPMToTicks(double RPM) {
+        return RPM * 28 / 60;
     }
 
     public boolean isReady() {
@@ -83,6 +96,7 @@ public class Flywheel {
 
     public void update() {
         currentRPM = getCurrentRPM();
+//        curentTicks = getTicks();
         double power = 0;
         if (targetRPM != 0){
             if (use_gained_schedule) {
@@ -90,6 +104,13 @@ public class Flywheel {
             }
             else {
                 power = flywheelController.calculate(targetRPM, currentRPM);
+//                if (curentTicks < targetTicks - TICKS_THRESHOLD) {
+//                    power = 1;
+//                } else if (curentTicks > targetTicks + TICKS_THRESHOLD) {
+//                    power = 0;
+//                } else {
+//                    power = kf;
+//                }
             }
         }
         power = Math.max(power, 0);
@@ -100,6 +121,8 @@ public class Flywheel {
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("RPM", currentRPM);
             packet.put("target RPM", targetRPM);
+//            packet.put("curret ticks", curentTicks);
+//            packet.put("target ticks", targetTicks);
             packet.put("Power", power);
             dashboard.sendTelemetryPacket(packet);
         }

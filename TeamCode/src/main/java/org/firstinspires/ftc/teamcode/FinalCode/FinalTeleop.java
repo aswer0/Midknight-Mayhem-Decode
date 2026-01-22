@@ -96,7 +96,7 @@ public class FinalTeleop extends OpMode {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
 
-        if (currentGamepad1.square && !previousGamepad1.square){
+        if (currentGamepad1.triangle && !previousGamepad1.triangle){
             if (alliance == Alliance.blue){
                 alliance = Alliance.red;
 
@@ -228,9 +228,9 @@ public class FinalTeleop extends OpMode {
         }
 
 
-//        if (flywheel.isReady() && flywheel.targetRPM != idleRpm) {
-//            gamepad1.rumble(100);
-//        }
+        if (flywheel.targetRPM != idleRpm && flywheel.targetRPM > 200 && flywheel.isReady()) {
+            gamepad1.rumble(100);
+        }
         //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         telemetry.addData("power", drivePower);
         telemetry.addData("transferStage", armTransfer.transferStage);

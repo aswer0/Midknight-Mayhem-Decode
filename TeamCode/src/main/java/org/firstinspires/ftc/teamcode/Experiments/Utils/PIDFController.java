@@ -22,7 +22,9 @@ public class PIDFController {
     private ElapsedTime timer;
     private double e_norm;
 
-    public static double n_thresh=1.3;
+    public static double n_thresh=1;
+    public static double p_thresh=1;
+    public static double ff_thresh=0.065;
 
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -98,13 +100,16 @@ public class PIDFController {
         e = tar - act;
         e_norm  = Math.abs(e / tar);
 
-        p = gains.p * (e);
+        p = gains.p * e;
         i = gains.i * iSum;
 
         d = ((e - e_last));
         double magnitude = Math.abs(d);
         double sign = Math.signum(d);
-        double D = gains.d * sign * Math.pow(magnitude, n_thresh+(1 - e_norm));
+        double D = gains.d * sign * Math.abs(Math.pow(magnitude, n_thresh+(1 - e_norm)));
+        if (e < 0){
+            D = gains.d * sign * magnitude;
+        }
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("Derivative", D);
@@ -114,6 +119,9 @@ public class PIDFController {
         e_last = e;
         timer.reset();
 
+        if (e_norm <= ff_thresh){
+            return p*Math.max(e_norm, p_thresh) + i + gains.f;
+        }
         return p + i + D + fOverride;
     }
 }

@@ -23,20 +23,23 @@ import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
-public class GateAutoBlue extends OpMode {
-    public static Point start_point = new Point(25, 126);
-    public static Point shoot_point = new Point(60, 81);
-    public static Point park_point = new Point(20, 81);
-    public static Point open_gate_point = new Point (14, 60);
-    public static Point intake_gate_point = new Point(10, 55);
+public class GateAutoRed extends OpMode {
+    public static double offset = 142;
 
-    public static double shootAngle = 180;
-    public static double openGateAngle = 145;
-    public static double intakeGateAngle = 115;
+    public static Point start_point = new Point(offset-25, 126);
+    public static Point shoot_point = new Point(offset-60, 81);
+    public static Point park_point = new Point(120, 81);
+    public static Point open_gate_point = new Point (offset-14, 60);
+    public static Point intake_gate_point = new Point(offset-10, 56);
 
-    public static double turretAngle = 44;
+    public static double shootAngle = 0;
+    public static double openGateAngle = 35;
+    public static double intakeGateAngle = 65;
+
+    public static double turretAngle = -44;
 
     /*
     P_0 = (60, 81)
@@ -49,17 +52,13 @@ public class GateAutoBlue extends OpMode {
 
     BCPath gatePath = new BCPath(new Point[][] {
             {
-                    new Point(60, 81),
-                    new Point(52.6,72.7),
-                    new Point(46.2,56.4),
-                    new Point(10.5,59.3),
-
-//                    new Point(48,69),
-//                    new Point(43,38.3),
-////                    new Point(20.3, 69.5),
-////                    new Point(8.3,56.1),
-//                    new Point(20,68.7),
-//                    new Point(10,59),
+                    new Point(offset-60, 81),
+                    new Point(offset-48,69),
+                    new Point(offset-43,38.3),
+//                    new Point(20.3, 69.5),
+//                    new Point(8.3,56.1),
+                    new Point(offset-20,68.7),
+                    new Point(offset-10,59),
 
 //                    new Point (50.5,59.6),
 //                    new Point(26.5,38.8),
@@ -77,8 +76,8 @@ public class GateAutoBlue extends OpMode {
     });
     BCPath closeBatch = new BCPath(new Point[][] { //straight line
             {
-                    new Point(60, 81),
-                    new Point (20, 82.5),
+                    new Point(offset-60, 81),
+                    new Point (offset-20, 82.5),
                     //new Point(53.8,84.5),
                     //new Point(35,74.6),
                     //new Point(10.67,98.5),
@@ -88,15 +87,15 @@ public class GateAutoBlue extends OpMode {
     });
     BCPath middleBatch = new BCPath(new Point[][] {
             {
-                    new Point(60, 81),
-                    new Point(55,61.6),
-                    new Point(62,61.7),
-                    new Point(20,57.5),
+                    new Point(offset-60, 81),
+                    new Point(offset-55,61.6),
+                    new Point(offset-62,61.7),
+                    new Point(offset-20,57.5),
             }
     });
     public static ArrayList<Point> farBatch = new ArrayList<>(List.of(
-            new Point(43.8,36.0),
-            new Point(17.6,35.3)
+            new Point(offset-43.8,36.0),
+            new Point(offset-17.6,35.3)
     ));
 
     enum State{
@@ -165,8 +164,8 @@ public class GateAutoBlue extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
-        FinalTeleop.alliance = FinalTeleop.Alliance.blue;
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
+        FinalTeleop.alliance = FinalTeleop.Alliance.red;
     }
 
     @Override
@@ -253,7 +252,6 @@ public class GateAutoBlue extends OpMode {
 
                     case intake:
                         intake.motorOn();
-                        wheelControl.stop();
                         //wheelControl.drive_to_point(intake_gate_point, intakeGateAngle, 1, 0.5, false);
                         if (timer.milliseconds() > intake_time) {
                             timer.reset();
@@ -285,19 +283,19 @@ public class GateAutoBlue extends OpMode {
                     timer.reset();
                     switch (loops) {
                         case 1:
-                            vf.setPath(middleBatch, 180, false);
+                            vf.setPath(middleBatch, 0, false);
                             pathPoints = middleBatch.get_path_points();
                             state = State.intakeBatch;
                             break;
                         case 2:
-                            vf.setPath(gatePath, openGateAngle, false);
+                            vf.setPath(gatePath, intakeGateAngle, false);
                             pathPoints = gatePath.get_path_points();
                             gateState = GateState.driveToGate;
                             state = State.intakeGate;
                             break;
                         case 3:
                             if (do_path3) {
-                                vf.setPath(closeBatch, 180, false);
+                                vf.setPath(closeBatch, 0, false);
                                 pathPoints = closeBatch.get_path_points();
                                 state = State.intakeBatch;
                             } else {
@@ -311,7 +309,7 @@ public class GateAutoBlue extends OpMode {
                             if (do_path3) {
                                 state = State.intakeBatch;
                             } else {
-                                vf.setPath(closeBatch, 180, false);
+                                vf.setPath(closeBatch, 0, false);
                                 pathPoints = closeBatch.get_path_points();
                                 state = State.intakeBatch;
                             }

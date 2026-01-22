@@ -24,7 +24,7 @@ import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous
+@Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
 public class CloseAutoBlueSide extends OpMode {
     public static Point start_point = new Point(25, 126);

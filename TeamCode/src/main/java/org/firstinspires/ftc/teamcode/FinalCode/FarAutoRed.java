@@ -22,7 +22,7 @@ import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
-@Autonomous
+@Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
 public class FarAutoRed extends OpMode {
     public static Point start_point = new Point(88, 8);

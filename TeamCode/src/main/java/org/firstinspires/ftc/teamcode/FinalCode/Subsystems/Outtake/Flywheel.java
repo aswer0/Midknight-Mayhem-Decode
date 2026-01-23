@@ -27,7 +27,7 @@ public class Flywheel {
     public static double kp=0.0095, ki=0, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
     public static double kp_new = 0.004, ki_new = 0, kd_new = 0.00011, kf_new = 0.08;
-    public static int CLOSE_RPM = 2690;
+    public static int CLOSE_RPM = 2650;
     public static int FAR_RPM = 3350;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;

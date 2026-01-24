@@ -82,6 +82,8 @@ public class FinalTeleop extends OpMode {
         led = new LED(hardwareMap, sensors, flywheel);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
+
+        flywheel.set_tele_coeffs();
     }
 
     @Override
@@ -162,7 +164,7 @@ public class FinalTeleop extends OpMode {
             drive.drive_to_point(new Point(127, 14), -45, 1, 0.5, false);
         }
 
-        pidToPoint = currentGamepad1.left_trigger > 0.3;
+        //pidToPoint = currentGamepad1.left_trigger > 0.3;
 
         //intake
         if (currentGamepad1.right_bumper) { //in
@@ -190,7 +192,12 @@ public class FinalTeleop extends OpMode {
                 if(intake.doorOpen || transferDelay.seconds() > 0.5) {
                     intake.motorOn();
                 } else intake.motorOff();
-            } else { //idle
+            } else if (gamepad1.left_trigger > 0.3) { //slow transfer
+                intake.doorOpen();
+                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
+                    intake.motorSlow();
+                } else intake.motorOff();
+            }else { //idle
                 intake.motorOff();
             }
         }

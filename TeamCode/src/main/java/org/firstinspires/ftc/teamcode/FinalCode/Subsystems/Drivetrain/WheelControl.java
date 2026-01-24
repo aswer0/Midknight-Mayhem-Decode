@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.AutoTuner.Vec3d;
+import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.AutoTuner.Vec3d;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 import org.opencv.core.Point;
 

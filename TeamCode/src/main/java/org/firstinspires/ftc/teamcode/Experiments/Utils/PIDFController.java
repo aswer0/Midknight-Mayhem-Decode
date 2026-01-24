@@ -4,6 +4,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.sun.tools.javac.code.Attribute;
+
+import java.util.ArrayList;
 
 
 @Config
@@ -25,9 +28,11 @@ public class PIDFController {
     public static double n_thresh=1;
     public static double p_thresh=1;
     public static double ff_thresh=0.065;
+    public static int U_win = 15;
 
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
+    ArrayList<Double> U_force;
 
     public PIDFController(double kp, double ki, double kd,double kf) {
         this.kp = kp;
@@ -36,6 +41,7 @@ public class PIDFController {
         this.kf = kf;
         timer = new ElapsedTime();
         gains = new PIDFCoefficients(kp, ki, kd, kf);
+        U_force = new ArrayList<Double>();
     }
     public PIDFController(PIDFCoefficients coefficients) {
         this.kp = coefficients.p;
@@ -44,6 +50,22 @@ public class PIDFController {
         this.kf = coefficients.f;
         timer = new ElapsedTime();
         gains = coefficients;
+        U_force = new ArrayList<Double>();
+    }
+
+    public PIDFController() {
+        timer = new ElapsedTime();
+        U_force = new ArrayList<Double>();
+    }
+
+    public void set_coeffs(double kp, double ki, double kd,double kf) {
+        this.kp = kp;
+        this.kd = kd;
+        this.ki = ki;
+        this.kf = kf;
+        timer = new ElapsedTime();
+        gains = new PIDFCoefficients(kp, ki, kd, kf);
+        U_force = new ArrayList<Double>();
     }
 
     public static double wrapError(double target, double current) {
@@ -120,7 +142,17 @@ public class PIDFController {
         timer.reset();
 
         if (e_norm <= ff_thresh){
-            return p*Math.max(e_norm, p_thresh) + i + gains.f;
+            double u = p*Math.max(e_norm, p_thresh) + i + gains.f;
+            U_force.add(u);
+
+            if (U_force.size() >= U_win){
+                double U_sum = 0;
+                for (int i=U_force.size()-U_win; i<U_force.size(); i++){
+                    U_sum += U_force.get(i);
+                }
+                return U_sum / U_win;
+            }
+            return u;
         }
         return p + i + D + fOverride;
     }

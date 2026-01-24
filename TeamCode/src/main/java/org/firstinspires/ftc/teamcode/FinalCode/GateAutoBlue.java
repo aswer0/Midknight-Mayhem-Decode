@@ -29,19 +29,31 @@ import java.util.List;
 public class GateAutoBlue extends OpMode {
     public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
-    public static Point park_point = new Point(20, 81);
-    public static Point park_shot_point = new Point(57,101);
+    public static Point park_point = new Point(18, 81);
+    public static Point park_shot_point = new Point(56.7,102);
     public static Point open_gate_point = new Point (14, 60);
     public static Point intake_gate_point = new Point(10, 55);
 
     public static double shootAngle = 180;
-    public static double openGateAngle = 145;
+    public static double openGateAngle = 155;
     public static double intakeGateAngle = 115;
 
     public static double FIRST_TURRET_ANGLE = 44;
-    public static double LAST_TURRET_ANGLE = 78;
+    public static double LAST_TURRET_ANGLE = 78.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2567;
+    public static double rpm = 2500;
+
+    public static boolean uk = false;
+    public static double gvf_threshold = 1;
+    public static double pid_threshold = 1.2;
+    public static double power = 1;
+    public static double first_shoot_wait_time = 1867;
+    public static double shoot_wait_time = 800;
+    public static double gate_wait_time = 3667;
+    public static double intake_time = 2000;
+    int loops = 0;
+    public static int wait_time = 0;
+    public static boolean do_path3 = false;
 
     /*
     P_0 = (60, 81)
@@ -57,7 +69,7 @@ public class GateAutoBlue extends OpMode {
                     new Point(60, 81),
                     new Point(52.6,72.7),
                     new Point(46.2,56.4),
-                    new Point(10.867,59.3),
+                    new Point(10.2,59.2),
 
 //                    new Point(48,69),
 //                    new Point(43,38.3),
@@ -146,18 +158,6 @@ public class GateAutoBlue extends OpMode {
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
 
-    public static boolean uk = false;
-    public static double gvf_threshold = 1;
-    public static double pid_threshold = 1.2;
-    public static double power = 1;
-    public static double first_shoot_wait_time = 2367;
-    public static double shoot_wait_time = 1167;
-    public static double gate_wait_time = 167;
-    public static double intake_time = 1667;
-    int loops = 0;
-    public static int wait_time = 0;
-    public static boolean do_path3 = true;
-
     ArrayList<Point> pathPoints;
 
     @Override
@@ -179,6 +179,8 @@ public class GateAutoBlue extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
+
+        flywheel.set_auto_coeffs();
     }
 
     @Override
@@ -237,7 +239,7 @@ public class GateAutoBlue extends OpMode {
                     vf.move();
                 }
                 else{
-                    at_point = pid_drive.pointDriver(180, 0.7, 3, pid_threshold, -1, uk, false);
+                    at_point = pid_drive.pointDriver(180, 1, 3, pid_threshold, -1, uk, false);
                 }
 
                 if (vf.at_end(gvf_threshold) || at_point){
@@ -263,7 +265,7 @@ public class GateAutoBlue extends OpMode {
                         intake.motorOn();
                         intake.doorClose();
                         //vf.move();
-                        if (vf.at_end(1)) {
+                        if (vf.at_end(1) || timer.milliseconds() > gate_wait_time) {
                             //wheelControl.stop();
                             timer.reset();
                             gateState = GateState.intake;
@@ -302,7 +304,7 @@ public class GateAutoBlue extends OpMode {
                 }
 
                 if (loops >= 5) { //4
-                    wheelControl.drive_to_point(park_shot_point, 225, power, pid_threshold, uk);
+                    wheelControl.drive_to_point(park_shot_point, 225, 0.7, pid_threshold, uk);
                     FinalTeleop.startX = odometry.get_x(false);
                     FinalTeleop.startY = odometry.get_y(false);
                     FinalTeleop.startHeading = odometry.get_heading(false);
@@ -326,25 +328,15 @@ public class GateAutoBlue extends OpMode {
                             state = State.intakeGate;
                             break;
                         case 3:
-                            if (do_path3) {
-                                vf.setPath(closeBatch, 180, false);
-                                pathPoints = closeBatch.get_path_points();
-                                state = State.intakeBatch;
-                            } else {
-                                vf.setPath(gatePath, openGateAngle, false);
-                                pathPoints = gatePath.get_path_points();
-                                gateState = GateState.driveToGate;
-                                state = State.intakeGate;
-                            }
+                            vf.setPath(gatePath, openGateAngle, false);
+                            pathPoints = gatePath.get_path_points();
+                            gateState = GateState.driveToGate;
+                            state = State.intakeGate;
                             break;
                         case 4:
                             if (do_path3) {
-                                flywheel.setTargetRPM(rpm);
                                 state = State.intakeBatch;
                             } else {
-//                                vf.setPath(closeBatch, 180, false);
-//                                pathPoints = closeBatch.get_path_points();
-//                                state = State.intakeBatch;
                                 vf.setPath(gatePath, openGateAngle, false);
                                 pathPoints = gatePath.get_path_points();
                                 gateState = GateState.driveToGate;
@@ -352,7 +344,7 @@ public class GateAutoBlue extends OpMode {
                             }
                             break;
                         case 5:
-                            //state = State.park;
+                            flywheel.setTargetRPM(rpm);
                             vf.setPath(closeBatch, 180, false);
                             pathPoints = closeBatch.get_path_points();
                             state = State.intakeBatch;
@@ -379,9 +371,9 @@ public class GateAutoBlue extends OpMode {
 //                vf.move();
 //                if (vf.at_end(gvf_threshold)){
                 if (Math.abs(Math.abs(odometry.get_heading(false))-180) < 26.7) {
-                    wheelControl.drive_to_point(new Point(odometry.get_x(false), odometry.get_y(false)), 225, power, pid_threshold, false);
+                    wheelControl.drive_to_point(new Point(36.7,90), 225, power, pid_threshold, false);
                 } else {
-                    if (wheelControl.drive_to_point(park_shot_point, 225, power, pid_threshold, false)) {
+                    if (wheelControl.drive_to_point(park_shot_point, 225, power, 2, false)) {
                         timer.reset();
                         flywheel.setTargetRPM(rpm);
                         state = State.shootBall;

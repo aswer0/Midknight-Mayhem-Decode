@@ -26,8 +26,9 @@ public class Flywheel {
 
     public static double kp=0.0095, ki=0, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
-    public static double kp_new = 0.004, ki_new = 0, kd_new = 0.00011, kf_new = 0.08;
-    public static int CLOSE_RPM = 2650;
+    public static double kp_tele = 0.004, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
+    public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
+    public static int CLOSE_RPM = 2590;
     public static int FAR_RPM = 3350;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
@@ -36,13 +37,19 @@ public class Flywheel {
     public boolean use_gained_schedule = true;
 
     public DcMotorEx flywheel;
-    PIDFController flywheelController = new PIDFController(kp, ki, kd, kf);
-    PIDFController testFlywheelController = new PIDFController(kp_new, ki_new, kd_new, kf_new);
+    PIDFController flywheelController = new PIDFController();
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         if (reverseFlywheel) flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void set_auto_coeffs(){
+        flywheelController.set_coeffs(kp_auto, ki_auto, kd_auto, kf_auto);
+    }
+    public void set_tele_coeffs(){
+        flywheelController.set_coeffs(kp_tele, ki_tele, kd_tele, kf_tele);
     }
 
     public void setTargetRPM(double target) {
@@ -100,7 +107,7 @@ public class Flywheel {
         double power = 0;
         if (targetRPM != 0){
             if (use_gained_schedule) {
-                power = testFlywheelController.calculate_gain_schedule(targetRPM, currentRPM, 0);
+                power = flywheelController.calculate_gain_schedule(targetRPM, currentRPM, 0);
             }
             else {
                 power = flywheelController.calculate(targetRPM, currentRPM);

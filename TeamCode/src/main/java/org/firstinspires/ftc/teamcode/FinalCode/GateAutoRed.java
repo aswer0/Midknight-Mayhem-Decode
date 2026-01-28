@@ -31,7 +31,7 @@ public class GateAutoRed extends OpMode {
     public static Point start_point = new Point(offset-25, 126);
     public static Point shoot_point = new Point(offset-60, 81);
     public static Point park_point = new Point(122, 81);
-    public static Point park_shot_point = new Point(offset-57,101);
+    public static Point park_shot_point = new Point(offset-57,104);
     public static Point open_gate_point = new Point (offset-14, 60);
     public static Point intake_gate_point = new Point(offset-10, 56);
 
@@ -39,10 +39,10 @@ public class GateAutoRed extends OpMode {
     public static double openGateAngle = 25;
     public static double intakeGateAngle = 65;
 
-    public static double FIRST_TURRET_ANGLE = -44;
-    public static double LAST_TURRET_ANGLE = -78.5;
+    public static double FIRST_TURRET_ANGLE = -44.4;
+    public static double LAST_TURRET_ANGLE = -74.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2567;
+    public static double rpm = 2490;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
@@ -326,7 +326,7 @@ public class GateAutoRed extends OpMode {
                             break;
                         case 5:
                             flywheel.setTargetRPM(rpm);
-                            vf.setPath(closeBatch, 180, false);
+                            vf.setPath(closeBatch, 0, false);
                             pathPoints = closeBatch.get_path_points();
                             state = State.intakeBatch;
                             break;

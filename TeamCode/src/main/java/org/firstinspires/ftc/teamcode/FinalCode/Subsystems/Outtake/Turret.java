@@ -26,6 +26,7 @@ public class Turret {
     public static double TICKS_PER_DEGREE = 3.5;
     public static double MAX_DEGREES = 100;
     public static double STOP_THRESHOLD = 0;
+    public static double READY_THRESHOLD = 5;
     public DcMotorEx turret;
 //    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.01,0,0,0.25);
     public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0.2);
@@ -217,8 +218,9 @@ public class Turret {
         return Math.max(compensatedPower, -1.0);
     }
 
-    public double update(){
+    public boolean update(){
         double power = 0;
+        double error = 67;
 //        boolean shouldAutoAim = true;
 //        double angle = Double.POSITIVE_INFINITY;
 //        LLResult result = camera.limelight.getLatestResult();
@@ -259,16 +261,20 @@ public class Turret {
             //===================== FUTURE VEL PREDICTION =====================
             double future_x = odometry.get_x_predicted(false, true);
             double future_y = odometry.get_y_predicted(false, true);
+            double future_heading = odometry.get_heading_predicted(false, true);
 
             //==========================================
 
             double actual = getAngle(); //- odometry.get_heading(false);
             double target = 0;
-            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-future_y),(blueShootPoint[0]-future_x))) +  odometry.get_heading(false);
-            else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) +  odometry.get_heading(false);
+            if(alliance == Alliance.blue) target = -Math.toDegrees(Math.atan2((blueShootPoint[1]-future_y),(blueShootPoint[0]-future_x))) + future_heading;
+            else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) + future_heading;
+            target = odometry.wrapAngle(target);
+            //target = Math.min(Math.max(target, -95), 95);
+            error = PIDFController.wrapError(target, actual);
             power = controller.calculate_heading(
                     target,
-                    actual, controller.gains.f * Math.signum(PIDFController.wrapError(target, getAngle())));
+                    actual, controller.gains.f * Math.signum(error));
             power = v_compensate(power);
             if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
                 power = 0;
@@ -277,7 +283,7 @@ public class Turret {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Auto Target", target);
                 packet.put("Auto Actual", actual);
-                packet.put("Auto Error", PIDFController.wrapError(target, actual));
+                packet.put("Auto Error", error);
                 packet.put("Turret Power", power);
                 packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
@@ -305,16 +311,24 @@ public class Turret {
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }
-        if (getAngle() < MAX_DEGREES && getAngle() > -MAX_DEGREES) {
-            turret.setPower(power);
+//        if (getAngle() < MAX_DEGREES && getAngle() > -MAX_DEGREES) {
+//            turret.setPower(power);
+//        } else {
+//            power = controller.calculate_heading(0, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+//            power = Math.min(power, 1);
+//            power = Math.max(power, -1);
+//            power = v_compensate(power);
+//            turret.setPower(power);
+//        }
+
+        if (getAngle() < -MAX_DEGREES) {
+            turret.setPower(Math.max(power, 0));
+        } else if (getAngle() > MAX_DEGREES) {
+            turret.setPower(Math.min(power, 0));
         } else {
-            power = controller.calculate_heading(0, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
-            power = Math.min(power, 1);
-            power = Math.max(power, -1);
-            power = v_compensate(power);
             turret.setPower(power);
         }
-        return power;
+        return Math.abs(error) < READY_THRESHOLD;
     }
 
 

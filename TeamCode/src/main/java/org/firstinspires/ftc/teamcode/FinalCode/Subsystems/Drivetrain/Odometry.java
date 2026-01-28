@@ -39,8 +39,10 @@ public class Odometry {
     public static double offset_y = -4.5;
     public static double mXDist = 0.67;
     public static double mYDist = 0.67;
+    public static double mHDist = 0.1;
     public static double mXTurret = 0.67;
     public static double mYTurret = 0.67;
+    public static double mHTurret = 0.1;
 
     public static double xyVariance = 25;
     public static double headingVariance = 100;
@@ -134,6 +136,13 @@ public class Odometry {
             return xEstimate.get(1, 0)[0] / 0.9144 * 36;
         }
         return pinpoint.getPosY(DistanceUnit.INCH);
+    }
+    public double get_heading_predicted(boolean use_kalman, boolean forTurret) {
+        if (forTurret) {
+            return (get_heading(use_kalman) + mHTurret * get_h_velocity());
+        } else {
+            return (get_heading(use_kalman) + mHDist * get_h_velocity());
+        }
     }
     public double get_x_predicted(boolean use_kalman, boolean forTurret){
         if (forTurret) {
@@ -255,5 +264,12 @@ public class Odometry {
         heading += 180;
         while (heading < 0) heading += 360;
         return (heading) % 360 - 180;
+    }
+
+    public boolean inCloseZone() {
+        double margin = 6.7;
+        boolean leftLine = get_y(false) > get_x(false) - (6+margin);
+        boolean rightLine = get_y(false) > -get_x(false) + (136+margin);
+        return leftLine && rightLine;
     }
 }

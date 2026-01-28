@@ -39,7 +39,7 @@ public class FarAutoRed extends OpMode {
                             new Point(adjusted-17.4,15.3),
                             new Point(adjusted-18.5,13),
                             new Point(adjusted-30, 18),
-                            new Point(adjusted-8,8),
+                            new Point(adjusted-6.5,8),
                     }
             })
     };
@@ -101,15 +101,14 @@ public class FarAutoRed extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
-        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
+
+        flywheel.set_auto_coeffs();
     }
 
     @Override
     public void init_loop() {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
-
-        timer.reset();
 
         if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
             wait_time--;
@@ -121,10 +120,12 @@ public class FarAutoRed extends OpMode {
 
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
+        turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
     }
 
     @Override
     public void start() {
+        timer.reset();
         turret.setAngle(turret_angle);
     }
 
@@ -132,7 +133,6 @@ public class FarAutoRed extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
-        boolean isTransferReady = true; armTransfer.update();
 
         switch (state) {
             case wait:
@@ -149,16 +149,14 @@ public class FarAutoRed extends OpMode {
                 flywheel.update();
 
                 if (flywheel.isReady()) {
-                    if (isTransferReady) {
-                        intake.doorOpen();
-                        intake.motorOn();
-//                        armTransfer.transfer();
-                    }
+                    intake.doorOpen();
+                    intake.motorSlow();
                 }
 
                 wheelControl.drive_to_point(start_point, bot_angle, power, pidf_threshold, uk);
 
                 if (timer.milliseconds() >= shoot_wait_time) {
+                    intake.doorClose();
                     loops++;
 
                     if (loops > 1) {
@@ -202,7 +200,6 @@ public class FarAutoRed extends OpMode {
                 break;
 
             case park:
-//                armTransfer.toIdle();
                 flywheel.stop();
                 flywheel.update();
                 intake.motorOff();

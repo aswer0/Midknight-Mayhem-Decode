@@ -83,7 +83,7 @@ public class FarAutoBlue extends OpMode {
     public static double gvf_threshold = 0.67;
     public static double pidf_threshold = 0.5;
     public static double power = 0.8;
-    public static double turret_angle = 67.7;
+    public static double turret_angle = 68.5;
     public static double bot_angle = 180;
 
     public static double shoot_wait_time = 6000;

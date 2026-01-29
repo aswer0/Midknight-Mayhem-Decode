@@ -28,7 +28,7 @@ public class FarAutoRed extends OpMode {
     public static Point start_point = new Point(88, 8);
     public static Point park_point = new Point(110, 10);
 
-    public static double adjusted = 146;
+    public static double adjusted = 142;
 
     public static BCPath[] follow_paths = {
             new BCPath(new Point[][]{
@@ -73,7 +73,7 @@ public class FarAutoRed extends OpMode {
     public static double gvf_threshold = 0.67;
     public static double pidf_threshold = 0.5;
     public static double power = 0.8;
-    public static double turret_angle = -67.67;
+    public static double turret_angle = -68.5;
     public static double bot_angle = 0;
 
     public static double shoot_wait_time = 6000;

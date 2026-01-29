@@ -55,6 +55,7 @@ public class FinalTeleop extends OpMode {
     boolean turretReady = false;
     boolean hasBackBall = false;
     boolean hasMidBall = false;
+    boolean shootFar = false;
 
     int x_sign;
     int y_sign;
@@ -232,26 +233,41 @@ public class FinalTeleop extends OpMode {
 //            turret.autoAiming = true;
         }
 
-        if ((hasBackBall || hasMidBall) && odo.inCloseZone()) {
+        if (hasBackBall || hasMidBall) {
             useAutoRPM = true;
-            turret.autoAiming = true;
-        } if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
+            if (odo.inCloseZone() || shootFar) {
+                turret.autoAiming = true;
+            } else {
+                turret.autoAiming = false;
+            }
+        } else {
+            if (!shootFar) {
+                useAutoRPM = false;
+                turret.autoAiming = false;
+            }
+        }
+
+        if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
             turret.autoAiming = false;
+            shootFar = false;
             turret.setAngle(0);
         } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close triangle
             intake.doorOpen();
             flywheel.shootClose();
             turret.autoAiming = false;
             turret.setAngle(0);
+            shootFar = false;
         } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far cross
             intake.doorOpen();
             flywheel.shootFar();
             turret.autoAiming = true;
+            shootFar = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close square
             useAutoRPM = true;
             turret.autoAiming = true;
+            shootFar = false;
         }
 
         if (flywheel.targetRPM != idleRpm && flywheel.targetRPM > 200 && flywheel.isReady() && turretReady) {

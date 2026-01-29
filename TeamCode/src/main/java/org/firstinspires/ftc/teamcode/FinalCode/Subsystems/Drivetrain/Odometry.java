@@ -267,9 +267,9 @@ public class Odometry {
     }
 
     public boolean inCloseZone() {
-        double margin = 6.7;
-        boolean leftLine = get_y(false) > get_x(false) - (6+margin);
-        boolean rightLine = get_y(false) > -get_x(false) + (136+margin);
+        double margin = 24;
+        boolean leftLine = get_y(false) > get_x(false) - 6 - margin;
+        boolean rightLine = get_y(false) > -get_x(false) + 136 - margin;
         return leftLine && rightLine;
     }
 }

@@ -23,6 +23,7 @@ public class PIDFController {
     private double e_last;
     private double iSum = 0;
     private ElapsedTime timer;
+    private ElapsedTime switch_timer;
     private double e_norm;
 
     public static double n_thresh=1;
@@ -40,6 +41,7 @@ public class PIDFController {
         this.ki = ki;
         this.kf = kf;
         timer = new ElapsedTime();
+        switch_timer = new ElapsedTime();
         gains = new PIDFCoefficients(kp, ki, kd, kf);
         U_force = new ArrayList<Double>();
     }
@@ -152,7 +154,14 @@ public class PIDFController {
                 }
                 return U_sum / U_win;
             }
-            return u;
+            else{
+                double U_sum = 0;
+                for (int i=0; i<U_force.size(); i++){
+                    U_sum += U_force.get(i);
+                }
+                return U_sum / U_force.size();
+            }
+
         }
         return p + i + D + fOverride;
     }

@@ -24,12 +24,14 @@ public class Flywheel {
     private double currentRPM = 0;
 //    private double curentTicks = 0;
 
-    public static double kp=0.0095, ki=0, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
+    public static double kp=0.0095, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
+    public double ki=0;
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
     public static double kp_tele = 0.004, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
     public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
     public static int CLOSE_RPM = 2590;
     public static int FAR_RPM = 3215;
+    public static int EXPERIMENTAL_RPM = 4000;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
 //    public static double TICKS_THRESHOLD = 16.7;
@@ -80,6 +82,9 @@ public class Flywheel {
     }
     public void shootFar() {
         setTargetRPM(FAR_RPM);
+    }
+    public void shootExperiment() {
+        setTargetRPM(EXPERIMENTAL_RPM);
     }
     public void shootAutoDist() {
         setTargetRPM(AUTO_RPM);

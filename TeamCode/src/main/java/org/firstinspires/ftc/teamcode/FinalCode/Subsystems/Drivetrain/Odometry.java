@@ -82,6 +82,9 @@ public class Odometry {
 
         pinpoint.setOffsets(offset_x, offset_y, DistanceUnit.INCH);
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, start_x, start_y, AngleUnit.DEGREES, start_h));
+//        pinpoint.setYawScalar(1.002305556);
+//        pinpoint.setYawScalar(0.997782705);
+        pinpoint.setYawScalar(1);
 
         pinpoint.recalibrateIMU();
 

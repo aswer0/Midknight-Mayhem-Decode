@@ -26,10 +26,10 @@ public class PIDFController {
     private ElapsedTime switch_timer;
     private double e_norm;
 
-    public static double n_thresh=1;
-    public static double p_thresh=1;
-    public static double ff_thresh=0.065;
-    public static int U_win = 15;
+    public static double n_thresh=0.9;
+    public static double p_thresh=1.2;
+    public static double ff_thresh=0.06;
+    public static int U_win = 5;
 
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -120,6 +120,32 @@ public class PIDFController {
         return calculate(tar, act, gains.f);
     }
 
+    public double calculate_rolling_average(double tar, double act){
+        e = tar - act;
+        e_norm  = Math.abs(e / tar);
+
+        p = gains.p * e;
+        i = gains.i * iSum;
+
+        double u = p*Math.max(e_norm, p_thresh) + i + gains.f;
+        U_force.add(u);
+
+        if (U_force.size() >= U_win){
+            double U_sum = 0;
+            for (int i=U_force.size()-U_win; i<U_force.size(); i++){
+                U_sum += U_force.get(i);
+            }
+            return U_sum / U_win;
+        }
+        else{
+            double U_sum = 0;
+            for (int i=0; i<U_force.size(); i++){
+                U_sum += U_force.get(i);
+            }
+            return U_sum / U_force.size();
+        }
+    }
+
     public double calculate_gain_schedule(double tar, double act, double fOverride) {
         e = tar - act;
         e_norm  = Math.abs(e / tar);
@@ -144,23 +170,7 @@ public class PIDFController {
         timer.reset();
 
         if (e_norm <= ff_thresh){
-            double u = p*Math.max(e_norm, p_thresh) + i + gains.f;
-            U_force.add(u);
-
-            if (U_force.size() >= U_win){
-                double U_sum = 0;
-                for (int i=U_force.size()-U_win; i<U_force.size(); i++){
-                    U_sum += U_force.get(i);
-                }
-                return U_sum / U_win;
-            }
-            else{
-                double U_sum = 0;
-                for (int i=0; i<U_force.size(); i++){
-                    U_sum += U_force.get(i);
-                }
-                return U_sum / U_force.size();
-            }
+            return calculate_rolling_average(tar, act);
 
         }
         return p + i + D + fOverride;

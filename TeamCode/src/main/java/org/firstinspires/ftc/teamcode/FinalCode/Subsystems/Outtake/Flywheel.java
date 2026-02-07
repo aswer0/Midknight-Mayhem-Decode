@@ -25,6 +25,7 @@ public class Flywheel {
 //    private double curentTicks = 0;
 
     public static double kp=0.0095, kd=0, kf=0.06; // i= 0.0002 d = 0.0006
+
     public double ki=0;
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
     public static double kp_tele = 0.004, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
@@ -38,8 +39,10 @@ public class Flywheel {
     public static boolean reverseFlywheel = false;
     public boolean use_gained_schedule = true;
 
+    public static double reggin = 2428.43221;
+
     public DcMotorEx flywheel;
-    PIDFController flywheelController = new PIDFController();
+    public PIDFController flywheelController = new PIDFController();
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -95,7 +98,7 @@ public class Flywheel {
 //        List<Double> coeffs = Arrays.asList(0.0392969, 10.62242, 1776.67);
         //List<Double> coeffs = Arrays.asList(0.0386717,-2.23064,2602.30985); //-0.314286x^{2}+58.2x+147.71429 MOST RECENT ONE
         //-0.000233344x^{4}+0.0791499x^{3}-9.85582x^{2}+546.54941x-8603.33051
-        List<Double> coeffs = Arrays.asList(0.0390004, 0.510431, 2398.43221);
+        List<Double> coeffs = Arrays.asList(0.0390004, 0.510431, reggin-16.7);
 
         int n = coeffs.size();
         double rpm = 0;

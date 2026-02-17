@@ -42,7 +42,7 @@ public class FinalTeleop extends OpMode {
     public static Point shoot_point = new Point(60, 81);
     public static Point blue_gate = new Point(9.5, 59.4);
     public static Point red_gate = new Point(127.7, 59.4);
-    public static boolean use_gain_schedule = true;
+    public static boolean use_gain_schedule = false;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
@@ -91,6 +91,7 @@ public class FinalTeleop extends OpMode {
         turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        flywheel.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
 
         turret.autoAiming = false;
@@ -123,14 +124,14 @@ public class FinalTeleop extends OpMode {
             x_sign = 1;
             y_sign = 1;
             //odo.set_heading(0);
-            target_shoot = new Point(142-11, 134);
+            target_shoot = new Point(136, 136);
             odo.set_x(startX); //used to be 122
             odo.set_y(startY); //81
         }
         else if (alliance == Alliance.blue){
             x_sign = -1;
             y_sign = -1;
-            target_shoot = new Point(11, 134);
+            target_shoot = new Point(18, 136);
             odo.set_x(startX); //used to be 20
             odo.set_y(startY); //81
         }
@@ -187,7 +188,7 @@ public class FinalTeleop extends OpMode {
         //intake
         if (currentGamepad1.right_bumper) { //in
 //            flywheel.setTargetRPM(-670);
-            if (!odo.inCloseZone()) {
+            if (!odo.inCloseZone(24)) {
                 flywheel.setTargetRPM(idleRpm);
                 useAutoRPM = false;
                 if (flywheel.getCurrentRPM() < idleRpm + 150) {
@@ -249,12 +250,12 @@ public class FinalTeleop extends OpMode {
         if (!triangle) {
             if (hasBackBall || hasMidBall) {
                 useAutoRPM = true;
-                if (odo.inCloseZone() || shootFar) {
+                if (odo.inCloseZone(24) || shootFar) {
                     turret.autoAiming = true;
                 } else {
                     turret.autoAiming = false;
                 }
-            } else if (!odo.inCloseZone()) {
+            } else if (!odo.inCloseZone(24)) {
                 if (!shootFar) {
                     useAutoRPM = false;
                     turret.autoAiming = false;
@@ -281,7 +282,9 @@ public class FinalTeleop extends OpMode {
             turret.autoAiming = true;
             shootFar = true;
         } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close square
-            useAutoRPM = true;
+//            useAutoRPM = true;
+            useAutoRPM = false; //NEW
+            flywheel.shootClose(); //NEW
             turret.autoAiming = true;
             shootFar = false;
             triangle = true;
@@ -316,6 +319,7 @@ public class FinalTeleop extends OpMode {
         double future_y = odo.get_y_predicted(false, false);
 
         double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
+        dist = Math.min(dist, 108);
 
         if (useAutoRPM){
             flywheel.shootAutoDist();
@@ -332,7 +336,7 @@ public class FinalTeleop extends OpMode {
             packet.put("Turret Heading Reggin", turret.getAngle());
             packet.put("Odo heading", odo.get_heading(false));
             packet.put("Has ball", hasBackBall || hasMidBall);
-            packet.put("in close zone", odo.inCloseZone());
+            packet.put("in close zone", odo.inCloseZone(24));
             dashboard.sendTelemetryPacket(packet);
         }
     }

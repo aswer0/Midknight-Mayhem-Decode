@@ -30,6 +30,9 @@ public class PIDFController {
     public static double p_thresh=1.2;
     public static double ff_thresh=0.06;
     public static int U_win = 5;
+    public static double alpha = 0.075;
+    double e_smooth_last = -1;
+    public static double kv_sign = 0;
 
     public PIDFCoefficients gains;
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -120,6 +123,19 @@ public class PIDFController {
         return calculate(tar, act, gains.f);
     }
 
+    public double calculate(double tar, double act, double ks, double kv) {
+        double s = timer.seconds();
+        e = tar - act;
+        p = gains.p * (e);
+        i = gains.i * iSum;
+        d = gains.d * ((e - e_last) / s);
+
+        iSum = Math.max(Math.min(iSum + s * e, iClamp),-iClamp);
+        e_last = e;
+        timer.reset();
+        return p + i + d + ks + /*kv_sign * Math.signum(tar-act) * */(kv * tar);
+    }
+
     public double calculate_rolling_average(double tar, double act){
         e = tar - act;
         e_norm  = Math.abs(e / tar);
@@ -144,6 +160,23 @@ public class PIDFController {
             }
             return U_sum / U_force.size();
         }
+    }
+    public double calculate_lpf(double tar, double act){
+        e = tar - act;
+        e_norm  = Math.abs(e / tar);
+
+        p = gains.p * e;
+        i = gains.i * iSum;
+
+        double u = p + i + gains.f;
+
+        if (e_smooth_last == -1){
+            e_smooth_last = u;
+            return u;
+        }
+
+        e_smooth_last = u;
+        return alpha*u + (1-alpha)*e_smooth_last;
     }
 
     public double calculate_gain_schedule(double tar, double act, double fOverride) {

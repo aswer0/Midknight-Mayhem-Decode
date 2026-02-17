@@ -38,10 +38,10 @@ public class GateAutoBlue extends OpMode {
     public static double openGateAngle = 155;
     public static double intakeGateAngle = 115;
 
-    public static double FIRST_TURRET_ANGLE = 44;
+    public static double FIRST_TURRET_ANGLE = 43.8;
     public static double LAST_TURRET_ANGLE = 78.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2500;
+    public static double rpm = 2220;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;

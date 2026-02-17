@@ -28,18 +28,23 @@ public class Flywheel {
 
     public double ki=0;
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
-    public static double kp_tele = 0.004, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
-    public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
-    public static int CLOSE_RPM = 2590;
+//    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
+    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0, kf_tele = 0;
+//    public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
+    public static double kp_auto = 0.001, ki_auto = 0, kd_auto = 0, kf_auto = 0;
+    public static double ks = 0.0867;
+    public static double kv = 0.0002;
+    public static int CLOSE_RPM = 2440;
     public static int FAR_RPM = 3215;
     public static int EXPERIMENTAL_RPM = 4000;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
+    public static int UPPER_THRESHOLD = 100;
+    public static int LOWER_THRESHOLD = 150;
 //    public static double TICKS_THRESHOLD = 16.7;
     public static boolean reverseFlywheel = false;
-    public boolean use_gained_schedule = true;
-
-    public static double reggin = 2428.43221;
+    public boolean use_gained_schedule = false;
+    public double CURRENT_VOLTAGE;
 
     public DcMotorEx flywheel;
     public PIDFController flywheelController = new PIDFController();
@@ -98,7 +103,9 @@ public class Flywheel {
 //        List<Double> coeffs = Arrays.asList(0.0392969, 10.62242, 1776.67);
         //List<Double> coeffs = Arrays.asList(0.0386717,-2.23064,2602.30985); //-0.314286x^{2}+58.2x+147.71429 MOST RECENT ONE
         //-0.000233344x^{4}+0.0791499x^{3}-9.85582x^{2}+546.54941x-8603.33051
-        List<Double> coeffs = Arrays.asList(0.0390004, 0.510431, reggin-16.7);
+        //List<Double> coeffs = Arrays.asList(0.0390004, 0.510431, 2428.43221-16.7);
+
+        List<Double> coeffs = Arrays.asList(0.18367, -22.64129, 3234.67806);
 
         int n = coeffs.size();
         double rpm = 0;
@@ -110,6 +117,14 @@ public class Flywheel {
         AUTO_RPM = rpm;
     }
 
+    public double v_compensate(double power){
+        double nominalVoltage = 12;
+        double voltageComp = nominalVoltage / CURRENT_VOLTAGE;
+        double compensatedPower = power * voltageComp;
+        compensatedPower = Math.min(compensatedPower, 1.0);
+        return Math.max(compensatedPower, -1.0);
+    }
+
     public void update() {
         currentRPM = getCurrentRPM();
 //        curentTicks = getTicks();
@@ -119,7 +134,14 @@ public class Flywheel {
                 power = flywheelController.calculate_gain_schedule(targetRPM, currentRPM, 0);
             }
             else {
-                power = flywheelController.calculate(targetRPM, currentRPM);
+                if (targetRPM - currentRPM > LOWER_THRESHOLD) {
+                    power = 1;
+                } else if (currentRPM - targetRPM > UPPER_THRESHOLD) {
+                    power = 0;
+                }else {
+                    power = flywheelController.calculate(targetRPM, currentRPM, ks, kv);
+                    power = v_compensate(power);
+                }
 //                if (curentTicks < targetTicks - TICKS_THRESHOLD) {
 //                    power = 1;
 //                } else if (curentTicks > targetTicks + TICKS_THRESHOLD) {

@@ -24,7 +24,7 @@ public class Turret {
 
     public static int TICKS_PER_ROTATION = 1572; //28*15*3
     public static double TICKS_PER_DEGREE = 3.5;
-    public static double MAX_DEGREES = 100;
+    public static double MAX_DEGREES = 90;
     public static double STOP_THRESHOLD = 0;
     public static double READY_THRESHOLD = 5;
     public DcMotorEx turret;

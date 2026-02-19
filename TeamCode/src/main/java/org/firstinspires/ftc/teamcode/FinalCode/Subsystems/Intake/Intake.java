@@ -42,7 +42,7 @@ public class Intake {
 
     PIDFController transfer_pid;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    ElapsedTime timer = new ElapsedTime();
+//    ElapsedTime timer = new ElapsedTime();
     Servo intakeDoor;
     Sensors sensors;
 
@@ -77,9 +77,9 @@ public class Intake {
         dashboard.sendTelemetryPacket(packet);
     }
 
-    public void resetTransferTimer(){
-        timer.reset();
-    }
+//    public void resetTransferTimer(){
+//        timer.reset();
+//    }
     public int intakeCurrentThreshold(double threshold){
         //6.7 threshold
         if(intakeMotor.getCurrent(CurrentUnit.AMPS) > threshold) return 1;
@@ -89,12 +89,12 @@ public class Intake {
         intakeMotor.setPower(motorSpeed);
         intakeMotorTwo.setPower(-motorSpeed);
     }
-    public void intervalTransfer() {
-        if (timer.milliseconds() >= motorInterval) {
-            intakeMotor.setPower(motorSpeed);
-            intakeMotorTwo.setPower(-motorSpeed);
-
-            timer.reset();
+    public void intervalTransfer(double timer, double onTime, double offTime) {
+        timer = timer % (onTime + offTime);
+        if (timer < onTime) {
+            motorOn();
+        } else {
+            motorOff();
         }
     }
     public void pidTransfer(boolean verbose) {
@@ -122,8 +122,6 @@ public class Intake {
 //            intakeDoor.setPosition(0.75);
 //        }
     }
-
-
 
     public boolean jamDetect() {
         v = intakeMotor.getVelocity();

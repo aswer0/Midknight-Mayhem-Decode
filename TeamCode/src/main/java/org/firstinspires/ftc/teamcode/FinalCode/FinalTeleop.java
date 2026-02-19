@@ -33,6 +33,7 @@ public class FinalTeleop extends OpMode {
     LED led;
     /** Transfer opens first, then shoots */
     ElapsedTime transferDelay = new ElapsedTime();
+    ElapsedTime timer = new ElapsedTime();
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
@@ -70,7 +71,7 @@ public class FinalTeleop extends OpMode {
     public static Alliance alliance = Alliance.red;
     public static double startX = 8;
     public static double startY = 8;
-    public static boolean outputDebugInfo = true;
+    public static boolean outputDebugInfo = false;
     public static double startHeading = 0.0;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     public static int idleRpm = 2467;
@@ -101,6 +102,7 @@ public class FinalTeleop extends OpMode {
     @Override
     public void start() {
         intake.doorOpen();
+        timer.reset();
     }
 
     @Override
@@ -221,13 +223,14 @@ public class FinalTeleop extends OpMode {
                 if(intake.doorOpen || transferDelay.seconds() > 0.5) {
                     intake.motorOn();
                 } else intake.motorOff();
-//            } else if (gamepad1.left_trigger > 0.3) { //slow transfer
-//                intake.doorOpen();
-//                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
-//                    intake.motorSlow();
-//                } else intake.motorOff();
+            } else if (gamepad1.left_trigger > 0.3) { //slow transfer
+                intake.doorOpen();
+                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
+                    intake.intervalTransfer(timer.milliseconds(), 200, 400);
+                } else intake.motorOff();
             }else { //idle
                 intake.motorOff();
+                timer.reset();
             }
         }
         if(!gamepad1.left_bumper)
@@ -310,10 +313,11 @@ public class FinalTeleop extends OpMode {
         //if(!turret.autoAiming) turret.turret.setPower(-(gamepad1.dpad_left ? 0.6: 0) + (gamepad1.dpad_right ? 0.6: 0));
         //telemetry.addData("power", drivePower);
         //telemetry.addData("transferStage", armTransfer.transferStage);
-        telemetry.addData("Alliance", alliance);
-        telemetry.addData("Correction Drive?", useDriveCorrecton);
-        telemetry.addData("heading", odo.get_heading(false));
-        telemetry.update();
+
+//        telemetry.addData("Alliance", alliance);
+//        telemetry.addData("Correction Drive?", useDriveCorrecton);
+//        telemetry.addData("heading", odo.get_heading(false));
+//        telemetry.update();
 
         double future_x = odo.get_x_predicted(false, false);
         double future_y = odo.get_y_predicted(false, false);

@@ -26,33 +26,29 @@ import java.util.ArrayList;
 @Config
 public class FarAutoBlue extends OpMode {
     public static Point start_point = new Point(56, 8);
+    public static Point shoot_point = new Point(56, 16);
     public static Point park_point = new Point(30, 10);
 
-    /*
+    BCPath cornerPath = new BCPath(new Point[][]{
+            {
+                    new Point(56, 16),
+                    new Point(22, 9),
+                    new Point(8, 1.3),
+                    new Point(17.4,15.3),
+                    new Point(18.5,13),
+                    new Point(30, 18),
+                    new Point(6.5,8),
+            }
+    });
 
-    P_0 = (56, 8)
-    P_1 = (22, 9)
-    P_2 = (8, 1.3)
-    P_3 = (17.4,15.3)
-    P_4 = (18.5,13)
-    P_5 = (30, 18)
-    P_6 = (8,8)
-
-    */
-
-    public static BCPath[] follow_paths = {
-            new BCPath(new Point[][]{
-                    {
-                            new Point(56, 8),
-                            new Point(22, 9),
-                            new Point(8, 1.3),
-                            new Point(17.4,15.3),
-                            new Point(18.5,13),
-                            new Point(30, 18),
-                            new Point(6.5,8),
-                    }
-            })
-    };
+    BCPath preloadPath = new BCPath(new Point[][]{
+            {
+                    new Point(56, 16),
+                    new Point(55.5, 20.6),
+                    new Point(59, 37.8),
+                    new Point(16.4, 35),
+            }
+    });
 
     enum State {
         wait,
@@ -68,6 +64,8 @@ public class FarAutoBlue extends OpMode {
     Odometry odometry;
     VectorField vf;
     ElapsedTime timer;
+    ElapsedTime parkTimer;
+    ElapsedTime transferTimer;
 
     Intake intake;
     Flywheel flywheel;
@@ -83,15 +81,17 @@ public class FarAutoBlue extends OpMode {
     public static double gvf_threshold = 0.67;
     public static double pidf_threshold = 0.5;
     public static double power = 0.8;
-    public static double turret_angle = 68.5;
+    public static double turret_angle = 66.5;
     public static double bot_angle = 180;
-
-    public static double shoot_wait_time = 6000;
+    public static double first_shoot_wait_time = 4000;
+    public static double shoot_wait_time = 2000;
+    public static int numCornerCycles = 5;
+    public static double transferOnTime = 200;
+    public static double transferOffTime = 400;
+    public static boolean do_path_3 = true;
 
     int loops = 0;
     int wait_time = 0;
-    int shotCounter = 0;
-    boolean prevFlywheelReady = false;
 
     ArrayList<Point> pathPoints;
 
@@ -102,8 +102,10 @@ public class FarAutoBlue extends OpMode {
 
         vf = new VectorField(wheelControl, odometry, uk);
         timer = new ElapsedTime();
+        parkTimer = new ElapsedTime();
+        transferTimer = new ElapsedTime();
 
-        pathPoints = follow_paths[loops].get_path_points();
+        pathPoints = cornerPath.get_path_points();
 
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
@@ -112,7 +114,7 @@ public class FarAutoBlue extends OpMode {
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
 
-        flywheel.set_auto_coeffs();
+        flywheel.set_tele_coeffs();
     }
 
     @Override
@@ -120,6 +122,9 @@ public class FarAutoBlue extends OpMode {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
 
+        if (!previousGamepad1.circle && currentGamepad1.circle){
+            do_path_3 = !do_path_3;
+        }
         if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
             wait_time--;
             wait_time = Math.max(wait_time, 0);
@@ -128,6 +133,7 @@ public class FarAutoBlue extends OpMode {
             wait_time++;
         }
 
+        telemetry.addData("do path 3? (circle)", do_path_3);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
@@ -136,6 +142,8 @@ public class FarAutoBlue extends OpMode {
     @Override
     public void start() {
         timer.reset();
+        parkTimer.reset();
+        transferTimer.reset();
         turret.setAngle(turret_angle);
     }
 
@@ -143,37 +151,47 @@ public class FarAutoBlue extends OpMode {
     public void loop() {
         odometry.update();
         turret.update();
+        flywheel.update();
+
+        if (parkTimer.milliseconds() > 29500) {
+            state = State.park;
+        }
 
         switch (state) {
             case wait:
                 flywheel.shootFar();
-                flywheel.update();
                 if (timer.seconds() >= wait_time) {
                     timer.reset();
-                    state = State.shootBall;
+                    state = State.driveToShootPos;
                 }
                 break;
 
             case shootBall:
                 flywheel.shootFar();
-                flywheel.update();
 
                 if (flywheel.isReady()) {
                     intake.doorOpen();
-                    intake.motorSlow();
+                    intake.intervalTransfer(timer.milliseconds(), transferOnTime, transferOffTime);
+                } else {
+                    transferTimer.reset();
                 }
 
-                wheelControl.drive_to_point(start_point, bot_angle, power, pidf_threshold, uk);
+                wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk);
 
-                if (timer.milliseconds() >= shoot_wait_time) {
+                if (timer.milliseconds() >= shoot_wait_time && loops != 0 || timer.milliseconds() >= first_shoot_wait_time) {
                     intake.doorClose();
                     loops++;
 
-                    if (loops > 1) {
+                    if (loops == 1 && do_path_3) {
+                        vf.setPath(preloadPath, 180, false);
+                        pathPoints = preloadPath.get_path_points();
+                        timer.reset();
+                        state = State.intakeBatch;
+                    } else if (loops > numCornerCycles || parkTimer.milliseconds() > 25000) {
                         state = State.park;
                     } else {
-                        vf.setPath(follow_paths[loops-1], 180, false);
-                        pathPoints = follow_paths[loops-1].get_path_points();
+                        vf.setPath(cornerPath, 180, false);
+                        pathPoints = cornerPath.get_path_points();
                         timer.reset();
                         state = State.intakeBatch;
                     }
@@ -183,7 +201,6 @@ public class FarAutoBlue extends OpMode {
 
             case intakeBatch:
                 flywheel.shootFar();
-                flywheel.update();
                 intake.motorOn();
                 intake.doorClose();
 
@@ -198,19 +215,17 @@ public class FarAutoBlue extends OpMode {
             case driveToShootPos:
                 intake.motorOff();
                 flywheel.shootFar();
-                flywheel.update();
 
-                if (wheelControl.drive_to_point(start_point, bot_angle, power, pidf_threshold, uk)) {
+                if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk)) {
                     timer.reset();
-                    shotCounter = 0;
+                    transferTimer.reset();
                     state = State.shootBall;
                 }
                 break;
 
             case park:
-                flywheel.stop();
-                flywheel.update();
                 intake.motorOff();
+                flywheel.stop();
 
                 wheelControl.drive_to_point(park_point, bot_angle, 1, pidf_threshold, false);
 
@@ -222,5 +237,6 @@ public class FarAutoBlue extends OpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("turret angle (actual)", turret.getAngle());
+        dashboard.sendTelemetryPacket(packet);
     }
 }

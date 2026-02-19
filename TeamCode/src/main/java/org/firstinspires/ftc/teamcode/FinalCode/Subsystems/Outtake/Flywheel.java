@@ -30,12 +30,12 @@ public class Flywheel {
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
 //    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
     public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0, kf_tele = 0;
-//    public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
-    public static double kp_auto = 0.001, ki_auto = 0, kd_auto = 0, kf_auto = 0;
+    public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
+    //public static double kp_auto = 0.001, ki_auto = 0, kd_auto = 0, kf_auto = 0;
     public static double ks = 0.0867;
     public static double kv = 0.0002;
-    public static int CLOSE_RPM = 2440;
-    public static int FAR_RPM = 3215;
+    public static int CLOSE_RPM = 2590; //2440
+    public static int FAR_RPM = 2950;
     public static int EXPERIMENTAL_RPM = 4000;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;

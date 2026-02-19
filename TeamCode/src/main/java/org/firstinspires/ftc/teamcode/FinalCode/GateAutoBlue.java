@@ -31,29 +31,30 @@ public class GateAutoBlue extends OpMode {
     public static Point shoot_point = new Point(60, 81);
     public static Point park_point = new Point(18, 81);
     public static Point park_shot_point = new Point(56.7,102);
-    public static Point open_gate_point = new Point (14, 60);
-    public static Point intake_gate_point = new Point(10, 55);
+    public static Point intake_gate_point = new Point(0, 59.2);
+    public static Point clear_balls_point = new Point(54, 9.5);
 
     public static double shootAngle = 180;
     public static double openGateAngle = 155;
-    public static double intakeGateAngle = 115;
+    public static double clearBallsAngle = 160;
 
     public static double FIRST_TURRET_ANGLE = 43.8;
     public static double LAST_TURRET_ANGLE = 78.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2220;
+    public static double rpm = 2510;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
     public static double pid_threshold = 1.2;
     public static double power = 1;
     public static double first_shoot_wait_time = 1867;
-    public static double shoot_wait_time = 800;
-    public static double gate_wait_time = 3667;
-    public static double intake_time = 2000;
+    public static double shoot_wait_time = 670;
+    public static double gate_wait_time = 3000;
+    public static double intake_time = 1800;
     int loops = 0;
     public static int wait_time = 0;
     public static boolean do_path3 = false;
+    public static boolean openGate = false;
 
     /*
     P_0 = (60, 81)
@@ -69,7 +70,7 @@ public class GateAutoBlue extends OpMode {
                     new Point(60, 81),
                     new Point(52.6,72.7),
                     new Point(46.2,56.4),
-                    new Point(10.2,59.2),
+                    new Point(9.8,59.2),
 
 //                    new Point(48,69),
 //                    new Point(43,38.3),
@@ -110,6 +111,14 @@ public class GateAutoBlue extends OpMode {
                     new Point(62,61.7),
                     new Point(20,57.5),
             }
+    });BCPath middleGateBatch = new BCPath(new Point[][] {
+            {
+                    new Point(60, 81),
+                    new Point(55,61.6),
+                    new Point(62,61.7),
+                    new Point(19.4,51.6),
+                    new Point(11.7,64.7),
+            }
     });
     BCPath parkShotPath = new BCPath(new Point[][] {
             {
@@ -134,7 +143,7 @@ public class GateAutoBlue extends OpMode {
 
     enum GateState{
         driveToGate,
-        wait,
+        clear,
         intake
     }
 
@@ -180,6 +189,7 @@ public class GateAutoBlue extends OpMode {
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
 
+        flywheel.use_gained_schedule = true;
         flywheel.set_auto_coeffs();
     }
 
@@ -191,6 +201,9 @@ public class GateAutoBlue extends OpMode {
         if (!previousGamepad1.circle && currentGamepad1.circle){
             do_path3 = !do_path3;
         }
+        if (!previousGamepad1.cross && currentGamepad1.cross){
+            openGate = !openGate;
+        }
         if (!previousGamepad1.dpad_left && currentGamepad1.dpad_left){
             wait_time--;
             wait_time = Math.max(wait_time, 0);
@@ -200,6 +213,7 @@ public class GateAutoBlue extends OpMode {
         }
 
         telemetry.addData("do path 3? (circle)", do_path3);
+        telemetry.addData("open gate? (cross)", openGate);
         telemetry.addData("wait time (dpad)", wait_time);
         telemetry.update();
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
@@ -261,24 +275,31 @@ public class GateAutoBlue extends OpMode {
                 vf.move();
                 switch (gateState) {
                     case driveToGate:
-                        //intake.motorOff();
                         intake.motorOn();
                         intake.doorClose();
                         //vf.move();
-                        if (vf.at_end(1) || timer.milliseconds() > gate_wait_time) {
+                        if (vf.at_end(1)) {
                             //wheelControl.stop();
                             timer.reset();
                             gateState = GateState.intake;
+                        } else if (timer.milliseconds() > gate_wait_time) {
+                            timer.reset();
+                            gateState = GateState.clear;
                         }
                         break;
 
-                    case wait:
+                    case clear:
+                        wheelControl.drive_to_point(clear_balls_point, clearBallsAngle, 0.5, 0.5, false);
+                        if (timer.milliseconds() > intake_time || intake.intakeCurrentThreshold(6.7) == 1) {
+                            timer.reset();
+                            state =State.driveToShootPos;
+                        }
                         break;
 
                     case intake:
                         intake.motorOn();
                         wheelControl.stop();
-                        //wheelControl.drive_to_point(intake_gate_point, intakeGateAngle, 1, 0.5, false);
+                        wheelControl.drive_to_point(intake_gate_point, openGateAngle, 0.2, 0.5, false);
                         if (timer.milliseconds() > intake_time || intake.intakeCurrentThreshold(6.7) == 1) {
                             timer.reset();
                             state =State.driveToShootPos;
@@ -288,8 +309,13 @@ public class GateAutoBlue extends OpMode {
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
-                intake.doorOpen();
+                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false) < 24) {
+                    intake.motorOn();
+                    intake.doorClose();
+                } else {
+                    intake.motorOff();
+                    intake.doorOpen();
+                }
                 if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
                     state = State.shootBall;
@@ -297,7 +323,8 @@ public class GateAutoBlue extends OpMode {
                 break;
 
             case shootBall:
-                turret.setAngle(turretAngle);
+                if(loops >= 5) turret.setAngle(turretAngle);
+                else turret.setAngle(odometry.wrapAngle(turretAngle + odometry.get_heading(false) - 180));
                 if (flywheel.isReady()) {
                     intake.doorOpen();
                     intake.motorOn();
@@ -317,8 +344,13 @@ public class GateAutoBlue extends OpMode {
                     timer.reset();
                     switch (loops) {
                         case 1:
-                            vf.setPath(middleBatch, 180, false);
-                            pathPoints = middleBatch.get_path_points();
+                            if (openGate) {
+                                vf.setPath(middleGateBatch, 180, false);
+                                pathPoints = middleGateBatch.get_path_points();
+                            } else {
+                                vf.setPath(middleBatch, 180, false);
+                                pathPoints = middleBatch.get_path_points();
+                            }
                             state = State.intakeBatch;
                             break;
                         case 2:
@@ -387,5 +419,10 @@ public class GateAutoBlue extends OpMode {
         packet.put("y", odometry.get_y(uk));
         packet.put("heading", odometry.get_heading(uk));
         dashboard.sendTelemetryPacket(packet);
+    }
+    public double calculateNewTurretHeading(double oldAngle, double offset) {
+        double error = (oldAngle + offset + 180) % 360;
+        if (error < 0) error += 360;
+        return error - 180;
     }
 }

@@ -129,6 +129,7 @@ public class TwentyOneBlueAuto extends OpMode {
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
 
+        flywheel.use_gained_schedule = true;
         flywheel.set_auto_coeffs();
     }
 
@@ -297,8 +298,6 @@ public class TwentyOneBlueAuto extends OpMode {
                 intake.motorOff();
                 intake.doorOpen();
 
-//                vf.move();
-//                if (vf.at_end(gvf_threshold)){
                 if (Math.abs(Math.abs(odometry.get_heading(false))-180) < 26.7) {
                     wheelControl.drive_to_point(new Point(36.7,90), 225, power, pid_threshold, false);
                 } else {

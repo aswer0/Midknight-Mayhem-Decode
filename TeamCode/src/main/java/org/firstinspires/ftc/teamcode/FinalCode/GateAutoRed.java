@@ -42,16 +42,16 @@ public class GateAutoRed extends OpMode {
     public static double FIRST_TURRET_ANGLE = -44.4;
     public static double LAST_TURRET_ANGLE = -74.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2390;
+    public static double rpm = 2500;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
     public static double pid_threshold = 1.2;
     public static double power = 1;
     public static double first_shoot_wait_time = 1867;
-    public static double shoot_wait_time = 800;
-    public static double gate_wait_time = 3667;
-    public static double intake_time = 2000;
+    public static double shoot_wait_time = 670;
+    public static double gate_wait_time = 3000;
+    public static double intake_time = 1600;
     int loops = 0;
     public static int wait_time = 0;
     boolean do_path3 = false;
@@ -161,6 +161,7 @@ public class GateAutoRed extends OpMode {
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
 
+        flywheel.use_gained_schedule = true;
         flywheel.set_auto_coeffs();
     }
 

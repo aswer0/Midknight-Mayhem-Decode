@@ -35,7 +35,7 @@ public class Flywheel {
     public static double ks = 0.0867;
     public static double kv = 0.0002;
     public static int CLOSE_RPM = 2590; //2440
-    public static int FAR_RPM = 2950;
+    public static int FAR_RPM = 2980;
     public static int EXPERIMENTAL_RPM = 4000;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;
@@ -106,6 +106,24 @@ public class Flywheel {
         //List<Double> coeffs = Arrays.asList(0.0390004, 0.510431, 2428.43221-16.7);
 
         List<Double> coeffs = Arrays.asList(0.18367, -22.64129, 3234.67806);
+
+        int n = coeffs.size();
+        double rpm = 0;
+
+        for (int i = 0; i < n; i++) {
+            rpm += coeffs.get(i) * Math.pow(dist, n - 1 - i);
+        }
+
+        AUTO_RPM = rpm;
+    }
+
+    public void set_auto_far_rpm(double dist) {
+        List<Double> coeffs = Arrays.asList(-0.661086, 187.95419, -10027.481);
+
+        if (dist >= 142){
+            AUTO_RPM = 3332;
+            return;
+        }
 
         int n = coeffs.size();
         double rpm = 0;

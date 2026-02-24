@@ -27,7 +27,7 @@ import java.util.ArrayList;
 public class FarAutoBlue extends OpMode {
     public static Point start_point = new Point(56, 8);
     public static Point shoot_point = new Point(56, 16);
-    public static Point park_point = new Point(30, 10);
+    public static Point park_point = new Point(40, 16);
 
     BCPath cornerPath = new BCPath(new Point[][]{
             {
@@ -80,14 +80,14 @@ public class FarAutoBlue extends OpMode {
     public static boolean uk = false;
     public static double gvf_threshold = 0.67;
     public static double pidf_threshold = 0.5;
-    public static double power = 0.8;
-    public static double turret_angle = 66.5;
+    public static double power = 1;
+    public static double turret_angle = 67;
     public static double bot_angle = 180;
     public static double first_shoot_wait_time = 4000;
-    public static double shoot_wait_time = 2000;
+    public static double shoot_wait_time = 1750;
     public static int numCornerCycles = 5;
-    public static double transferOnTime = 200;
-    public static double transferOffTime = 400;
+    public static double transferOnTime = 210;
+    public static double transferOffTime = 280;
     public static boolean do_path_3 = true;
 
     int loops = 0;
@@ -153,7 +153,7 @@ public class FarAutoBlue extends OpMode {
         turret.update();
         flywheel.update();
 
-        if (parkTimer.milliseconds() > 29500) {
+        if (parkTimer.milliseconds() > 29000) {
             state = State.park;
         }
 
@@ -167,6 +167,8 @@ public class FarAutoBlue extends OpMode {
                 break;
 
             case shootBall:
+//                turret.setAngle(odometry.wrapAngle(turret_angle + odometry.get_heading(false) - 180));
+                turret.setAngle(turret_angle);
                 flywheel.shootFar();
 
                 if (flywheel.isReady()) {
@@ -187,7 +189,7 @@ public class FarAutoBlue extends OpMode {
                         pathPoints = preloadPath.get_path_points();
                         timer.reset();
                         state = State.intakeBatch;
-                    } else if (loops > numCornerCycles || parkTimer.milliseconds() > 25000) {
+                    } else if (loops > (numCornerCycles + (do_path_3 ? 1 : 0)) || parkTimer.milliseconds() > 25000) {
                         state = State.park;
                     } else {
                         vf.setPath(cornerPath, 180, false);
@@ -200,7 +202,6 @@ public class FarAutoBlue extends OpMode {
                 break;
 
             case intakeBatch:
-                flywheel.shootFar();
                 intake.motorOn();
                 intake.doorClose();
 
@@ -214,9 +215,8 @@ public class FarAutoBlue extends OpMode {
 
             case driveToShootPos:
                 intake.motorOff();
-                flywheel.shootFar();
 
-                if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk)) {
+                if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk) || timer.milliseconds() > 2000) {
                     timer.reset();
                     transferTimer.reset();
                     state = State.shootBall;
@@ -227,7 +227,7 @@ public class FarAutoBlue extends OpMode {
                 intake.motorOff();
                 flywheel.stop();
 
-                wheelControl.drive_to_point(park_point, bot_angle, 1, pidf_threshold, false);
+                wheelControl.drive_to_point(park_point, bot_angle, 0.7, pidf_threshold, false);
 
                 FinalTeleop.startX = park_point.x;
                 FinalTeleop.startY = park_point.y;

@@ -25,6 +25,8 @@ import java.util.ArrayList;
 @Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
 public class FarAutoBlue extends OpMode {
+    public static double adjust = 3;
+
     public static Point start_point = new Point(56, 8);
     public static Point shoot_point = new Point(56, 16);
     public static Point park_point = new Point(40, 16);
@@ -32,12 +34,12 @@ public class FarAutoBlue extends OpMode {
     BCPath cornerPath = new BCPath(new Point[][]{
             {
                     new Point(56, 16),
-                    new Point(22, 9),
-                    new Point(8, 1.3),
-                    new Point(17.4,15.3),
-                    new Point(18.5,13),
-                    new Point(30, 18),
-                    new Point(6.5,8),
+                    new Point(adjust+22, 9),
+                    new Point(adjust+8, 1.3),
+                    new Point(adjust+17.4,15.3),
+                    new Point(adjust+18.5,13),
+                    new Point(adjust+30, 18),
+                    new Point(6.7,6.7),
             }
     });
 
@@ -80,7 +82,7 @@ public class FarAutoBlue extends OpMode {
     public static boolean uk = false;
     public static double gvf_threshold = 0.67;
     public static double pidf_threshold = 0.5;
-    public static double power = 1;
+    public static double power = 0.8;
     public static double turret_angle = 67;
     public static double bot_angle = 180;
     public static double first_shoot_wait_time = 4000;
@@ -214,7 +216,13 @@ public class FarAutoBlue extends OpMode {
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
+                if (odometry.get_x(false) < 24) {
+                    intake.motorOn();
+                    intake.doorClose();
+                } else {
+                    intake.motorOff();
+                    intake.doorOpen();
+                }
 
                 if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk) || timer.milliseconds() > 2000) {
                     timer.reset();

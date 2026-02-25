@@ -33,25 +33,25 @@ public class GateAutoRed extends OpMode {
     public static Point park_shot_point = new Point(offset-57,105);
     public static Point intake_gate_point = new Point(offset-10,58.8);
     public static Point clear_balls_point = new Point(offset-10.5, 54);
-    public static Point last_point = new Point(offset-14.3, 62.5);
+    public static Point last_point = new Point(125.9, 62.6);
 
     public static double shootAngle = 0;
     public static double openGateAngle = 25;
     public static double clearBallsAngle = 20;
 
-    public static double FIRST_TURRET_ANGLE = -44.4;
-    public static double LAST_TURRET_ANGLE = -74.5;
+    public static double FIRST_TURRET_ANGLE = -44.2;
+    public static double LAST_TURRET_ANGLE = -76.7;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2500;
+    public static double rpm = 2490;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
     public static double pid_threshold = 1.2;
     public static double power = 1;
-    public static double first_shoot_wait_time = 1867;
-    public static double shoot_wait_time = 670;
-    public static double gate_wait_time = 3000;
-    public static double intake_time = 1600;
+    public static double first_shoot_wait_time = 1500;
+    public static double shoot_wait_time = 650;
+    public static double gate_wait_time = 2400;
+    public static double intake_time = 1800;
     int loops = 0;
     public static int wait_time = 0;
     public static boolean do_path3 = false;
@@ -62,7 +62,7 @@ public class GateAutoRed extends OpMode {
                     new Point(offset-60, 81),
                     new Point(offset-52.6,72.7),
                     new Point(offset-46.2,56.4),
-                    new Point(offset-11.5,58.8),
+                    new Point(offset-11.5,59),
             }
     });
     BCPath closeBatch = new BCPath(new Point[][] { //straight line
@@ -220,7 +220,7 @@ public class GateAutoRed extends OpMode {
                     at_point = pid_drive.pointDriver(0, 1, 3, pid_threshold, -1, uk, false);
                 }
 
-                if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 3000){
+                if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 2700 || (loops == 5 && odometry.get_x(false) > offset-20)){
                     if (loops == 5) {
                         timer.reset();
                         vf.setPath(parkShotPath, -45, false);

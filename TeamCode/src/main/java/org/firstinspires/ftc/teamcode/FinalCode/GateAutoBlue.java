@@ -46,9 +46,9 @@ public class GateAutoBlue extends OpMode {
     public static double gvf_threshold = 1;
     public static double pid_threshold = 1.2;
     public static double power = 1;
-    public static double first_shoot_wait_time = 1867;
-    public static double shoot_wait_time = 670;
-    public static double gate_wait_time = 3000;
+    public static double first_shoot_wait_time = 1500;
+    public static double shoot_wait_time = 650;
+    public static double gate_wait_time = 2400;
     public static double intake_time = 1800;
     int loops = 0;
     public static int wait_time = 0;
@@ -223,7 +223,7 @@ public class GateAutoBlue extends OpMode {
 //                    }
 //                }
 
-                if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 3000){
+                if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 2700 || (loops == 5 && odometry.get_x(false) < 20)){
                     if (loops == 5) {
                         timer.reset();
                         vf.setPath(parkShotPath, 225, false);

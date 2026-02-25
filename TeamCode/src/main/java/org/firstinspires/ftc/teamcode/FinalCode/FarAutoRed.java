@@ -34,12 +34,12 @@ public class FarAutoRed extends OpMode {
     BCPath cornerPath = new BCPath(new Point[][]{
             {
                     new Point(adjusted-56, 16),
-                    new Point(adjusted-22, 9),
-                    new Point(adjusted-8, 1.3),
-                    new Point(adjusted-17.4,15.3),
-                    new Point(adjusted-18.5,13),
-                    new Point(adjusted-30, 18),
-                    new Point(adjusted-6.5,8),
+                    new Point(adjusted-24, 9),
+                    new Point(adjusted-10, 1.3),
+                    new Point(adjusted-19.4,15.3),
+                    new Point(adjusted-20.5,13),
+                    new Point(adjusted-32, 18),
+                    new Point(adjusted-6.7,6.7),
             }
     });
 
@@ -81,8 +81,8 @@ public class FarAutoRed extends OpMode {
 
     public static boolean uk = false;
     public static double gvf_threshold = 0.67;
-    public static double pidf_threshold = 0.67;
-    public static double power = 1;
+    public static double pidf_threshold = 0.5;
+    public static double power = 0.8;
     public static double turret_angle = -67;
     public static double bot_angle = 0;
     public static double first_shoot_wait_time = 4000;
@@ -216,7 +216,13 @@ public class FarAutoRed extends OpMode {
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
+                if (odometry.get_x(false) > adjusted-24) {
+                    intake.motorOn();
+                    intake.doorClose();
+                } else {
+                    intake.motorOff();
+                    intake.doorOpen();
+                }
 
                 if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk) || timer.milliseconds() > 2000) {
                     timer.reset();

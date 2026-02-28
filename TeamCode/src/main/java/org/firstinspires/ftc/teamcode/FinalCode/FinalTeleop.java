@@ -64,6 +64,8 @@ public class FinalTeleop extends OpMode {
     boolean hasMidBall = false;
     boolean shootFar = false;
     boolean triangle = false;
+    boolean inCloseZone = false;
+    boolean lastInCloseZone = false;
 
     int x_sign;
     int y_sign;
@@ -167,6 +169,8 @@ public class FinalTeleop extends OpMode {
             useDriveCorrecton = !useDriveCorrecton;
         }
 
+        pidToGate = currentGamepad1.left_stick_button;
+
         //drive
         if (useDriveCorrecton && !pidToGate){
             drive.correction_drive(x_sign*gamepad1.left_stick_y, y_sign*1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower, false);
@@ -182,8 +186,6 @@ public class FinalTeleop extends OpMode {
             }
         }
 
-        pidToGate = currentGamepad1.left_stick_button;
-
         //intake
         if (currentGamepad1.right_bumper) { //in
             if (!odo.inCloseZone(24)) {
@@ -197,7 +199,7 @@ public class FinalTeleop extends OpMode {
             // If we have 3 balls, auto stop intake
             hasBackBall = sensors.getBackColor() == 1;
             hasMidBall = sensors.getMidColor() == 1;
-            if(shouldStopIntake || hasBackBall && hasMidBall && intake.intakeCurrentThreshold(6.7) == 1) {
+            if(shouldStopIntake || (hasBackBall && hasMidBall && intake.intakeCurrentThreshold(6.7) == 1)) {
                 intake.motorOff();
                 gamepad1.rumble(500);
                 shouldStopIntake = true;
@@ -245,14 +247,19 @@ public class FinalTeleop extends OpMode {
         }
 
         if (!triangle) {
+            inCloseZone = odo.inCloseZone(24);
+            if (lastInCloseZone && !inCloseZone) {
+                hasBackBall = sensors.getBackColor() == 1;
+                hasMidBall = sensors.getMidColor() == 1;
+            }
             if (hasBackBall || hasMidBall) {
                 useAutoRPM = true;
-                if (odo.inCloseZone(24) || shootFar) {
+                if (inCloseZone || shootFar) {
                     turret.autoAiming = true;
                 } else {
                     turret.autoAiming = false;
                 }
-            } else if (!odo.inCloseZone(24)) {
+            } else if (!inCloseZone) {
                 if (!shootFar) {
                     useAutoRPM = false;
                     turret.autoAiming = false;
@@ -310,15 +317,18 @@ public class FinalTeleop extends OpMode {
         double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
         //dist = Math.min(dist, 108);
 
-        if (useAutoRPM){
-            if (dist > 110) {
+        if (useAutoRPM) {
+            if (dist > 110 && shootFar) {
                 flywheel.shootAutoDist();
                 flywheel.set_auto_far_rpm(dist);
             } else {
+                dist = Math.min(dist, 110);
                 flywheel.shootAutoDist();
                 flywheel.set_auto_rpm(dist);
             }
         }
+
+        lastInCloseZone = inCloseZone;
 
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();

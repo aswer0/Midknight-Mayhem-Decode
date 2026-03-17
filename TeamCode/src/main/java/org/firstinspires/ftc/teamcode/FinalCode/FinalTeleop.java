@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Hood;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
@@ -31,6 +32,7 @@ public class FinalTeleop extends OpMode {
     ArmTransfer armTransfer;
     Turret turret;
     LED led;
+    Hood hood;
     /** Transfer opens first, then shoots */
     ElapsedTime transferDelay = new ElapsedTime();
     ElapsedTime timer = new ElapsedTime();
@@ -44,6 +46,7 @@ public class FinalTeleop extends OpMode {
     public static Point blue_gate = new Point(9.5, 59.4);
     public static Point red_gate = new Point(130.2, 59.4);
     public static boolean use_gain_schedule = false;
+    public static double hood_angle = 23;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
@@ -93,6 +96,7 @@ public class FinalTeleop extends OpMode {
         armTransfer = new ArmTransfer(hardwareMap, intake);
         turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
+        hood = new Hood(hardwareMap);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
@@ -329,6 +333,7 @@ public class FinalTeleop extends OpMode {
         }
 
         lastInCloseZone = inCloseZone;
+        hood.set_angle(hood_angle);
 
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();

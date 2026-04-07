@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Hood;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Model;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
@@ -46,7 +47,7 @@ public class FinalTeleop extends OpMode {
     public static Point blue_gate = new Point(9.5, 59.4);
     public static Point red_gate = new Point(130.2, 59.4);
     public static boolean use_gain_schedule = false;
-    public static double hood_angle = 23;
+    public static double hood_angle = 30;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
@@ -333,7 +334,16 @@ public class FinalTeleop extends OpMode {
         }
 
         lastInCloseZone = inCloseZone;
+//        hood_angle = Model.auto_hood;
+        if (currentGamepad1.dpad_up){
+            hood_angle = 50;
+        }
+        if (currentGamepad1.dpad_down){
+            hood_angle = 30;
+        }
         hood.set_angle(hood_angle);
+
+        Model.update_values(dist);
 
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();

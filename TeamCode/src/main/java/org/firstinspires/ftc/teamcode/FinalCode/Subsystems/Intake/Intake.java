@@ -58,10 +58,10 @@ public class Intake {
         transfer_pid = new PIDFController(kp, ki, kd, kf);
 //        intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
-    public void motorOn() {intakeMotor.setPower(INTAKE_POWER); intakeMotorTwo.setPower(-INTAKE_POWER);}
-    public void motorOff() {intakeMotor.setPower(0); intakeMotorTwo.setPower(0);}
-    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER); intakeMotorTwo.setPower(INTAKE_POWER);}
-    public void motorSlow() {intakeMotor.setPower(slowSpeed); intakeMotorTwo.setPower(-slowSpeed);}
+    public void motorOn() {intakeMotor.setPower(INTAKE_POWER); /*intakeMotorTwo.setPower(-slowSpeed);*/}
+    public void motorOff() {intakeMotor.setPower(0); /*intakeMotorTwo.setPower(-slowSpeed);*/}
+    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER); /*intakeMotorTwo.setPower(-slowSpeed);*/}
+    public void motorSlow() {intakeMotor.setPower(slowSpeed); /*intakeMotorTwo.setPower(-slowSpeed);*/}
     public void doorOpen(){
         intakeDoor.setPosition(DOOR_OPEN_POSITION);
         doorOpen = true;
@@ -87,7 +87,7 @@ public class Intake {
     }
     public void continuousTransfer() {
         intakeMotor.setPower(motorSpeed);
-        intakeMotorTwo.setPower(-motorSpeed);
+//        intakeMotorTwo.setPower(-motorSpeed);
     }
     public void intervalTransfer(double timer, double onTime, double offTime) {
         timer = timer % (onTime + offTime);
@@ -108,7 +108,7 @@ public class Intake {
         }
 
         intakeMotor.setPower(speed);
-        intakeMotorTwo.setPower(-speed);
+//        intakeMotorTwo.setPower(-speed);
     }
 
     public void runIntake() {

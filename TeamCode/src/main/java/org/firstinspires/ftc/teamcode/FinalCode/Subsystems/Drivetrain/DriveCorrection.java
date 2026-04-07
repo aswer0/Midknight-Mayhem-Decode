@@ -24,7 +24,7 @@ public class DriveCorrection {
 
     public double stable_correction(double target_angle, boolean use_kalman){
         double error = stable_correction.calculate(odometry.get_heading(use_kalman), target_angle);
-        if (error <= tolerance){
+        if (Math.abs(error) <= tolerance){
             return 0.0;
         }
         return error;

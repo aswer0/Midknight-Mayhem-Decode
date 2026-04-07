@@ -32,8 +32,8 @@ public class Flywheel {
     public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0, kf_tele = 0;
     public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
     //public static double kp_auto = 0.001, ki_auto = 0, kd_auto = 0, kf_auto = 0;
-    public static double ks = 0.0867;
-    public static double kv = 0.0002;
+    public static double ks = 0.19; //0.0867;
+    public static double kv = 0.000178; //0.0002;
     public static int CLOSE_RPM = 2590; //2440
     public static int FAR_RPM = 2980;
     public static int EXPERIMENTAL_RPM = 4000;
@@ -46,13 +46,16 @@ public class Flywheel {
     public boolean use_gained_schedule = false;
     public double CURRENT_VOLTAGE;
 
-    public DcMotorEx flywheel;
+    public DcMotorEx flywheel_right;
+    public DcMotorEx flywheel_left;
     public PIDFController flywheelController = new PIDFController();
 
     public Flywheel(HardwareMap hardwareMap) {
-        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-        if (reverseFlywheel) flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel");
+        flywheel_left = hardwareMap.get(DcMotorEx.class, "intakeMotorTwo");
+        if (reverseFlywheel) flywheel_left.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheel_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void set_auto_coeffs(){
@@ -67,11 +70,11 @@ public class Flywheel {
         targetRPM = target;
     }
     public double getCurrentRPM() {
-        return (flywheel.getVelocity() / 28 * 60);
+        return (flywheel_right.getVelocity() / 28 * 60);
     }
 
     public double getTicks() {
-        return flywheel.getVelocity();
+        return flywheel_right.getVelocity();
     }
 
     public double RPMToTicks(double RPM) {
@@ -115,6 +118,7 @@ public class Flywheel {
         }
 
         AUTO_RPM = rpm;
+        //AUTO_RPM = Model.auto_rpm;
     }
 
     public void set_auto_far_rpm(double dist) {
@@ -170,7 +174,8 @@ public class Flywheel {
             }
         }
         power = Math.max(power, 0);
-        flywheel.setPower(power);
+        flywheel_right.setPower(power);
+        flywheel_left.setPower(power);
 
         if (outputDebugInfo) {
             FtcDashboard dashboard = FtcDashboard.getInstance();

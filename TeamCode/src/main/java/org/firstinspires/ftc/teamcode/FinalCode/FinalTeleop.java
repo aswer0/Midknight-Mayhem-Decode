@@ -271,7 +271,8 @@ public class FinalTeleop extends OpMode {
                 }
             }
         }
-
+        if(currentGamepad1.dpad_up) hood_angle = 50;
+        if(currentGamepad1.dpad_down)hood_angle = (30);
         if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;

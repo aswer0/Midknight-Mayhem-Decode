@@ -15,6 +15,8 @@ public class BBTest extends OpMode {
         bb2 = hardwareMap.get(DigitalChannel.class, "BB2");
         bb1.setMode(DigitalChannel.Mode.INPUT);
         bb2.setMode(DigitalChannel.Mode.INPUT);
+        bb1.setState(false);
+        bb2.setState(false);
     }
 
     @Override

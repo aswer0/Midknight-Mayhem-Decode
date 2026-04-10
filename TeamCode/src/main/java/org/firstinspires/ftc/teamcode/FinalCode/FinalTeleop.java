@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -86,6 +87,7 @@ public class FinalTeleop extends OpMode {
         red,
         blue,
     }
+    DigitalChannel breakbeam;
 
     @Override
     public void init() {
@@ -98,6 +100,8 @@ public class FinalTeleop extends OpMode {
         turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
         hood = new Hood(hardwareMap);
+        breakbeam = hardwareMap.get(DigitalChannel.class, "BB2");
+        breakbeam.setMode(DigitalChannel.Mode.INPUT);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
@@ -345,7 +349,8 @@ public class FinalTeleop extends OpMode {
         }
         hood.set_angle(hood_angle);
         Model.update_values(dist);
-
+        telemetry.addData("Breakbeam", breakbeam.getState());
+        telemetry.update();
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("distance", dist);

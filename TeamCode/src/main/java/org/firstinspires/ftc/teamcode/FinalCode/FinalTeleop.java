@@ -336,6 +336,7 @@ public class FinalTeleop extends OpMode {
 
         lastInCloseZone = inCloseZone;
 //        hood_angle = Model.auto_hood;
+//        flywheel.setTargetRPM(Model.auto_rpm);
         if (currentGamepad1.dpad_up){
             hood_angle = 50;
         }
@@ -343,7 +344,6 @@ public class FinalTeleop extends OpMode {
             hood_angle = 30;
         }
         hood.set_angle(hood_angle);
-
         Model.update_values(dist);
 
         if (outputDebugInfo) {
@@ -357,6 +357,7 @@ public class FinalTeleop extends OpMode {
             packet.put("Odo heading", odo.get_heading(false));
             packet.put("Has ball", hasBackBall || hasMidBall);
             packet.put("in close zone", odo.inCloseZone(24));
+            packet.put("MODEL/AUTO_HOOD", Model.auto_hood);
             dashboard.sendTelemetryPacket(packet);
         }
     }

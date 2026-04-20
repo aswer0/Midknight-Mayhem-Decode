@@ -18,13 +18,11 @@ public class TurretTest extends OpMode {
 
         turret = new Turret(hardwareMap, /*new Camera(hardwareMap)*/ null, true);
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
-        turret.autoAiming = true;
+        //turret.autoAiming = true;
     }
 
     @Override
     public void loop() {
-        turret.setAngle(angle);
-        turret.odometry.update();
-        turret.update();
+        turret.set_angle(angle);
     }
 }

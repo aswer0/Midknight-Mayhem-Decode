@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.PIDdrive.P
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Hood;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.opencv.core.Point;
@@ -124,6 +125,7 @@ public class GateAutoBlue extends OpMode {
 
     Intake intake;
     Flywheel flywheel;
+    Hood hood;
     Sensors sensors;
     Turret turret;
     Pathing pid_drive;
@@ -148,6 +150,7 @@ public class GateAutoBlue extends OpMode {
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
+        hood = new Hood(hardwareMap);
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.blue;
 
@@ -173,6 +176,7 @@ public class GateAutoBlue extends OpMode {
         if (!previousGamepad1.dpad_right && currentGamepad1.dpad_right){
             wait_time++;
         }
+        hood.set_angle(45);
 
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("open gate? (cross)", openGate);
@@ -194,6 +198,7 @@ public class GateAutoBlue extends OpMode {
         odometry.update();
         turret.update();
         flywheel.update();
+        hood.set_angle(45);
 
         if (autoTimer.milliseconds() >= 29500) {
             intake.doorClose();

@@ -58,10 +58,16 @@ public class Intake {
         transfer_pid = new PIDFController(kp, ki, kd, kf);
 //        intakeDoor = hardwareMap.get(Servo.class,"intakeDoor");
     }
-    public void motorOn() {intakeMotor.setPower(INTAKE_POWER); /*intakeMotorTwo.setPower(-slowSpeed);*/}
-    public void motorOff() {intakeMotor.setPower(0); /*intakeMotorTwo.setPower(-slowSpeed);*/}
-    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER); /*intakeMotorTwo.setPower(-slowSpeed);*/}
-    public void motorSlow() {intakeMotor.setPower(slowSpeed); /*intakeMotorTwo.setPower(-slowSpeed);*/}
+    public void motorOn() {
+        intakeMotor.setPower(INTAKE_POWER); intakeMotorTwo.setPower(-INTAKE_POWER);
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("A Intake 1 Current", intakeMotor.getCurrent(CurrentUnit.AMPS));
+        packet.put("A Intake 2 Current", intakeMotorTwo.getCurrent(CurrentUnit.AMPS));
+        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+    }
+    public void motorOff() {intakeMotor.setPower(0); intakeMotorTwo.setPower(0);}
+    public void motorReverse() {intakeMotor.setPower(-INTAKE_POWER); intakeMotorTwo.setPower(INTAKE_POWER);}
+    public void motorSlow() {intakeMotor.setPower(slowSpeed); intakeMotorTwo.setPower(-slowSpeed);}
     public void doorOpen(){
         intakeDoor.setPosition(DOOR_OPEN_POSITION);
         doorOpen = true;

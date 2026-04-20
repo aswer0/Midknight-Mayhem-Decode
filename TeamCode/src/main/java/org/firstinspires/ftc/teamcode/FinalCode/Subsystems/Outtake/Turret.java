@@ -8,10 +8,12 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
@@ -53,6 +55,18 @@ public class Turret {
     public static double[] redShootPoint = {136,136};
     public static double[] blueShootPoint = {8,136};
 
+    public Servo servo_UR;
+    public Servo servo_DR;
+    public Servo servo_UL;
+    public Servo servo_DL;
+
+    public static int servo_UR_direction = 1;
+    public static int servo_DR_direction = -1;
+    public static int servo_UL_direction = -1;
+    public static int servo_DL_direction = 1;
+
+    public static double gear_ratio = (19.0/54.0) * (19.0/40.0) * (60.0/20.0);
+
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
         this.alliance = alliance;
         this.camera = camera;
@@ -60,13 +74,16 @@ public class Turret {
         this.coefficients = coefficients;
         this.hardwareMap = hardwareMap;
         turret = hardwareMap.get(DcMotorEx.class, "turret");
-//        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         if (resetEncoder) {
             turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
         controller = new PIDFController(coefficients);
         looptimes = new ElapsedTime();
+
+        servo_UR = hardwareMap.get(Servo.class, "servoUR");
+        servo_UL = hardwareMap.get(Servo.class, "servoUL");
 
     }
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
@@ -218,6 +235,15 @@ public class Turret {
         return Math.max(compensatedPower, -1.0);
     }
 
+    public void set_ticks(double ticks){
+        //Angle -> ticks
+        servo_UR.setPosition(ticks * servo_UR_direction);
+        servo_UL.setPosition(ticks * servo_UL_direction);
+    }
+    public void set_angle(double angle){
+        set_ticks(gear_ratio * angle / 340);
+    }
+
     public boolean update(){
         double power = 0;
         double error = 67;
@@ -279,6 +305,10 @@ public class Turret {
             if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
                 power = 0;
             }
+            TelemetryPacket amps_packet = new TelemetryPacket();
+            amps_packet.put("A Turret Current", turret.getCurrent(CurrentUnit.AMPS));
+            (FtcDashboard.getInstance()).sendTelemetryPacket(amps_packet);
+
             if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Auto Target", target);

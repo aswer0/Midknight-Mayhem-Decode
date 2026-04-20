@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 
@@ -29,7 +30,7 @@ public class Flywheel {
     public double ki=0;
     //kp_new = 0.003, ki_new = 0, kd_new = 0.000112, kf_new = 0.003;
 //    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
-    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0, kf_tele = 0;
+    public static double kp_tele = 0.001, ki_tele = 0, kd_tele = 0.00012, kf_tele = 0.08;
     public static double kp_auto = 0.009, ki_auto = 0, kd_auto = 0.00011, kf_auto = 0.08;
     //public static double kp_auto = 0.001, ki_auto = 0, kd_auto = 0, kf_auto = 0;
     public static double ks = 0.19; //0.0867;
@@ -52,7 +53,7 @@ public class Flywheel {
 
     public Flywheel(HardwareMap hardwareMap) {
         flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel");
-        flywheel_left = hardwareMap.get(DcMotorEx.class, "intakeMotorTwo");
+        flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel2");
         if (reverseFlywheel) flywheel_left.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flywheel_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -118,7 +119,7 @@ public class Flywheel {
         }
 
         AUTO_RPM = rpm;
-        //AUTO_RPM = Model.auto_rpm;
+//        AUTO_RPM = Model.auto_rpm;
     }
 
     public void set_auto_far_rpm(double dist) {

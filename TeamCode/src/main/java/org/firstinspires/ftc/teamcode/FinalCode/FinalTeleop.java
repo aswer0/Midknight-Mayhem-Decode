@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.LED;
@@ -47,7 +48,7 @@ public class FinalTeleop extends OpMode {
     public static Point shoot_point = new Point(60, 81);
     public static Point blue_gate = new Point(9.5, 59.4);
     public static Point red_gate = new Point(130.2, 59.4);
-    public static boolean use_gain_schedule = false;
+    public static boolean use_gain_schedule = true;
     public static double hood_angle = 30;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
@@ -276,7 +277,7 @@ public class FinalTeleop extends OpMode {
             }
         }
         if(currentGamepad1.dpad_up) hood_angle = 50;
-        if(currentGamepad1.dpad_down)hood_angle = (30);
+        if(currentGamepad1.dpad_down) hood_angle = 45;
         if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
             flywheel.setTargetRPM(idleRpm);
             useAutoRPM = false;
@@ -292,6 +293,7 @@ public class FinalTeleop extends OpMode {
             shootFar = false;
         } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far cross
             intake.doorOpen();
+            hood.set_angle(50);
             flywheel.shootFar();
 //            triangle = true;
 //            useAutoRPM = false;
@@ -339,17 +341,13 @@ public class FinalTeleop extends OpMode {
         }
 
         lastInCloseZone = inCloseZone;
-//        hood_angle = Model.auto_hood;
-//        flywheel.setTargetRPM(Model.auto_rpm);
-        if (currentGamepad1.dpad_up){
-            hood_angle = 50;
-        }
-        if (currentGamepad1.dpad_down){
-            hood_angle = 30;
-        }
+
+        //hood_angle = Model.auto_hood;
+        //flywheel.setTargetRPM(Model.auto_rpm);
         hood.set_angle(hood_angle);
-        Model.update_values(dist);
-        telemetry.addData("Breakbeam", breakbeam.getState());
+//        Model.rpm_curr = flywheel.getCurrentRPM();
+//        Model.update_values(dist);
+        telemetry.addData("Breakbeam reggin", breakbeam.getState());
         telemetry.update();
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();
@@ -358,11 +356,23 @@ public class FinalTeleop extends OpMode {
             packet.put("y", odo.get_y(false));
             packet.put("Auto RPM", Flywheel.AUTO_RPM);
             packet.put("RPM", flywheel.getCurrentRPM());
+            packet.put("Model RPM", Model.auto_rpm);
+            packet.put("Model Hood Angle", Model.auto_hood);
+            packet.put("Model RPM current", Model.rpm_curr);
             packet.put("Turret Heading Reggin", turret.getAngle());
             packet.put("Odo heading", odo.get_heading(false));
             packet.put("Has ball", hasBackBall || hasMidBall);
             packet.put("in close zone", odo.inCloseZone(24));
             packet.put("MODEL/AUTO_HOOD", Model.auto_hood);
+            packet.put("AAAAA BL current", drive.BL.getCurrent(CurrentUnit.AMPS));
+            packet.put("AAAAA FL current", drive.FL.getCurrent(CurrentUnit.AMPS));
+            packet.put("AAAAA FR current", drive.FR.getCurrent(CurrentUnit.AMPS));
+//            packet.put("AAAA Turret current", turret.turret.getCurrent(CurrentUnit.AMPS));
+//            packet.put("AAA flywheel left current", flywheel.flywheel_left.getCurrent(CurrentUnit.AMPS));
+//            packet.put("AAA flywheel right current", flywheel.flywheel_right.getCurrent(CurrentUnit.AMPS));
+//            packet.put("AA intake 1 current", intake.intakeMotor.getCurrent(CurrentUnit.AMPS));
+//            packet.put("AA intake 2 current", intake.intakeMotorTwo.getCurrent(CurrentUnit.AMPS));
+
             dashboard.sendTelemetryPacket(packet);
         }
     }

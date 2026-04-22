@@ -14,6 +14,7 @@ public class TurretServoTest extends OpMode {
     public static double UR_pos=0;
     public static double UL_pos=0;
     public static double pos=0;
+    public static double buffer=0.01;
     public Servo servo_UR;
     public Servo servo_UL;
 
@@ -39,8 +40,8 @@ public class TurretServoTest extends OpMode {
 
     @Override
     public void loop() {
-        servo_UR.setPosition(pos);
-        servo_UL.setPosition(1-pos);
+        servo_UR.setPosition(pos-buffer);
+        servo_UL.setPosition(1-pos-buffer);
 
     }
 }

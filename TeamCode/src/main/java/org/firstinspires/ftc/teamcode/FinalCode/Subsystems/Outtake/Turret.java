@@ -65,6 +65,11 @@ public class Turret {
     public static int servo_UL_direction = -1;
     public static int servo_DL_direction = 1;
 
+    public static double rangeOfMotion = 150;
+    public static double centerPos = 0.52;
+
+    public static double buffer=0.04;
+
     public static double gear_ratio = (19.0/54.0) * (19.0/40.0) * (60.0/20.0);
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
@@ -73,12 +78,12 @@ public class Turret {
         this.odometry = odometry;
         this.coefficients = coefficients;
         this.hardwareMap = hardwareMap;
-        turret = hardwareMap.get(DcMotorEx.class, "turret");
-        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        if (resetEncoder) {
-            turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+//        turret = hardwareMap.get(DcMotorEx.class, "turret");
+//        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//        if (resetEncoder) {
+//            turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        }
         controller = new PIDFController(coefficients);
         looptimes = new ElapsedTime();
 
@@ -218,11 +223,11 @@ public class Turret {
         }, 72,72,0), Alliance.red, resetEncoder);
     }
     public double getAngle(){
-        return (double)turret.getCurrentPosition()/TICKS_PER_DEGREE;
+        return this.target_angle;
     }
-    public double getTicks(){
-        return turret.getCurrentPosition();
-    }
+//    public double getTicks(){
+//        return turret.getCurrentPosition();
+//    }
 
     public void setAngle(double target_angle){
         this.target_angle = target_angle;
@@ -237,11 +242,11 @@ public class Turret {
 
     public void set_ticks(double ticks){
         //Angle -> ticks
-        servo_UR.setPosition(ticks * servo_UR_direction);
-        servo_UL.setPosition(ticks * servo_UL_direction);
+        servo_UR.setPosition(ticks-buffer);
+        servo_UL.setPosition(1-ticks-buffer);
     }
     public void set_angle(double angle){
-        set_ticks(gear_ratio * angle / 340);
+        set_ticks(-angle / rangeOfMotion + centerPos);
     }
 
     public boolean update(){
@@ -297,16 +302,17 @@ public class Turret {
             else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) + future_heading;
             target = odometry.wrapAngle(target);
             //target = Math.min(Math.max(target, -95), 95);
+            set_angle(target);
             error = PIDFController.wrapError(target, actual);
-            power = controller.calculate_heading(
-                    target,
-                    actual, controller.gains.f * Math.signum(error));
-            power = v_compensate(power);
-            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
-                power = 0;
-            }
+//            power = controller.calculate_heading(
+//                    target,
+//                    actual, controller.gains.f * Math.signum(error));
+//            power = v_compensate(power);
+//            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+//                power = 0;
+//            }
             TelemetryPacket amps_packet = new TelemetryPacket();
-            amps_packet.put("A Turret Current", turret.getCurrent(CurrentUnit.AMPS));
+//            amps_packet.put("A Turret Current", turret.getCurrent(CurrentUnit.AMPS));
             (FtcDashboard.getInstance()).sendTelemetryPacket(amps_packet);
 
             if (outputDebugInfo) {
@@ -314,8 +320,8 @@ public class Turret {
                 packet.put("Auto Target", target);
                 packet.put("Auto Actual", actual);
                 packet.put("Auto Error", error);
-                packet.put("Turret Power", power);
-                packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
+//                packet.put("Turret Power", power);
+//                packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
                 //packet.put("LLResult", result.getTimestamp() - lastResultTime);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
@@ -323,21 +329,22 @@ public class Turret {
 //                return 0;
             }
         } else {
-            power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
-            power = Math.min(power, 1);
-            power = Math.max(power, -1);
-
-            power = v_compensate(power);
-            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
-                power = 0;
-            }
+//            power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+//            power = Math.min(power, 1);
+//            power = Math.max(power, -1);
+//
+//            power = v_compensate(power);
+            set_angle(target_angle);
+//            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+//                power = 0;
+//            }
 
             //turret.setPower(power);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Single Actual Angle", getAngle());
                 packet.put("Single Target Angle", target_angle);
-                packet.put("Turret Power", power);
+//                packet.put("Turret Power", power);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }
@@ -351,14 +358,14 @@ public class Turret {
 //            turret.setPower(power);
 //        }
 
-        if (getAngle() < -MAX_DEGREES) {
-            turret.setPower(Math.max(power, 0));
-        } else if (getAngle() > MAX_DEGREES) {
-            turret.setPower(Math.min(power, 0));
-        } else {
-            turret.setPower(power);
-        }
-        return Math.abs(error) < READY_THRESHOLD;
+//        if (getAngle() < -MAX_DEGREES) {
+//            turret.setPower(Math.max(power, 0));
+//        } else if (getAngle() > MAX_DEGREES) {
+//            turret.setPower(Math.min(power, 0));
+//        } else {
+//            turret.setPower(power);
+//        }
+        return true;// Math.abs(error) < READY_THRESHOLD;
     }
 
 

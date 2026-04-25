@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
@@ -14,7 +15,8 @@ import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 @TeleOp
 @Config
 public class MotorTest extends OpMode {
-    DcMotorEx motor;
+    Servo motor;
+    DcMotorEx motor2;
     FtcDashboard dashboard;
     static public double power = 1d;
     PIDFController controller;
@@ -24,7 +26,7 @@ public class MotorTest extends OpMode {
     public void init() {
         controller = new PIDFController(coefficients);
         dashboard = FtcDashboard.getInstance();
-        motor = hardwareMap.get(DcMotorEx.class, "BL");
+        motor = hardwareMap.get(Servo.class, "turret");
         //motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
@@ -33,9 +35,9 @@ public class MotorTest extends OpMode {
         //motor.setVelocity(power, AngleUnit.DEGREES);
 
         //motor.setPower(controller.calculate((motor.getVelocity()/28 * 60), power));
-        motor.setPower(power);
+        motor.setPosition(power);
         TelemetryPacket packet = new TelemetryPacket();
-        packet.put("RPM", motor.getVelocity()/28 * 60); // REV HD hex has 28 counts per revolution
+        //packet.put("RPM", motor.getVelocity()/28 * 60); // REV HD hex has 28 counts per revolution
         dashboard.sendTelemetryPacket(packet);
     }
 

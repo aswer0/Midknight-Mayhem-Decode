@@ -38,7 +38,6 @@ public class DriveTest extends OpMode {
 
         odo = new Odometry(hardwareMap, telemetry, 0, 0, 0);
     }
-
     @Override
     public void loop() {
         previousGamepad1.copy(currentGamepad1);

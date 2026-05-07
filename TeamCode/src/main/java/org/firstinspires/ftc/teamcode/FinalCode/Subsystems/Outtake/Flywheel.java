@@ -54,7 +54,9 @@ public class Flywheel {
     public Flywheel(HardwareMap hardwareMap) {
         flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel2");
-        if (reverseFlywheel) flywheel_left.setDirection(DcMotorSimple.Direction.REVERSE);
+//        if (reverseFlywheel) flywheel_left.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel_left.setDirection(DcMotorSimple.Direction.FORWARD);
+        flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flywheel_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
@@ -100,6 +102,17 @@ public class Flywheel {
     }
     public void shootAutoDist() {
         setTargetRPM(AUTO_RPM);
+    }
+
+    private double getTargetHoodAngle(double dist) {
+        //TODO: get regression for optimal angle from dist
+        return 0;
+    }
+
+    public void set_auto_hood_rpm(double dist) {
+        double targetAngle = getTargetHoodAngle(dist);
+        //TODO: find the target rpm based on target hood angle
+        //TODO: set the hood angle to compensate for current rpm
     }
 
     public void set_auto_rpm(double dist) {

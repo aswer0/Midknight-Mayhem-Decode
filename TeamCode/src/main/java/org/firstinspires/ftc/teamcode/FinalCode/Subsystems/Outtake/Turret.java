@@ -65,12 +65,12 @@ public class Turret {
     public static int servo_UL_direction = -1;
     public static int servo_DL_direction = 1;
 
-    public static double rangeOfMotion = 150;
-    public static double centerPos = 0.52;
+    public static double rangeOfMotion = 265;
+    public static double centerPos = 0.5;
 
-    public static double buffer=0.04;
+    public static double buffer=0.025;
 
-    public static double gear_ratio = (19.0/54.0) * (19.0/40.0) * (60.0/20.0);
+    public static double gear_ratio = 0.8205;
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
         this.alliance = alliance;

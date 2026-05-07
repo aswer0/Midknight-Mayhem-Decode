@@ -61,6 +61,19 @@ public class Sensors {
 //        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
     }
 
+    public boolean hasAllBalls() {
+        return hasFrontBall() && hasMidBall() && hasBackBall();
+    }
+    public boolean hasBackBall() {
+        return false;
+    }
+    public boolean hasMidBall() {
+        return false;
+    }
+    public boolean hasFrontBall() {
+        return false;
+    }
+
     public int getFrontColor() {
 
 //        front1.set(

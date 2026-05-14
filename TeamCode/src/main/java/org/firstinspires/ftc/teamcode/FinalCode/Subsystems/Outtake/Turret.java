@@ -8,12 +8,10 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
 import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
@@ -30,11 +28,11 @@ public class Turret {
     public static double STOP_THRESHOLD = 0;
     public static double READY_THRESHOLD = 5;
     public DcMotorEx turret;
-//    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.01,0,0,0.25);
+    //    public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.01,0,0,0.25);
     public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.045, .0055, 0.00025, 0.2);
     //public static PIDFCoefficients autoAimCoefficients = new PIDFCoefficients(0.035, 0.0055, 0.00045, 0.28);;
-            //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
-            //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
+    //new PIDFCoefficients(0.045, 0.0075, 0.0003, 0.3);
+    //new PIDFCoefficients(0.05, 0, 0, 0.4); // new PIDFCoefficients(0.01, 0, 0, 0.3);
     // auto aim: f = 0.43, p = 0.015
     double target_angle;
     public boolean autoAiming = false;
@@ -55,22 +53,8 @@ public class Turret {
     public static double[] redShootPoint = {136,136};
     public static double[] blueShootPoint = {8,136};
 
-    public Servo servo_UR;
-    public Servo servo_DR;
-    public Servo servo_UL;
-    public Servo servo_DL;
-
-    public static int servo_UR_direction = 1;
-    public static int servo_DR_direction = -1;
-    public static int servo_UL_direction = -1;
-    public static int servo_DL_direction = 1;
-
-    public static double rangeOfMotion = 265;
-    public static double centerPos = 0.5;
-
-    public static double buffer=0.025;
-
-    public static double gear_ratio = 0.8205;
+    public static double turret_ks = 0;
+    public static double turret_kv = 0;
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
         this.alliance = alliance;
@@ -78,17 +62,14 @@ public class Turret {
         this.odometry = odometry;
         this.coefficients = coefficients;
         this.hardwareMap = hardwareMap;
-//        turret = hardwareMap.get(DcMotorEx.class, "turret");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
 //        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//        if (resetEncoder) {
-//            turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        }
+        if (resetEncoder) {
+            turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
         controller = new PIDFController(coefficients);
         looptimes = new ElapsedTime();
-
-        servo_UR = hardwareMap.get(Servo.class, "servoUR");
-        servo_UL = hardwareMap.get(Servo.class, "servoUL");
 
     }
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder) {
@@ -223,11 +204,11 @@ public class Turret {
         }, 72,72,0), Alliance.red, resetEncoder);
     }
     public double getAngle(){
-        return this.target_angle;
+        return (double)turret.getCurrentPosition()/TICKS_PER_DEGREE;
     }
-//    public double getTicks(){
-//        return turret.getCurrentPosition();
-//    }
+    public double getTicks(){
+        return turret.getCurrentPosition();
+    }
 
     public void setAngle(double target_angle){
         this.target_angle = target_angle;
@@ -238,15 +219,6 @@ public class Turret {
         double compensatedPower = power * voltageComp;
         compensatedPower = Math.min(compensatedPower, 1.0);
         return Math.max(compensatedPower, -1.0);
-    }
-
-    public void set_ticks(double ticks){
-        //Angle -> ticks
-        servo_UR.setPosition(ticks-buffer);
-        servo_UL.setPosition(1-ticks-buffer);
-    }
-    public void set_angle(double angle){
-        set_ticks(-angle / rangeOfMotion + centerPos);
     }
 
     public boolean update(){
@@ -302,26 +274,21 @@ public class Turret {
             else target =                           -Math.toDegrees(Math.atan2((redShootPoint[1]-future_y),(redShootPoint[0]-future_x))) + future_heading;
             target = odometry.wrapAngle(target);
             //target = Math.min(Math.max(target, -95), 95);
-            set_angle(target);
             error = PIDFController.wrapError(target, actual);
-//            power = controller.calculate_heading(
-//                    target,
-//                    actual, controller.gains.f * Math.signum(error));
-//            power = v_compensate(power);
-//            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
-//                power = 0;
-//            }
-            TelemetryPacket amps_packet = new TelemetryPacket();
-//            amps_packet.put("A Turret Current", turret.getCurrent(CurrentUnit.AMPS));
-            (FtcDashboard.getInstance()).sendTelemetryPacket(amps_packet);
-
+            power = controller.calculate_heading(
+                    target,
+                    actual, turret_ks * Math.signum(error), turret_kv);
+            power = v_compensate(power);
+            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+                power = 0;
+            }
             if (outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Auto Target", target);
                 packet.put("Auto Actual", actual);
                 packet.put("Auto Error", error);
-//                packet.put("Turret Power", power);
-//                packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
+                packet.put("Turret Power", power);
+                packet.put("Turret F", controller.gains.f * Math.signum(target - getAngle()));
                 packet.put("odometry", new double[]{odometry.get_x(false), odometry.get_y(false), odometry.get_heading(false)});
                 //packet.put("LLResult", result.getTimestamp() - lastResultTime);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
@@ -329,22 +296,21 @@ public class Turret {
 //                return 0;
             }
         } else {
-//            power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
-//            power = Math.min(power, 1);
-//            power = Math.max(power, -1);
-//
-//            power = v_compensate(power);
-            set_angle(target_angle);
-//            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
-//                power = 0;
-//            }
+            power = controller.calculate_heading(target_angle, getAngle(), turret_ks * Math.signum(target_angle - getAngle()), turret_kv);
+            power = Math.min(power, 1);
+            power = Math.max(power, -1);
+
+            power = v_compensate(power);
+            if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
+                power = 0;
+            }
 
             //turret.setPower(power);
             if(outputDebugInfo) {
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("Single Actual Angle", getAngle());
                 packet.put("Single Target Angle", target_angle);
-//                packet.put("Turret Power", power);
+                packet.put("Turret Power", power);
                 (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
             }
         }
@@ -358,14 +324,14 @@ public class Turret {
 //            turret.setPower(power);
 //        }
 
-//        if (getAngle() < -MAX_DEGREES) {
-//            turret.setPower(Math.max(power, 0));
-//        } else if (getAngle() > MAX_DEGREES) {
-//            turret.setPower(Math.min(power, 0));
-//        } else {
-//            turret.setPower(power);
-//        }
-        return true;// Math.abs(error) < READY_THRESHOLD;
+        if (getAngle() < -MAX_DEGREES) {
+            turret.setPower(Math.max(power, 0));
+        } else if (getAngle() > MAX_DEGREES) {
+            turret.setPower(Math.min(power, 0));
+        } else {
+            turret.setPower(power);
+        }
+        return true;
     }
 
 

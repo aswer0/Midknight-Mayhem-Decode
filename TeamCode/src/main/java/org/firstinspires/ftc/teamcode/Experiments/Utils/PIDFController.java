@@ -103,6 +103,32 @@ public class PIDFController {
         timer.reset();
         return p + i + d + fOverride;
     }
+    public double calculate_heading(double tar, double act, double ks, double kv) {
+//        double s = timer.seconds();
+//
+//        e = wrapError(tar, act);
+//        p = gains.p * (e);
+//        i = gains.i * iSum;
+//        d = gains.d * ((e - e_last) / s);
+//
+//        iSum += s * e;
+//        e_last = e;
+//        timer.reset();
+//        return p + d + gains.f;
+
+        double s = timer.seconds();
+        e = wrapError(tar, act);
+        p = gains.p * (e);
+        i = gains.i * iSum;
+        d = gains.d * ((e - e_last) / s);
+
+        iSum = Math.max(Math.min(iSum + s * e, iClamp), -iClamp);
+        TelemetryPacket packet = new TelemetryPacket(); packet.put("Sum", iSum); dashboard.sendTelemetryPacket(packet);
+        e_last = e;
+        timer.reset();
+
+        return p + i + d + ks + (kv * tar);
+    }
     public double calculate_heading(double tar, double act) {
         return calculate_heading(tar, act, gains.f);
     }

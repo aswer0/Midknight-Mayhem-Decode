@@ -14,7 +14,7 @@ public class TurretServoTest extends OpMode {
     public static double UR_pos=0;
     public static double UL_pos=0;
     public static double pos=0;
-    public static double buffer=0.025;
+    public static double buffer=0.03;
     public Servo servo_UR;
     public Servo servo_UL;
 
@@ -23,7 +23,7 @@ public class TurretServoTest extends OpMode {
 
     public static double gear_ratio = (24/12.)*(16/13.)*(30/90.);
     public static double rangeOfMotion = 265;
-    public static double centerPos = 0.5;
+    public static double centerPos = 0.51;
 
     public void set_ticks(double ticks){
         //Angle -> ticks

@@ -23,6 +23,7 @@ public class TurretTest extends OpMode {
 
     @Override
     public void loop() {
-        turret.set_angle(angle);
+        turret.setAngle(angle);
+        turret.update();
     }
 }

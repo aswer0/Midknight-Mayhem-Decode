@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.FinalCode;
 
+import static org.firstinspires.ftc.teamcode.FinalCode.Constants.shootWaitTime;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -40,6 +42,9 @@ public class FinalTeleop extends OpMode {
     ElapsedTime transferDelay = new ElapsedTime();
     ElapsedTime timer = new ElapsedTime();
 
+    ElapsedTime doorTimer = new ElapsedTime();
+    ElapsedTime transferTimer = new ElapsedTime();
+
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
     Gamepad currentGamepad2 = new Gamepad();
@@ -48,7 +53,7 @@ public class FinalTeleop extends OpMode {
     public static Point shoot_point = new Point(60, 81);
     public static Point blue_gate = new Point(9.5, 59.4);
     public static Point red_gate = new Point(130.2, 59.4);
-    public static boolean use_gain_schedule = true;
+    public static boolean use_gain_schedule = false;
     public static double hood_angle = 30;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
@@ -72,6 +77,7 @@ public class FinalTeleop extends OpMode {
     boolean triangle = false;
     boolean inCloseZone = false;
     boolean lastInCloseZone = false;
+    boolean hasBall = false;
 
     int x_sign;
     int y_sign;
@@ -107,13 +113,15 @@ public class FinalTeleop extends OpMode {
         flywheel.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
 
-        turret.autoAiming = false;
+        turret.autoAiming = true;
         flywheel.set_tele_coeffs();
     }
 
     @Override
     public void start() {
         intake.doorOpen();
+        doorTimer.reset();
+        transferTimer.reset();
         timer.reset();
     }
 
@@ -198,114 +206,83 @@ public class FinalTeleop extends OpMode {
 
         //intake
         if (currentGamepad1.right_bumper) { //in
-            if (!odo.inCloseZone(24)) {
-                flywheel.setTargetRPM(idleRpm);
-                useAutoRPM = false;
-                if (flywheel.getCurrentRPM() < idleRpm + 150) {
-                    turret.autoAiming = false;
-                    turret.setAngle(0);
-                }
-            }
             // If we have 3 balls, auto stop intake
             hasBackBall = sensors.getBackColor() == 1;
             hasMidBall = sensors.getMidColor() == 1;
-            if(shouldStopIntake || (hasBackBall && hasMidBall && intake.intakeCurrentThreshold(6.7) == 1)) {
+            if (hasBall || hasMidBall) hasBall = true;
+            if(hasBackBall && hasMidBall && intake.intakeCurrentThreshold(6.7) == 1) {
                 intake.motorOff();
                 gamepad1.rumble(500);
-                shouldStopIntake = true;
+//                shouldStopIntake = true;
             } else {
                 intake.motorOn();
                 intake.doorClose();
+                doorTimer.reset();
             }
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
-            stopFlywheel = true;
+            //stopFlywheel = true;
         } else {
+            if (doorTimer.milliseconds() > 400) intake.doorOpen();
             if (gamepad1.left_bumper) { //transfer
-                intake.doorOpen();
-                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
+                hasBall = false;
+                if (transferTimer.milliseconds() > shootWaitTime) {
+                    doorTimer.reset();
+                    intake.doorClose();
                     intake.motorOn();
-                } else intake.motorOff();
-
-            } else if (gamepad1.left_trigger > 0.3) { //slow transfer
+                } else {
+                    intake.doorOpen();
+                    intake.motorOn();
+                }
+//                intake.doorOpen();
+//                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
+//                    intake.motorOn();
+//                } else intake.motorOff();
+            } else if (currentGamepad1.left_trigger > 0.3) { //slow transfer
+                hasBall = false;
                 intake.doorOpen();
-                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
-                    if (flywheel.isReady()) {
-                        intake.intervalTransfer(timer.milliseconds(), 210, 280);
-                    } else {
-                        timer.reset();
-                    }
-                } else intake.motorOff();
-
+                intake.intervalTransfer(timer.milliseconds(), 210, 280);
             }else { //idle
                 intake.motorOff();
-                timer.reset();
+                transferTimer.reset();
             }
         }
-        if(!gamepad1.left_bumper)
-            transferDelay.reset();
-        if(!currentGamepad1.right_bumper) shouldStopIntake = false;
+//        if(!gamepad1.left_bumper)
+//            transferDelay.reset();
+//        if(!currentGamepad1.right_bumper) shouldStopIntake = false;
+//
+//        if (stopFlywheel && currentGamepad1.right_trigger <= 0.3){
+//            flywheel.setTargetRPM(idleRpm);
+//            stopFlywheel = false;
+//        }
+//        else if (stopFlywheel && !currentGamepad1.right_bumper){
+//            flywheel.setTargetRPM(idleRpm);
+//            stopFlywheel = false;
+////            turret.autoAiming = true;
+//        }
 
-        if (stopFlywheel && currentGamepad1.right_trigger <= 0.3){
-            flywheel.setTargetRPM(idleRpm);
-            stopFlywheel = false;
-        }
-        else if (stopFlywheel && !currentGamepad1.right_bumper){
-            flywheel.setTargetRPM(idleRpm);
-            stopFlywheel = false;
-//            turret.autoAiming = true;
-        }
-
-        if (!triangle) {
-            inCloseZone = odo.inCloseZone(24);
-            if (lastInCloseZone && !inCloseZone) {
-                hasBackBall = sensors.getBackColor() == 1;
-                hasMidBall = sensors.getMidColor() == 1;
-            }
-            if (hasBackBall || hasMidBall) {
-                useAutoRPM = true;
-                if (inCloseZone || shootFar) {
-                    turret.autoAiming = true;
-                } else {
-                    turret.autoAiming = false;
-                }
-            } else if (!inCloseZone) {
-                if (!shootFar) {
-                    useAutoRPM = false;
-                    turret.autoAiming = false;
-                }
-            }
-        }
-        if(currentGamepad1.dpad_up) hood_angle = 50;
-        if(currentGamepad1.dpad_down) hood_angle = 45;
-        if (currentGamepad1.cross && !previousGamepad1.cross) { //stop shooter circle
-            flywheel.setTargetRPM(idleRpm);
-            useAutoRPM = false;
-            turret.autoAiming = false;
+        if (currentGamepad1.cross) {
             shootFar = false;
-            triangle = false;
-            turret.setAngle(0);
-        } else if (currentGamepad1.square && !previousGamepad1.square) { //manual shoot close triangle
-            intake.doorOpen();
-            flywheel.shootClose();
-            turret.autoAiming = false;
-            turret.setAngle(0);
-            shootFar = false;
-        } else if (currentGamepad1.circle && !previousGamepad1.circle) { // shoot far cross
-            intake.doorOpen();
-            hood.set_angle(50);
-            flywheel.shootFar();
-//            triangle = true;
-//            useAutoRPM = false;
-            turret.autoAiming = true;
+        } else if (currentGamepad1.circle) {
             shootFar = true;
-        } else if (currentGamepad1.triangle && !previousGamepad1.triangle) { //auto shoot close square
-            useAutoRPM = true;
-//            useAutoRPM = false; //NEW
-//            flywheel.shootClose(); //NEW
-            turret.autoAiming = true;
-            shootFar = false;
-            triangle = true;
+        }
+
+        double future_x = odo.get_x_predicted(false, false);
+        double future_y = odo.get_y_predicted(false, false);
+
+        double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
+
+        if (odo.inCloseZone(24) || hasBall) {
+            if (dist > 115 && shootFar) {
+                flywheel.shootAutoDist();
+                flywheel.set_auto_far_rpm(dist);
+            } else {
+                dist = Math.min(dist, 115);
+                flywheel.shootAutoDist();
+                flywheel.set_auto_rpm(dist);
+            }
+        } else {
+            flywheel.setTargetRPM(idleRpm);
         }
 
         if ((currentGamepad1.dpad_right && !previousGamepad1.dpad_right) || (currentGamepad2.dpad_right && !previousGamepad2.dpad_right)) {
@@ -314,39 +291,13 @@ public class FinalTeleop extends OpMode {
                 odo.set_heading(odo.get_heading(false)-2);
         }
 
-        if (flywheel.targetRPM != idleRpm && flywheel.targetRPM > 200 && flywheel.isReady() && turretReady) {
-            gamepad1.rumble(500);
-        }
-
-//        telemetry.addData("Alliance", alliance);
-//        telemetry.addData("Correction Drive?", useDriveCorrecton);
-//        telemetry.addData("heading", odo.get_heading(false));
-//        telemetry.update();
-
-        double future_x = odo.get_x_predicted(false, false);
-        double future_y = odo.get_y_predicted(false, false);
-
-        double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
-        //dist = Math.min(dist, 108);
-
-        if (useAutoRPM) {
-            if (dist > 110 && shootFar) {
-                flywheel.shootAutoDist();
-                flywheel.set_auto_far_rpm(dist);
-            } else {
-                dist = Math.min(dist, 110);
-                flywheel.shootAutoDist();
-                flywheel.set_auto_rpm(dist);
-            }
-        }
-
         lastInCloseZone = inCloseZone;
 
-        //hood_angle = Model.auto_hood;
-        //flywheel.setTargetRPM(Model.auto_rpm);
+        hood_angle = Model.auto_hood;
         hood.set_angle(hood_angle);
-//        Model.rpm_curr = flywheel.getCurrentRPM();
-//        Model.update_values(dist);
+        Model.rpm_curr = flywheel.getCurrentRPM();
+        Model.update_values(dist);
+
         telemetry.addData("Breakbeam reggin", breakbeam.getState());
         telemetry.update();
         if (outputDebugInfo) {
@@ -364,14 +315,10 @@ public class FinalTeleop extends OpMode {
             packet.put("Has ball", hasBackBall || hasMidBall);
             packet.put("in close zone", odo.inCloseZone(24));
             packet.put("MODEL/AUTO_HOOD", Model.auto_hood);
-            packet.put("AAAAA BL current", drive.BL.getCurrent(CurrentUnit.AMPS));
-            packet.put("AAAAA FL current", drive.FL.getCurrent(CurrentUnit.AMPS));
-            packet.put("AAAAA FR current", drive.FR.getCurrent(CurrentUnit.AMPS));
-//            packet.put("AAAA Turret current", turret.turret.getCurrent(CurrentUnit.AMPS));
-//            packet.put("AAA flywheel left current", flywheel.flywheel_left.getCurrent(CurrentUnit.AMPS));
-//            packet.put("AAA flywheel right current", flywheel.flywheel_right.getCurrent(CurrentUnit.AMPS));
-//            packet.put("AA intake 1 current", intake.intakeMotor.getCurrent(CurrentUnit.AMPS));
-//            packet.put("AA intake 2 current", intake.intakeMotorTwo.getCurrent(CurrentUnit.AMPS));
+
+            packet.put("AAAAAAAAAAAAAAAA flywheel left current", flywheel.flywheel_left.getCurrent(CurrentUnit.AMPS));
+            packet.put("AAAAAAAAAAAAAAA intake 1 current", intake.intakeMotor.getCurrent(CurrentUnit.AMPS));
+            packet.put("AAAAAAAAAAAAAAA intake 2 current", intake.intakeMotorTwo.getCurrent(CurrentUnit.AMPS));
 
             dashboard.sendTelemetryPacket(packet);
         }

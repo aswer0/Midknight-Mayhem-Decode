@@ -52,12 +52,12 @@ public class Flywheel {
     public PIDFController flywheelController = new PIDFController();
 
     public Flywheel(HardwareMap hardwareMap) {
-        flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel");
+//        flywheel_right = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel_left = hardwareMap.get(DcMotorEx.class, "flywheel2");
 //        if (reverseFlywheel) flywheel_left.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel_left.setDirection(DcMotorSimple.Direction.FORWARD);
-        flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
-        flywheel_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        flywheel_right.setDirection(DcMotorSimple.Direction.REVERSE);
+//        flywheel_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flywheel_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -73,11 +73,11 @@ public class Flywheel {
         targetRPM = target;
     }
     public double getCurrentRPM() {
-        return (flywheel_right.getVelocity() / 28 * 60);
+        return (flywheel_left.getVelocity() / 28 * 60);
     }
 
     public double getTicks() {
-        return flywheel_right.getVelocity();
+        return flywheel_left.getVelocity();
     }
 
     public double RPMToTicks(double RPM) {
@@ -131,8 +131,8 @@ public class Flywheel {
             rpm += coeffs.get(i) * Math.pow(dist, n - 1 - i);
         }
 
-        AUTO_RPM = rpm;
-//        AUTO_RPM = Model.auto_rpm;
+//        AUTO_RPM = rpm;
+        AUTO_RPM = Model.auto_rpm;
     }
 
     public void set_auto_far_rpm(double dist) {
@@ -188,7 +188,7 @@ public class Flywheel {
             }
         }
         power = Math.max(power, 0);
-        flywheel_right.setPower(power);
+//        flywheel_right.setPower(power);
         flywheel_left.setPower(power);
 
         if (outputDebugInfo) {

@@ -7,9 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFCoefficients;
+import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
@@ -23,17 +26,15 @@ public class B_DriveTest extends OpMode {
     Odometry odo;
     Intake intake;
     Sensors sensors;
+    Turret turret;
     BeltTransfer beltTransfer;
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
+    public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
-    boolean useDriveCorrecton = true;
-    boolean pidToPoint = false;
-    public static Point shoot_point = new Point(60, 81);
-    public static double target_shoot_heading = 135;
     int turnPower = 1;
     double drivePower = 1;
     boolean useKalmanOdo = false;
@@ -42,27 +43,12 @@ public class B_DriveTest extends OpMode {
     public void loop() {
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
-        sensors = new Sensors(hardwareMap);
-        intake = new Intake(hardwareMap, sensors);
         odo.update();
+        turret.update();
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             //set heading to 0
             odo.set_heading(0);
-        }
-        if (currentGamepad1.share && !previousGamepad1.share) {
-            //set heading to 0
-            useDriveCorrecton = !useDriveCorrecton;
-        }
-        if (currentGamepad1.right_stick_button && !previousGamepad1.right_stick_button) {
-            pidToPoint = true;
-        }
-
-        if (currentGamepad1.left_stick_button){
-            drivePower = drivePower/(drivePower+1);
-        }
-        else{
-            drivePower = 1;
         }
 
         if (!previousGamepad1.left_bumper && currentGamepad1.left_bumper) {
@@ -71,18 +57,7 @@ public class B_DriveTest extends OpMode {
             intake.motorOff();
         }
 
-        if (useDriveCorrecton && !pidToPoint){
-            drive.correction_drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower, false);
-        }
-        else{
-            if (!pidToPoint){
-                drive.drive(gamepad1.left_stick_y, 1.2 * gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower);
-            }
-        }
-        if (pidToPoint){
-            drive.drive_to_point(shoot_point, target_shoot_heading, 1, 0.5, false);
-        }
-
+        drive.correction_drive(-gamepad1.left_stick_y, 1.2 * -gamepad1.left_stick_x, -gamepad1.right_stick_x * turnPower, -Math.toRadians(-odo.get_heading(useKalmanOdo)), drivePower, false);
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("X position", odo.get_x(false));
@@ -99,6 +74,10 @@ public class B_DriveTest extends OpMode {
     public void init() {
         odo = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 0);
         drive = new WheelControl(hardwareMap, odo);
+        sensors = new Sensors(hardwareMap);
+        intake = new Intake(hardwareMap, sensors);
+        turret = new Turret(hardwareMap, null, odo, FinalTeleop.Alliance.blue, false, turretCoefficients);
+        turret.autoAiming = true;
 
         odo.setOutputDebugInfo(false);
 

@@ -53,7 +53,7 @@ public class Turret {
     public static double[] redShootPoint = {136,136};
     public static double[] blueShootPoint = {8,136};
 
-    public static double turret_ks = 0;
+    public static double turret_ks = 0.2;
     public static double turret_kv = 0;
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
@@ -278,6 +278,9 @@ public class Turret {
             power = controller.calculate_heading(
                     target,
                     actual, turret_ks * Math.signum(error), turret_kv);
+//            power = controller.calculate_heading(
+//                    target,
+//                    actual, controller.gains.f * Math.signum(error));
             power = v_compensate(power);
             if (power <= STOP_THRESHOLD && power >= -STOP_THRESHOLD){
                 power = 0;
@@ -296,7 +299,10 @@ public class Turret {
 //                return 0;
             }
         } else {
-            power = controller.calculate_heading(target_angle, getAngle(), turret_ks * Math.signum(target_angle - getAngle()), turret_kv);
+            //power = controller.calculate_heading(target_angle, getAngle(), controller.gains.f * Math.signum(target_angle - getAngle()));
+            power = controller.calculate_heading(
+                    target_angle, getAngle(),
+                    turret_ks * Math.signum(target_angle - getAngle()), turret_kv);
             power = Math.min(power, 1);
             power = Math.max(power, -1);
 

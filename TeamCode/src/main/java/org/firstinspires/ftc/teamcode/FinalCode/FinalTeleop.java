@@ -217,8 +217,8 @@ public class FinalTeleop extends OpMode {
             } else {
                 intake.motorOn();
                 intake.doorClose();
-                doorTimer.reset();
             }
+            doorTimer.reset();
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
             //stopFlywheel = true;

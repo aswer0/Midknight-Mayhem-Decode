@@ -6,9 +6,9 @@ import org.firstinspires.ftc.teamcode.Experiments.Utils.PIDFController;
 
 @Config
 public class DriveCorrection {
-    public static double stable_hp = 0.00013, stable_hi = 0, stable_hd = 0.001;
+    public static double stable_hp = 0.0001, stable_hi = 0, stable_hd = 0.001;
     public static double set_hp = 0.1, set_hi = 0, set_hd = 0.001;
-    public static double tolerance = 0.15;
+    public static double tolerance = 0.25;
 
     Odometry odometry;
 

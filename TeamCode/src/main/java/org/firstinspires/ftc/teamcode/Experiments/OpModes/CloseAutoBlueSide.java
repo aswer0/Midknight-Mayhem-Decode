@@ -1,14 +1,15 @@
-package org.firstinspires.ftc.teamcode.FinalCode;
+package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.Camera;
+import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.PIDdrive.Pathing;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
@@ -24,12 +25,13 @@ import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+@Disabled
 @Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
-public class CloseAutoRedSide extends OpMode {
-    public static Point start_point = new Point(142-25, 126);
-    public static Point shoot_point = new Point(142-60, 81);
-    public static Point park_point = new Point(120, 81);
+public class CloseAutoBlueSide extends OpMode {
+    public static Point start_point = new Point(25, 126);
+    public static Point shoot_point = new Point(60, 81);
+    public static Point park_point = new Point(20, 81);
 
     /*
     P_0 = (60, 81)
@@ -79,47 +81,48 @@ public class CloseAutoRedSide extends OpMode {
     P_3 = (53.7,39)
     P_4 = (24,34)
 
-    new Point(52.6,102.4),
-    new Point(50.2,72),
-    new Point(62.6,27.7),
-    new Point(53.7,39),
-    new Point(24,34),
+    P_0 = (60, 81)
+    P_1 = (53.8,84.5)
+    P_2 = (35,74.6)
+    P_3 = (6,98.5)
+    P_4 = (29.2,74.5)
+    P_5 = (15,71.3)
 
      */
 
     public static BCPath[] follow_paths = {
             new BCPath(new Point[][] {
                     {
-                            new Point(142-60, 81),
-                            new Point(142-53.8,84.5),
-                            new Point(142-35,74.6),
-                            new Point(142-6,98.5),
-                            new Point(142-29.2,74.5),
-                            new Point(142-15,71.3),
+                            new Point(60, 81),
+                            new Point(53.8,84.5),
+                            new Point(35,74.6),
+                            new Point(10.67,98.5),
+                            new Point(29.2,74.5),
+                            new Point(14.6,71.3),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(142-60, 81),
-                            new Point(142-55,61.6),
-                            new Point(142-62,61.7),
-                            new Point(142-24,57.5),
+                            new Point(60, 81),
+                            new Point(55,61.6),
+                            new Point(62,61.7),
+                            new Point(20,57.5),
                     }
             }),
             new BCPath(new Point[][] {
                     {
-                            new Point(142-52.6,102.4),
-                            new Point(142-50.2,72),
-                            new Point(142-62.6,27.7),
-                            new Point(142-53.7,39),
-                            new Point(142-24,34),
+                            new Point(52.6,102.4),
+                            new Point(50.2,72),
+                            new Point(62.6,27.7),
+                            new Point(53.7,39),
+                            new Point(24,34),
                     }
             })
     };
 
     public static ArrayList<Point> thirdPath = new ArrayList<>(List.of(
-            new Point(142-43.80173283594432,36.0),
-            new Point(142-19.6,35.37290537531175)
+            new Point(43.80173283594432,36.0),
+            new Point(17.6,35.37290537531175)
     ));
     private ElapsedTime shotTimer = null;
 
@@ -154,8 +157,8 @@ public class CloseAutoRedSide extends OpMode {
     public static double gvf_threshold = 0.67;
     public static double pid_threshold = 1.2;
     public static double power = 0.8;
-    public static double turret_angle = -44;
-    public double shoot_angle = 180-135;
+    public static double turret_angle = 44;
+    public double shoot_angle = 135;
 
     public static double first_shoot_wait_time = 5000;
     public static double shoot_wait_time = 3000;
@@ -171,7 +174,7 @@ public class CloseAutoRedSide extends OpMode {
 
     @Override
     public void init() {
-        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 180-135);
+        odometry = new Odometry(hardwareMap, telemetry, start_point.x, start_point.y, 135);
         wheelControl = new WheelControl(hardwareMap, odometry);
 
         vf = new VectorField(wheelControl, odometry, uk);
@@ -186,8 +189,8 @@ public class CloseAutoRedSide extends OpMode {
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
         armTransfer = new ArmTransfer(hardwareMap, intake);
-        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
-        FinalTeleop.alliance = FinalTeleop.Alliance.red;
+        turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.blue, true);
+        FinalTeleop.alliance = FinalTeleop.Alliance.blue;
     }
 
     @Override
@@ -243,7 +246,7 @@ public class CloseAutoRedSide extends OpMode {
                     vf.move();
                 }
                 else{
-                    at_point = pid_drive.pointDriver(0, 0.7, 1, pid_threshold, -1, uk, false);
+                    at_point = pid_drive.pointDriver(180, 0.7, 1, pid_threshold, -1, uk, false);
                 }
 
                 if (loops == 0){
@@ -304,10 +307,10 @@ public class CloseAutoRedSide extends OpMode {
                         state = State.park;
                     }
                     else {
-                        vf.setPath(follow_paths[loops], 0, false);
+                        vf.setPath(follow_paths[loops], 180, false);
                         pathPoints = follow_paths[loops].get_path_points();
 
-                        shoot_angle = 0;
+                        shoot_angle = 180;
                         timer.reset();
                         state = State.intakeBatch;
                     }
@@ -319,7 +322,7 @@ public class CloseAutoRedSide extends OpMode {
                 flywheel.stop();
                 intake.motorOff();
 
-                wheelControl.drive_to_point(park_point, 0, 1, 0.5, false);
+                wheelControl.drive_to_point(park_point, 180, 1, 0.5, false);
                 break;
         }
 

@@ -105,14 +105,14 @@ public class Flywheel {
     }
 
     private double getTargetHoodAngle(double dist) {
-        //TODO: get regression for optimal angle from dist
-        return 0;
+        return -0.00155134*dist*dist + 0.4901*dist + 16.59648;
     }
 
     public void set_auto_hood_rpm(double dist) {
         double targetAngle = getTargetHoodAngle(dist);
-        //TODO: find the target rpm based on target hood angle
-        //TODO: set the hood angle to compensate for current rpm
+
+        //y=0.00180556x^{3}-0.348512x^{2}+30.72867x+1482.81994
+        AUTO_RPM = 0.00180556*dist*dist*dist - 0.348512*dist*dist + 30.72867*dist + 1482.81994;
     }
 
     public void set_auto_rpm(double dist) {

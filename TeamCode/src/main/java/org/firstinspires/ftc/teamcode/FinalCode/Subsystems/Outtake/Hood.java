@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Hood {
     public static boolean outputDebugInfo = false;
 
-    //MIN SERVO POSITION: 0
+    //MIN SERVO POSITION: 30
     //MAX_ANGLE = 50;
 
     public static double MAX_ANGLE = 20;
@@ -25,6 +25,9 @@ public class Hood {
     }
 
     public void set_angle(double angle){
+        angle = Math.max(angle, 30);
+        angle = Math.min(angle, 50);
+
         double position = ((angle - BASE_ANGLE) / MAX_ANGLE) * MAX_SERVO_POS;
 
         left_servo.setPosition(position);

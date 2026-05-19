@@ -18,8 +18,7 @@ public class Intake {
 
     public DcMotorEx intakeMotor;
     public DcMotorEx intakeMotorTwo;
-    //public Servo intakeDoor;
-    //public Sensors sensors;
+
     public static double INTAKE_POWER = 1;
     public static double DOOR_OPEN_POSITION = 0.49;
     public static double DOOR_CLOSE_POSITION = 0.59;
@@ -76,16 +75,7 @@ public class Intake {
         intakeDoor.setPosition(DOOR_CLOSE_POSITION);
         doorOpen = false;
     }
-    public void colorSensor(){
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("left sensors", sensors.getFrontColor());
-        packet.put("right sensors", sensors.getFrontColor());
-        dashboard.sendTelemetryPacket(packet);
-    }
 
-//    public void resetTransferTimer(){
-//        timer.reset();
-//    }
     public int intakeCurrentThreshold(double threshold){
         //6.7 threshold
         if(intakeMotor.getCurrent(CurrentUnit.AMPS) > threshold) return 1;
@@ -115,18 +105,6 @@ public class Intake {
 
         intakeMotor.setPower(speed);
 //        intakeMotorTwo.setPower(-speed);
-    }
-
-    public void runIntake() {
-        //int color = sensors.getFrontColor();
-
-//        if (color == 1) {
-//            intakeDoor.setPosition(0.75);
-//        } else if (color == 2) {
-//            intakeDoor.setPosition(0.25);
-//        } else {
-//            intakeDoor.setPosition(0.75);
-//        }
     }
 
     public boolean jamDetect() {

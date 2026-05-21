@@ -6,6 +6,7 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -34,6 +35,7 @@ public class Sensors {
     public double back2D;
     public double mid1D;
     public double mid2D;
+    public ElapsedTime timeSinceThreeBalls = new ElapsedTime();
 
     public Sensors(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
@@ -53,6 +55,13 @@ public class Sensors {
     public boolean hasAllBalls() {
         return hasFrontBall() && hasMidBall() && hasBackBall();
     }
+//        boolean result = hasAllBallsNoDelay();
+//        if(!result) timeSinceThreeBalls.reset();
+//        return timeSinceThreeBalls.milliseconds() > 100;
+//    }
+//    public boolean hasAllBallsNoDelay() {
+//        return hasFrontBall() && hasMidBall() && hasBackBall();
+//    }
     public boolean hasFrontBall() {
         return !frontBreakBeam.getState();
     }

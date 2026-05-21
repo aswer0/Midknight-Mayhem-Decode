@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.AutoTuner.Vec3d;
@@ -15,13 +16,15 @@ import org.opencv.core.Point;
 //
 @Config
 public class WheelControl {
-    public static double xp = 0.25, xi = 0, xd = 0.04, xf = 0;
-    public static double yp = 0.3, yi = 0, yd = 0.04, yf = 0;
+    public static double xp = 0.2, xi = 0, xd = 0.04, xf = 0;
+    public static double yp = 0.2, yi = 0, yd = 0.04, yf = 0;
     public static double hp = 0.03, hi = 0, hd = 0.003, hF = 0;
+    public static double sp = 0.07, si = 0, sd = 0.005, sF = 0;
 
     PIDFController x_controller;
     PIDFController y_controller;
     PIDFController h_controller;
+    PIDFController special;
 
     public DcMotorEx BR;
     public DcMotorEx BL;
@@ -61,6 +64,7 @@ public class WheelControl {
         x_controller = new PIDFController(xp, xi, xd, xf);
         y_controller = new PIDFController(yp, yi, yd, yf);
         h_controller = new PIDFController(hp, hi, hd, hF);
+        special = new PIDFController(sp, si, sd, sF);
     }
 
     public void update_gains(Vec3d p, Vec3d i, Vec3d d){
@@ -286,6 +290,38 @@ public class WheelControl {
 
         TelemetryPacket packet = new TelemetryPacket();
         packet.put("error from target", error);
+        packet.put("x-error", point.x - rx);
+        packet.put("y-error", point.y - ry);
+        packet.put("h-error", PIDFController.wrapError(target_h, rh));
+        (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
+
+        return error <= dist_thresh;
+    }
+
+    public boolean drive_to_point_special(Point point, double target_h, double power, double dist_thresh, boolean use_kalman){
+        double rx = odometry.get_x(use_kalman);
+        double ry = odometry.get_y(use_kalman);
+        double rh = odometry.get_heading(use_kalman);
+
+        double y = x_controller.calculate(point.x, rx);
+        double x = y_controller.calculate(point.y, ry);
+        double h = special.calculate_heading(target_h, rh);
+
+        double nominalVoltage = 13.0;
+        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double voltageComp = nominalVoltage / currentVoltage;
+        double compensatedPower = power * voltageComp;
+        compensatedPower = Math.min(compensatedPower, 1.0);
+
+        this.drive(-y, -x, h, -Math.toRadians(-odometry.get_heading(use_kalman)), compensatedPower);
+
+        double error = Math.sqrt((rx-point.x)*(rx-point.x) + (ry-point.y)*(ry-point.y));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("error from target", error);
+        packet.put("x-error", point.x - rx);
+        packet.put("y-error", point.y - ry);
+        packet.put("h-error", PIDFController.wrapError(target_h, rh));
         (FtcDashboard.getInstance()).sendTelemetryPacket(packet);
 
         return error <= dist_thresh;

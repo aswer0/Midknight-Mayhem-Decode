@@ -274,4 +274,8 @@ public class Odometry {
         boolean rightLine = get_y(false) > -get_x(false) + 136 - margin;
         return leftLine && rightLine;
     }
+
+    public boolean inFarZone() {
+        return (get_x(false) > 48 && get_x(false) < 96) && (get_y(false) < 36);
+    }
 }

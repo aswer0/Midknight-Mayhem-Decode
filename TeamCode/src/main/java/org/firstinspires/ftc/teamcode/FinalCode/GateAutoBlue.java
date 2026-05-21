@@ -256,7 +256,7 @@ public class GateAutoBlue extends OpMode {
                             gateState = GateState.intake;
                         } else if (timer.milliseconds() > gate_wait_time) {
                             timer.reset();
-                            gateState = GateState.clear;
+                            gateState = GateState.intake;
                         }
                         break;
 
@@ -281,13 +281,13 @@ public class GateAutoBlue extends OpMode {
                 break;
 
             case driveToShootPos:
-                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false) < 24) {
-                    intake.motorOn();
-                    intake.doorClose();
-                } else {
+//                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false) < 24) {
+//                    intake.motorOn();
+//                    intake.doorClose();
+//                } else {
                     intake.motorOff();
                     intake.doorOpen();
-                }
+//                }
                 if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
                     state = State.shootBall;

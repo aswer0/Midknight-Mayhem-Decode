@@ -50,8 +50,12 @@ public class Turret {
     ElapsedTime lastSeenAt = new ElapsedTime();
     PIDFCoefficients coefficients = null;
     public Odometry odometry;
-    public static double[] redShootPoint = {136,136};
-    public static double[] blueShootPoint = {8,136};
+    public double[] redShootPoint = {136,136};
+    public double[] blueShootPoint = {8,136};
+    public static double[] redShootPointTele = {136,136};
+    public static double[] blueShootPointTele = {8,136};
+    public static double[] redShootPointAuto = {136,136};
+    public static double[] blueShootPointAuto = {12,136};
 
     public static double turret_ks = 0.2;
     public static double turret_kv = 0;

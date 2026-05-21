@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop;
+import org.firstinspires.ftc.teamcode.FinalCode.GateAutoBlue;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
@@ -36,7 +37,7 @@ public class TwentyOneBlueAuto extends OpMode {
 
     public double shootAngle = 180;
     public static double openGateAngle = 155;
-    public static double rpm = 2220;
+    public static double rpm = 2500;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
@@ -218,8 +219,14 @@ public class TwentyOneBlueAuto extends OpMode {
                 break;
 
             case driveToShootPos:
-                intake.motorOff();
-                intake.doorOpen();
+                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 6 && odometry.get_x(false) < 24) {
+                    intake.motorOn();
+                    intake.doorClose();
+                    wheelControl.drive_to_point(new Point(30, 81), shootAngle, power, pid_threshold, uk);
+                } else {
+                    intake.motorOff();
+                    intake.doorOpen();
+                }
                 if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
                     timer.reset();
                     state = State.shootBall;

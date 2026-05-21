@@ -47,5 +47,9 @@ public class SensorTest extends OpMode {
             intake.motorOff();
 //            intake.doorOpen();
         }
+
+        telemetry.addData("Back", sensors.hasBackBall());
+        telemetry.addData("Mid", sensors.hasMidBall());
+        telemetry.addData("Front", sensors.hasFrontBall());
     }
 }

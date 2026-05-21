@@ -4,7 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -14,22 +16,18 @@ import org.firstinspires.ftc.teamcode.Experiments.Utils.RGB;
 public class Sensors {
 
     public DcMotorEx intakeMotor;
+
     // sensors
-    RevColorSensorV3 frontSensor1;
-    RevColorSensorV3 frontSensor2;
     RevColorSensorV3 midSensor1;
     RevColorSensorV3 midSensor2;
     RevColorSensorV3 backSensor1;
     RevColorSensorV3 backSensor2;
 
-    // sensors for LED
-    RevColorSensorV3 leftLEDSensor;
-    RevColorSensorV3 rightLEDSensor;
-
-    RGB rgb;
+    DigitalChannel frontBreakBeam;
+    DigitalChannel midBreakBeam;
+//    DigitalChannel backBreakBeam;
 
     // sensor color values
-    public RGB front1 = new RGB();public  RGB front2 = new RGB();
     public RGB mid1 = new RGB();public  RGB mid2 = new RGB();
     public RGB back1 = new RGB();public RGB back2 = new RGB();
 
@@ -37,70 +35,47 @@ public class Sensors {
     public double back2D;
     public double mid1D;
     public double mid2D;
-
-    // sensor values for LED
-    RGB left_LED;
-    RGB right_LED;
+    public ElapsedTime timeSinceThreeBalls = new ElapsedTime();
 
     public Sensors(HardwareMap hardwareMap) {
-//        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"LeftSensor");
-//        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"RightSensor");
-//        midSensor1 = hardwareMap.get(RevColorSensorV3.class, "MidSensor1");
-//        midSensor2 = hardwareMap.get(RevColorSensorV3.class, "MidSensor2");
-//        backSensor1 = hardwareMap.get(RevColorSensorV3.class, "BackSensor1");
-//        backSensor2 = hardwareMap.get(RevColorSensorV3.class, "BackSensor2");
-//        frontSensor1 = hardwareMap.get(RevColorSensorV3.class,"fS1");
-//        frontSensor2 = hardwareMap.get(RevColorSensorV3.class,"fS2");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         midSensor1 = hardwareMap.get(RevColorSensorV3.class,"mS1");
         midSensor2 = hardwareMap.get(RevColorSensorV3.class,"mS2");
         backSensor1 = hardwareMap.get(RevColorSensorV3.class,"bS1");
         backSensor2 = hardwareMap.get(RevColorSensorV3.class,"bS2");
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
 
-//        leftLEDSensor = hardwareMap.get(RevColorSensorV3.class, "LeftSensor");
-//        rightLEDSensor = hardwareMap.get(RevColorSensorV3.class, "RightSensor");
+        frontBreakBeam = hardwareMap.get(DigitalChannel.class, "fBB");
+        midBreakBeam = hardwareMap.get(DigitalChannel.class, "mBB");
+//        backBreakBeam = hardwareMap.get(DigitalChannel.class, "bBB");
+        frontBreakBeam.setMode(DigitalChannel.Mode.INPUT);
+        midBreakBeam.setMode(DigitalChannel.Mode.INPUT);
+//        backBreakBeam.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public boolean hasAllBalls() {
         return hasFrontBall() && hasMidBall() && hasBackBall();
     }
-    public boolean hasBackBall() {
-        return false;
+//        boolean result = hasAllBallsNoDelay();
+//        if(!result) timeSinceThreeBalls.reset();
+//        return timeSinceThreeBalls.milliseconds() > 100;
+//    }
+//    public boolean hasAllBallsNoDelay() {
+//        return hasFrontBall() && hasMidBall() && hasBackBall();
+//    }
+    public boolean hasFrontBall() {
+        return !frontBreakBeam.getState();
     }
     public boolean hasMidBall() {
-        return false;
+        return !midBreakBeam.getState();
     }
-    public boolean hasFrontBall() {
-        return false;
-    }
-
-    public int getFrontColor() {
-
-//        front1.set(
-//            frontSensor1.red(),
-//            frontSensor1.green(),
-//            frontSensor1.blue()
-//        );
-//        front2.set(
-//                frontSensor2.red(),
-//                frontSensor2.green(),
-//                frontSensor2.blue()
-//        );
-
-        return 1;
-
+    public boolean hasBackBall() {
+        back1D = backSensor1.getDistance(DistanceUnit.INCH);
+        back2D = backSensor2.getDistance(DistanceUnit.INCH);
         // 0 -> no ball
         // 1 -> ball
-//        if (front1.r + front1.g + front1.b >= 900) {
-//            return 1;
-//        } else {
-//            if (front2.r + front2.g + front2.b >= 900) {
-//                return 1;
-//            } else {
-//                return 0;
-//            }
-//        }
+        return (back1D < 1.467 || back2D < 1.467);
     }
+
 
     public int getMidColor() {
         mid1.set(
@@ -129,114 +104,11 @@ public class Sensors {
     }
 
     public int getBackColor() {
-//        back1.set(
-//                backSensor1.red(),
-//                backSensor1.green(),
-//                backSensor1.blue()
-//        );
-//        back2.set(
-//                backSensor2.red(),
-//                backSensor2.green(),
-//                backSensor2.blue()
-//        );
         back1D = backSensor1.getDistance(DistanceUnit.INCH);
         back2D = backSensor2.getDistance(DistanceUnit.INCH);
         // 0 -> no ball
         // 1 -> ball
-//        if (back1.r + back1.g + back1.b >= 900) {
-//            return 1;
-//        } else {
-//            if (back2.r + back2.g + back2.b >= 900) {
-//                return 1;
-//            } else {
-//                return 0;
-//            }
-//        }
         if(back1D < 1.467 || back2D < 1.467) return 1;
         return 0;
     }
-
-//    public int getMidColor() {
-//
-//        lS1_red = leftSensor1.red();
-//        lS1_green = leftSensor1.green();
-//        lS1_blue = leftSensor1.blue();
-//
-//        // 0 -> no ball
-//        // 1 -> ball
-//        if (lS1_red + lS1_green + lS1_blue >= 900) {
-//            return 1;
-//        } else {
-//            lS2_red = leftSensor2.red();
-//            lS2_green = leftSensor2.green();
-//            lS2_blue = leftSensor2.blue();
-//
-//            if (lS2_red + lS2_green + lS2_blue >= 900) {
-//                return 1;
-//            } else {
-//                return 0;
-//            }
-//        }
-//    }
-//
-//    public int getBackColor() {
-//
-//        rS1_red = rightSensor1.red();
-//        rS1_green = rightSensor1.green();
-//        rS1_blue = rightSensor1.blue();
-//
-//        // 0 -> no ball
-//        // 1 -> ball
-//        if (rS1_red + rS1_green + rS1_blue >= 900) {
-//            return 1;
-//        } else {
-//            rS2_red = rightSensor2.red();
-//            rS2_green = rightSensor2.green();
-//            rS2_blue = rightSensor2.blue();
-//
-//            if (rS2_red + rS2_green + rS2_blue >= 900) {
-//                return 1;
-//            } else {
-//                return 0;
-//            }
-//        }
-//    }
-//
-//    public int getLeftColorLED() {
-//
-//        l_red = leftLEDSensor.red();
-//        l_green = leftLEDSensor.green();
-//        l_blue = leftLEDSensor.blue();
-//
-//        // 0 is no ball
-//        // 1 purple
-//        // 2 is green
-//        if (l_red + l_green + l_blue >= 900) {
-//            if (l_blue > l_red && l_blue > l_green) {
-//                return 1;
-//            } else if (l_green > l_blue && l_green > l_red) {
-//                return 2;
-//            }
-//        }
-//        return 0;
-//    }
-//
-//    public int getRightColorLED() {
-//
-//        r_red = rightLEDSensor.red();
-//        r_green = rightLEDSensor.green();
-//        r_blue = rightLEDSensor.blue();
-//
-//        // 0 is no ball
-//        // 1 purple
-//        // 2 is green
-//        if (r_red + r_green + r_blue >= 900) {
-//            if (r_blue > r_red && r_blue > r_green) {
-//                return 1;
-//            } else if (r_green > r_blue && r_green > r_red) {
-//                return 2;
-//            }
-//        }
-//        return 0;
-//    }
 }

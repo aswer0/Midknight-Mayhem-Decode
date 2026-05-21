@@ -39,7 +39,6 @@ public class FinalTeleop extends OpMode {
     LED led;
     Hood hood;
     /** Transfer opens first, then shoots */
-    ElapsedTime transferDelay = new ElapsedTime();
     ElapsedTime timer = new ElapsedTime();
 
     ElapsedTime doorTimer = new ElapsedTime();
@@ -50,31 +49,20 @@ public class FinalTeleop extends OpMode {
     Gamepad currentGamepad2 = new Gamepad();
     Gamepad previousGamepad2 = new Gamepad();
 
-    public static Point shoot_point = new Point(60, 81);
-    public static Point blue_gate = new Point(9.5, 59.4);
+    public static Point blue_gate = new Point(11, 58); //(9.5, 59.4);
     public static Point red_gate = new Point(130.2, 59.4);
     public static boolean use_gain_schedule = false;
     public static double hood_angle = 30;
     public static Point target_shoot = new Point(11, 134);
     public static PIDFCoefficients turretCoefficients = new PIDFCoefficients(0.02, 0.003, 0.00025,0.2);
 
-    public static double target_shoot_heading = 135;
-
     double turnPower = 1;
     int drivePower = 1;
     boolean useKalmanOdo = false;
-    boolean isTransferReady = true;
     boolean useDriveCorrecton = true;
-    public boolean shouldStopIntake = false;
     boolean pidToGate = false;
-    boolean pidToPoint = false;
-    boolean useAutoRPM = false;
-    boolean stopFlywheel = false;
     boolean turretReady = false;
-    boolean hasBackBall = false;
-    boolean hasMidBall = false;
     boolean shootFar = false;
-    boolean triangle = false;
     boolean inCloseZone = false;
     boolean lastInCloseZone = false;
     boolean hasBall = false;
@@ -94,7 +82,6 @@ public class FinalTeleop extends OpMode {
         red,
         blue,
     }
-    DigitalChannel breakbeam;
 
     @Override
     public void init() {
@@ -107,19 +94,20 @@ public class FinalTeleop extends OpMode {
         turret = new Turret(hardwareMap, null, odo, alliance, false, turretCoefficients);
         led = new LED(hardwareMap, sensors, flywheel);
         hood = new Hood(hardwareMap);
-        breakbeam = hardwareMap.get(DigitalChannel.class, "BB2");
-        breakbeam.setMode(DigitalChannel.Mode.INPUT);
+
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
         flywheel.use_gained_schedule = use_gain_schedule;
 
+        turret.blueShootPoint = Turret.blueShootPointTele;
+        turret.redShootPoint = Turret.redShootPointTele;
         turret.autoAiming = true;
         flywheel.set_tele_coeffs();
     }
 
     @Override
     public void start() {
-        intake.doorOpen();
+        intake.doorClose();
         doorTimer.reset();
         transferTimer.reset();
         timer.reset();
@@ -145,14 +133,14 @@ public class FinalTeleop extends OpMode {
         if (alliance == Alliance.red){
             x_sign = 1;
             y_sign = 1;
-            target_shoot = new Point(136, 136);
+            target_shoot = new Point(132, 132); //(136, 136) had to adjust cuz blue error
             odo.set_x(startX); //used to be 122
             odo.set_y(startY); //81
         }
         else if (alliance == Alliance.blue){
             x_sign = -1;
             y_sign = -1;
-            target_shoot = new Point(18, 136);
+            target_shoot = new Point(12, 132); //used to be (18, 136) probably typo? but had to adjust so model didnt break
             odo.set_x(startX); //used to be 20
             odo.set_y(startY); //81
         }
@@ -206,14 +194,11 @@ public class FinalTeleop extends OpMode {
 
         //intake
         if (currentGamepad1.right_bumper) { //in
+            if (sensors.hasMidBall() || sensors.hasBackBall()) hasBall = true;
             // If we have 3 balls, auto stop intake
-            hasBackBall = sensors.getBackColor() == 1;
-            hasMidBall = sensors.getMidColor() == 1;
-            if (hasBall || hasMidBall) hasBall = true;
-            if(hasBackBall && hasMidBall && intake.intakeCurrentThreshold(6.7) == 1) {
+            if(sensors.hasAllBalls() && intake.intakeCurrentThreshold(5.5) == 1) {
                 intake.motorOff();
                 gamepad1.rumble(500);
-//                shouldStopIntake = true;
             } else {
                 intake.motorOn();
                 intake.doorClose();
@@ -221,9 +206,8 @@ public class FinalTeleop extends OpMode {
             doorTimer.reset();
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
-            //stopFlywheel = true;
         } else {
-            if (doorTimer.milliseconds() > 400) intake.doorOpen();
+            if (odo.inCloseZone(24) || (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5.5) == 1)) intake.doorOpen();
             if (gamepad1.left_bumper) { //transfer
                 hasBall = false;
                 if (transferTimer.milliseconds() > shootWaitTime) {
@@ -234,32 +218,15 @@ public class FinalTeleop extends OpMode {
                     intake.doorOpen();
                     intake.motorOn();
                 }
-//                intake.doorOpen();
-//                if(intake.doorOpen || transferDelay.seconds() > 0.5) {
-//                    intake.motorOn();
-//                } else intake.motorOff();
             } else if (currentGamepad1.left_trigger > 0.3) { //slow transfer
                 hasBall = false;
                 intake.doorOpen();
-                intake.intervalTransfer(timer.milliseconds(), 210, 280);
+                intake.intervalTransfer(timer.milliseconds(), 210, 350);
             }else { //idle
                 intake.motorOff();
                 transferTimer.reset();
             }
         }
-//        if(!gamepad1.left_bumper)
-//            transferDelay.reset();
-//        if(!currentGamepad1.right_bumper) shouldStopIntake = false;
-//
-//        if (stopFlywheel && currentGamepad1.right_trigger <= 0.3){
-//            flywheel.setTargetRPM(idleRpm);
-//            stopFlywheel = false;
-//        }
-//        else if (stopFlywheel && !currentGamepad1.right_bumper){
-//            flywheel.setTargetRPM(idleRpm);
-//            stopFlywheel = false;
-////            turret.autoAiming = true;
-//        }
 
         if (currentGamepad1.cross) {
             shootFar = false;
@@ -272,7 +239,7 @@ public class FinalTeleop extends OpMode {
 
         double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
 
-        if (odo.inCloseZone(24) || hasBall) {
+        if (odo.inCloseZone(24) || odo.inFarZone() || hasBall) {
             if (dist > 115 && shootFar) {
                 flywheel.shootAutoDist();
                 flywheel.set_auto_far_rpm(dist);
@@ -298,23 +265,25 @@ public class FinalTeleop extends OpMode {
         Model.rpm_curr = flywheel.getCurrentRPM();
         Model.update_values(dist);
 
-        telemetry.addData("Breakbeam reggin", breakbeam.getState());
         telemetry.update();
         if (outputDebugInfo) {
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("distance", dist);
             packet.put("x", odo.get_x(false));
             packet.put("y", odo.get_y(false));
+            packet.put("heading", odo.get_heading(false));
+            packet.put("Turret Heading", turret.getAngle());
+
             packet.put("Auto RPM", Flywheel.AUTO_RPM);
             packet.put("RPM", flywheel.getCurrentRPM());
             packet.put("Model RPM", Model.auto_rpm);
+            packet.put("Model Target Angle", Model.target_angle);
             packet.put("Model Hood Angle", Model.auto_hood);
             packet.put("Model RPM current", Model.rpm_curr);
-            packet.put("Turret Heading Reggin", turret.getAngle());
-            packet.put("Odo heading", odo.get_heading(false));
-            packet.put("Has ball", hasBackBall || hasMidBall);
-            packet.put("in close zone", odo.inCloseZone(24));
             packet.put("MODEL/AUTO_HOOD", Model.auto_hood);
+
+            packet.put("Has ball", hasBall);
+            packet.put("in close zone", odo.inCloseZone(24));
 
             packet.put("AAAAAAAAAAAAAAAA flywheel left current", flywheel.flywheel_left.getCurrent(CurrentUnit.AMPS));
             packet.put("AAAAAAAAAAAAAAA intake 1 current", intake.intakeMotor.getCurrent(CurrentUnit.AMPS));

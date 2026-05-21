@@ -22,6 +22,7 @@ public class Model {
 
     //0.0275028\cdot\sin\left(20.75486x-0.69396\right)+0.0686839
     public static double rpm_curr;
+    public static double target_angle;
     public static double auto_rpm;
     public static double auto_hood;
     public static FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -69,9 +70,9 @@ public class Model {
     }
 
     public static void update_values(double dist){
-        double angle = dF_dtheta_descent(dist);
-        auto_rpm = F(dist, angle);
-        auto_hood = angle;
+        target_angle = getTargetHoodAngle(dist);
+        auto_rpm = F(dist, target_angle);
+        auto_hood = dF_dtheta_descent(dist);
     }
 
     public static double dF_dtheta(double theta, double dist){
@@ -124,6 +125,7 @@ public class Model {
         double min_cost = 100000000;
         int min_angle, max_angle;
 
+        //TODO: try limiting the range of theta you search based on target angle
         for (int theta=30; theta<51; theta++){
             double rpm = F(dist, theta);
             double cost = Math.abs(rpm - rpm_curr);
@@ -136,5 +138,9 @@ public class Model {
 //        return TEST_HOOD_ANGLE;
         return theta_min;
 
+    }
+
+    private static double getTargetHoodAngle(double dist) {
+        return -0.00155134*dist*dist + 0.4901*dist + 16.59648;
     }
 }

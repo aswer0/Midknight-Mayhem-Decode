@@ -62,6 +62,10 @@ public class Sensors {
 //    public boolean hasAllBallsNoDelay() {
 //        return hasFrontBall() && hasMidBall() && hasBackBall();
 //    }
+
+    public boolean hasAnyBall() {
+        return hasFrontBall() || hasMidBall() || hasBackBall();
+    }
     public boolean hasFrontBall() {
         return !frontBreakBeam.getState();
     }

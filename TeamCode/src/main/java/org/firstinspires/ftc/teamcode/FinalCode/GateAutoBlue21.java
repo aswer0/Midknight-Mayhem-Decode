@@ -263,7 +263,7 @@ public class GateAutoBlue21 extends OpMode {
                                 timer.reset();
                                 gateState = GateState.intake;
                             }
-                            if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || intake.intakeCurrentThreshold(6.7) == 1) {
+                            if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
                                 timer.reset();
                                 state = State.driveToShootPos;
                             }
@@ -273,7 +273,7 @@ public class GateAutoBlue21 extends OpMode {
 
                     case clear:
                         wheelControl.drive_to_point(clear_balls_point, clearBallsAngle, 0.5, 0.5, false);
-                        if (timer.milliseconds() > intake_time || sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || intake.intakeCurrentThreshold(6.7) == 1) {
+                        if (timer.milliseconds() > intake_time || sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
                             timer.reset();
                             state = State.driveToShootPos;
                         }
@@ -282,7 +282,7 @@ public class GateAutoBlue21 extends OpMode {
                     case intake:
                         intake.motorOn();
                         wheelControl.drive_to_point(new Point(intake_gate_point.x - 5, intake_gate_point.y), openGateAngle, 0.2, 0.1, false);
-                        if (timer.milliseconds() > intake_time || sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || intake.intakeCurrentThreshold(6.7) == 1) {
+                        if (timer.milliseconds() > intake_time || sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
                             timer.reset();
                             state = State.driveToShootPos;
                         }

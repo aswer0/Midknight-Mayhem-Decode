@@ -13,7 +13,7 @@ public class Constants {
     public static Point redResetPoint = new Point(122, 81);
     public static Point blueResetPoint = new Point(20, 81);
 
-    public static double slowTransferOnTime = 210;
+    public static double slowTransferOnTime = 200;
     public static double slowTransferOffTime = 280;
     public static double shootWaitTime = 650;
 

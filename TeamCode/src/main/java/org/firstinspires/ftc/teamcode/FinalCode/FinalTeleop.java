@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.FinalCode;
 
 import static org.firstinspires.ftc.teamcode.FinalCode.Constants.shootWaitTime;
+import static org.firstinspires.ftc.teamcode.FinalCode.Constants.slowTransferOffTime;
+import static org.firstinspires.ftc.teamcode.FinalCode.Constants.slowTransferOnTime;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -221,7 +223,7 @@ public class FinalTeleop extends OpMode {
             } else if (currentGamepad1.left_trigger > 0.3) { //slow transfer
                 hasBall = false;
                 intake.doorOpen();
-                intake.intervalTransfer(timer.milliseconds(), 210, 350);
+                intake.intervalTransfer(transferTimer.milliseconds(), slowTransferOnTime, slowTransferOffTime);
             }else { //idle
                 intake.motorOff();
                 transferTimer.reset();

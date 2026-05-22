@@ -38,7 +38,7 @@ public class GateAutoRed21 extends OpMode {
     public static Point gate_pivot_point = new Point (142-21, 65);
     public static Point intake_gate_point = new Point(142-(10+1.5), 58-0.5);
     public static Point clear_balls_point = new Point(142-9.5, 54);
-    public static Point last_point = new Point(142-14.3,62.5);
+    public static Point last_point = new Point(142-14.3,63);
 
     public static double shootAngle = 180-199;
     public static double openGateAngle = 180-155;
@@ -88,7 +88,7 @@ public class GateAutoRed21 extends OpMode {
             {
                     shoot_point,
                     new Point(142-55,61.6),
-                    new Point(142-62,61.7),
+                    new Point(103, 65.3),
                     new Point(142-29.5,54),
                     last_point,
             }

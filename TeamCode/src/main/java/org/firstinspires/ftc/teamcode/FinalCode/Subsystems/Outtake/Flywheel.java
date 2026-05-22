@@ -136,7 +136,8 @@ public class Flywheel {
     }
 
     public void set_auto_far_rpm(double dist) {
-        List<Double> coeffs = Arrays.asList(-0.661086, 187.95419, -10027.481);
+        //List<Double> coeffs = Arrays.asList(-0.661086, 187.95419, -10027.481);
+        List<Double> coeffs = Arrays.asList(10., 1860.);
 
         if (dist >= 142){
             AUTO_RPM = 3332;

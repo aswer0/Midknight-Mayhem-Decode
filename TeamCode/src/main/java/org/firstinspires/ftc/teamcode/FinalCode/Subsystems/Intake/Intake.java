@@ -88,8 +88,10 @@ public class Intake {
     public void intervalTransfer(double timer, double onTime, double offTime) {
         timer = timer % (onTime + offTime);
         if (timer < onTime) {
+            doorOpen();
             motorOn();
         } else {
+            doorClose();
             motorOff();
         }
     }

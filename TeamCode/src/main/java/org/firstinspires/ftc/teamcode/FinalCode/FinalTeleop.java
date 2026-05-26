@@ -28,7 +28,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.ArmTransfer;
 import org.opencv.core.Point;
 
-@TeleOp
+@TeleOp(group = "Final")
 @Config
 public class FinalTeleop extends OpMode {
     Odometry odo;
@@ -159,6 +159,8 @@ public class FinalTeleop extends OpMode {
         flywheel.update();
         led.speedCheck();
         turretReady = turret.update();
+        lastInCloseZone = inCloseZone;
+        inCloseZone = odo.inCloseZone(24);
 
         if (currentGamepad1.options && !previousGamepad1.options) {
             if (alliance == Alliance.red){
@@ -209,7 +211,10 @@ public class FinalTeleop extends OpMode {
         } else if (currentGamepad1.right_trigger > 0.3) { //reverse
             intake.motorReverse();
         } else {
-            if (odo.inCloseZone(24) || (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5.5) == 1)) intake.doorOpen();
+            if ((inCloseZone && sensors.hasAllBalls())
+                    || (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5.5) == 1)) {
+                intake.doorOpen();
+            }
             if (gamepad1.left_bumper) { //transfer
                 hasBall = false;
                 if (transferTimer.milliseconds() > shootWaitTime) {
@@ -241,7 +246,7 @@ public class FinalTeleop extends OpMode {
 
         double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
 
-        if (odo.inCloseZone(24) || odo.inFarZone() || hasBall) {
+        if (inCloseZone || odo.inFarZone() || hasBall) {
             if (dist > 115 && shootFar) {
                 flywheel.shootAutoDist();
                 flywheel.set_auto_far_rpm(dist);
@@ -259,8 +264,6 @@ public class FinalTeleop extends OpMode {
         } else if ((currentGamepad1.dpad_left && !previousGamepad1.dpad_left) || (currentGamepad2.dpad_left && !previousGamepad2.dpad_left)) {
                 odo.set_heading(odo.get_heading(false)-2);
         }
-
-        lastInCloseZone = inCloseZone;
 
         hood_angle = Model.auto_hood;
         hood.set_angle(hood_angle);

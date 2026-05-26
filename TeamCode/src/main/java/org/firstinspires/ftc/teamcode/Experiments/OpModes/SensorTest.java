@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 
 import java.util.Locale;
 
-@TeleOp
+@TeleOp(group = "Test")
 public class SensorTest extends OpMode {
     Sensors sensors;
     Intake intake;

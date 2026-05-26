@@ -38,7 +38,7 @@ public class GateAutoBlue21 extends OpMode {
     public static Point gate_pivot_point = new Point (21, 65);
     public static Point intake_gate_point = new Point(10, 58);
     public static Point clear_balls_point = new Point(9.5, 54);
-    public static Point last_point = new Point(14.3,62.5);
+    public static Point last_point = new Point(14.3,63.5);
 
     public static double shootAngle = 199;
     public static double openGateAngle = 155;
@@ -88,7 +88,7 @@ public class GateAutoBlue21 extends OpMode {
             {
                     shoot_point,
                     new Point(55,61.6),
-                    new Point(62,61.7),
+                    new Point(39,61.7),
                     new Point(29.5,54),
                     last_point,
             }
@@ -263,7 +263,7 @@ public class GateAutoBlue21 extends OpMode {
                                 timer.reset();
                                 gateState = GateState.intake;
                             }
-                            if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
+                            if ((sensors.hasAllBalls() && intake.intakeCurrentThreshold(5) == 1) || (intake.intakeCurrentThreshold(6.7) == 1 && sensors.hasAnyBall())) {
                                 timer.reset();
                                 state = State.driveToShootPos;
                             }
@@ -282,7 +282,7 @@ public class GateAutoBlue21 extends OpMode {
                     case intake:
                         intake.motorOn();
                         wheelControl.drive_to_point(new Point(intake_gate_point.x - 5, intake_gate_point.y), openGateAngle, 0.2, 0.1, false);
-                        if (timer.milliseconds() > intake_time || sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
+                        if (timer.milliseconds() > intake_time || (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5) == 1) || (intake.intakeCurrentThreshold(6.7) == 1 && sensors.hasAnyBall())) {
                             timer.reset();
                             state = State.driveToShootPos;
                         }

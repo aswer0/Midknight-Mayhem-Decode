@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
 
-@TeleOp
+@TeleOp(group = "Test")
 @Config
 public class NewFlywheelTest extends OpMode {
     public static int target = 0;

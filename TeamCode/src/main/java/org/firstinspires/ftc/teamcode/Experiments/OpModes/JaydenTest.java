@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -16,6 +17,7 @@ import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+@Disabled
 @TeleOp
 @Config
 public class JaydenTest extends OpMode {

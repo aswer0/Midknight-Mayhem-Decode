@@ -24,7 +24,7 @@ import java.util.List;
 
 @Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
-public class GateAutoRed extends OpMode {
+public class GateAutoRed18 extends OpMode {
     public static double offset = 142;
 
     public static Point start_point = new Point(offset-25, 126);

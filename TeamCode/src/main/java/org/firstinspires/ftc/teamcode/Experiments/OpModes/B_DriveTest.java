@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Transfer.BeltTransfer;
 import org.opencv.core.Point;
 
+@Disabled
 @TeleOp
 @Config
 public class B_DriveTest extends OpMode {

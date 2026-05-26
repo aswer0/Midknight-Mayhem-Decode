@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.Experiments.OpModes;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 
+@Disabled
 @TeleOp
 @Config
 public class AutoRPMTest extends OpMode {

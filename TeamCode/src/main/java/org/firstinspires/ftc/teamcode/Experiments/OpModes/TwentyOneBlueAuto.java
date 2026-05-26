@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.FinalCode.FinalTeleop;
-import org.firstinspires.ftc.teamcode.FinalCode.GateAutoBlue;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.BCPath;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.GVF.VectorField;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.Odometry;

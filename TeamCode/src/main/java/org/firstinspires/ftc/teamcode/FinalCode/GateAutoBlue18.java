@@ -25,7 +25,7 @@ import java.util.List;
 
 @Autonomous(preselectTeleOp = "FinalTeleop")
 @Config
-public class GateAutoBlue extends OpMode {
+public class GateAutoBlue18 extends OpMode {
     public static Point start_point = new Point(25, 126);
     public static Point shoot_point = new Point(60, 81);
     public static Point park_point = new Point(18, 81);

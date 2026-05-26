@@ -57,7 +57,7 @@ public class Turret {
     public static double[] redShootPointAuto = {134,136};
     public static double[] blueShootPointAuto = {12,136};
 
-    public static double turret_ks = 0.2;
+    public static double turret_ks = 0.18;
     public static double turret_kv = 0;
 
     public Turret(HardwareMap hardwareMap, Camera camera, Odometry odometry, Alliance alliance, boolean resetEncoder, PIDFCoefficients coefficients) {
@@ -71,6 +71,7 @@ public class Turret {
         if (resetEncoder) {
             turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
         controller = new PIDFController(coefficients);
         looptimes = new ElapsedTime();

@@ -36,7 +36,7 @@ public class Flywheel {
     public static double ks = 0.19; //0.0867;
     public static double kv = 0.000178; //0.0002;
     public static int CLOSE_RPM = 2590; //2440
-    public static int FAR_RPM = 2980;
+    public static int FAR_RPM = 3100;
     public static int EXPERIMENTAL_RPM = 4000;
     public static double AUTO_RPM = 3000;
     public static int THRESHOLD = 150;

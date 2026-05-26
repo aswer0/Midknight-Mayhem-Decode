@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Hood;
 
 @Config
-@TeleOp
+@TeleOp(group = "Test")
 public class hoodTest extends OpMode {
     public static double angle = 0;
     public static double tick = 0;

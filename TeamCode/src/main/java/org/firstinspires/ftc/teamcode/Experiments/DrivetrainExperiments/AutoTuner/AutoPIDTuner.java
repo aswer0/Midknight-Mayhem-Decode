@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Experiments.DrivetrainExperiments.AutoTun
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,7 +15,7 @@ import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-
+@Disabled
 @TeleOp
 @Config
 public class AutoPIDTuner extends OpMode {

@@ -68,6 +68,7 @@ public class FinalTeleop extends OpMode {
     boolean inCloseZone = false;
     boolean lastInCloseZone = false;
     boolean hasBall = false;
+    double offset = 0;
 
     int x_sign;
     int y_sign;
@@ -118,6 +119,7 @@ public class FinalTeleop extends OpMode {
     @Override
     public void init_loop(){
         telemetry.addData("Alliance", alliance);
+        telemetry.addData("Drive correction", useDriveCorrecton);
         telemetry.update();
         previousGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
@@ -244,7 +246,7 @@ public class FinalTeleop extends OpMode {
         double future_x = odo.get_x_predicted(false, false);
         double future_y = odo.get_y_predicted(false, false);
 
-        double dist = Math.sqrt((future_x-target_shoot.x)*(future_x-target_shoot.x) + (future_y-target_shoot.y)*(future_y-target_shoot.y));
+        double dist = Math.hypot(future_x-target_shoot.x, future_y-target_shoot.y) + offset;
 
         if (inCloseZone || odo.inFarZone() || hasBall) {
             if (dist > 115 && shootFar) {
@@ -263,6 +265,11 @@ public class FinalTeleop extends OpMode {
                 odo.set_heading(odo.get_heading(false)+2);
         } else if ((currentGamepad1.dpad_left && !previousGamepad1.dpad_left) || (currentGamepad2.dpad_left && !previousGamepad2.dpad_left)) {
                 odo.set_heading(odo.get_heading(false)-2);
+        }
+        if ((currentGamepad1.dpad_up && !previousGamepad1.dpad_up) || (currentGamepad2.dpad_up && !previousGamepad2.dpad_up)) {
+            offset += 2;
+        } else if ((currentGamepad1.dpad_down && !previousGamepad1.dpad_down) || (currentGamepad2.dpad_down && !previousGamepad2.dpad_down)) {
+            offset -= 2;
         }
 
         hood_angle = Model.auto_hood;

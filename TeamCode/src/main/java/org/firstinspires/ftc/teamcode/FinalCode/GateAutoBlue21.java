@@ -30,13 +30,13 @@ import java.util.List;
 @Config
 public class GateAutoBlue21 extends OpMode {
     public static Point start_point = new Point(25, 126);
-    public static Point shoot_point = new Point(53, 76);
+    public static Point shoot_point = new Point(53+2, 76-1);
     public static Point drive_pivot_point = new Point(18,60);
     public static Point park_point = new Point(18, 81);
     public static Point park_shot_point = new Point(56.7,102);
     public static Point new_park_point = new Point(48, 118.5);
     public static Point gate_pivot_point = new Point (21, 65);
-    public static Point intake_gate_point = new Point(10, 58);
+    public static Point intake_gate_point = new Point(10+0.5, 58);
     public static Point clear_balls_point = new Point(9.5, 54);
     public static Point last_point = new Point(14.3,63.5);
 
@@ -44,8 +44,7 @@ public class GateAutoBlue21 extends OpMode {
     public static double openGateAngle = 155;
     public static double clearBallsAngle = 160;
 
-    public static double FIRST_TURRET_ANGLE = 70;
-    public static double LAST_TURRET_ANGLE = 77;
+    public static double FIRST_TURRET_ANGLE = 70-0.5;
     public  double turretAngle = FIRST_TURRET_ANGLE;
     public static double rpm = 2290;
 
@@ -253,7 +252,7 @@ public class GateAutoBlue21 extends OpMode {
                         intake.motorOn();
                         intake.doorClose();
 
-                        if (odometry.get_x(false) > 32) {
+                        if (odometry.get_x(false) > (32-2)) {
                             wheelControl.drive_to_point_special(gate_pivot_point, 190, 1, 2, false);
 //                        } else if (odometry.get_heading(false) > 165 || odometry.get_heading(false) < 0) {
 //                            wheelControl.drive_to_point(intake_gate_point, extremeAngle, 0.7, pid_threshold, false);
@@ -328,7 +327,7 @@ public class GateAutoBlue21 extends OpMode {
                     FinalTeleop.startY = odometry.get_y(false);
                     FinalTeleop.startHeading = odometry.get_heading(false);
                 } else {
-                    wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk);
+                    wheelControl.drive_to_point(shoot_point, shootAngle, 0.7, pid_threshold, uk);
                 }
 
                 if (timer.milliseconds() >= shoot_wait_time && loops != 0 || timer.milliseconds() >= first_shoot_wait_time) {
@@ -346,19 +345,19 @@ public class GateAutoBlue21 extends OpMode {
                             state = State.intakeBatch;
                             break;
                         case 2:
-                            vf.setPath(gatePath, openGateAngle, false);
+                            //vf.setPath(gatePath, openGateAngle, false);
                             pathPoints = gatePath.get_path_points();
                             gateState = GateState.driveToGate;
                             state = State.intakeGate;
                             break;
                         case 3:
-                            vf.setPath(gatePath, openGateAngle, false);
+                            //vf.setPath(gatePath, openGateAngle, false);
                             pathPoints = gatePath.get_path_points();
                             gateState = GateState.driveToGate;
                             state = State.intakeGate;
                             break;
                         case 4:
-                            vf.setPath(gatePath, openGateAngle, false);
+                            //vf.setPath(gatePath, openGateAngle, false);
                             pathPoints = gatePath.get_path_points();
                             gateState = GateState.driveToGate;
                             state = State.intakeGate;
@@ -367,7 +366,7 @@ public class GateAutoBlue21 extends OpMode {
                             if (do_path3) {
                                 state = State.intakeBatch;
                             } else {
-                                vf.setPath(gatePath, openGateAngle, false);
+                                //vf.setPath(gatePath, openGateAngle, false);
                                 pathPoints = gatePath.get_path_points();
                                 gateState = GateState.driveToGate;
                                 state = State.intakeGate;

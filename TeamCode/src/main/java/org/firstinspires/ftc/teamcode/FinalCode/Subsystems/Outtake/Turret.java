@@ -54,7 +54,7 @@ public class Turret {
     public double[] blueShootPoint = {8,136};
     public static double[] redShootPointTele = {136,136};
     public static double[] blueShootPointTele = {8,136};
-    public static double[] redShootPointAuto = {134,136};
+    public static double[] redShootPointAuto = {132,136};
     public static double[] blueShootPointAuto = {12,136};
 
     public static double turret_ks = 0.18;

@@ -45,7 +45,6 @@ public class GateAutoRed21 extends OpMode {
     public static double clearBallsAngle = 180-160;
 
     public static double FIRST_TURRET_ANGLE = -(70-1);
-    public static double LAST_TURRET_ANGLE = -77;
     public  double turretAngle = FIRST_TURRET_ANGLE;
     public static double rpm = 2290;
 
@@ -263,7 +262,7 @@ public class GateAutoRed21 extends OpMode {
                                 timer.reset();
                                 gateState = GateState.intake;
                             }
-                            if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(6) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
+                            if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall()) {
                                 timer.reset();
                                 state = State.driveToShootPos;
                             }

@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.Experiments.Utils;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+@Disabled
 @TeleOp(name = "God is the greatest")
 public class judaism extends OpMode {
     DcMotorEx FR;

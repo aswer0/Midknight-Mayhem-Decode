@@ -32,27 +32,27 @@ public class Model {
     public static double LR = 1e-3;
     public static int TEST_HOOD_ANGLE = 45;
 
-//    public static int U_win = 3;
-//    public static ArrayList<Double> U_force;
-//
-//    public static double calculate_rolling_average(double val){
-//        U_force.add(val);
-//
-//        if (U_force.size() >= U_win){
-//            double U_sum = 0;
-//            for (int i=U_force.size()-U_win; i<U_force.size(); i++){
-//                U_sum += U_force.get(i);
-//            }
-//            return U_sum / U_win;
-//        }
-//        else{
-//            double U_sum = 0;
-//            for (int i=0; i<U_force.size(); i++){
-//                U_sum += U_force.get(i);
-//            }
-//            return U_sum / U_force.size();
-//        }
-//    }
+    public static int U_win = 3;
+    public static ArrayList<Double> U_force = new ArrayList<>();
+
+    public static double calculate_rolling_average(double val){
+        U_force.add(val);
+
+        if (U_force.size() >= U_win){
+            double U_sum = 0;
+            for (int i=U_force.size()-U_win; i<U_force.size(); i++){
+                U_sum += U_force.get(i);
+            }
+            return U_sum / U_win;
+        }
+        else{
+            double U_sum = 0;
+            for (int i=0; i<U_force.size(); i++){
+                U_sum += U_force.get(i);
+            }
+            return U_sum / U_force.size();
+        }
+    }
 
     public static double F(double dist, double angle){
         if (dist >= 142){
@@ -125,8 +125,11 @@ public class Model {
         double min_cost = 100000000;
         int min_angle, max_angle;
 
-        //TODO: try limiting the range of theta you search based on target angle
-        for (int theta=30; theta<51; theta++){
+        //limiting the range of theta you search based on target angle (so shots are still reasonable arc)
+        int min = (int)(target_angle - 12);
+        int max = (int)(target_angle + 2);
+
+        for (int theta=30; theta<=50; theta++){
             double rpm = F(dist, theta);
             double cost = Math.abs(rpm - rpm_curr);
             if (cost < min_cost){
@@ -136,6 +139,7 @@ public class Model {
         }
 
 //        return TEST_HOOD_ANGLE;
+        theta_min = calculate_rolling_average(theta_min);
         return theta_min;
 
     }

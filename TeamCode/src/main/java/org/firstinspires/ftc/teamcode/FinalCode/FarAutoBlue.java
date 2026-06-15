@@ -55,7 +55,7 @@ public class FarAutoBlue extends OpMode {
                     new Point(adjust+17.4,15.3),
                     new Point(adjust+18.5,13),
                     new Point(adjust+30, 18),
-                    new Point(9.5,9.5),
+                    new Point(9,7),
             }
     });
 
@@ -248,7 +248,7 @@ public class FarAutoBlue extends OpMode {
                     intake.doorClose();
                 } else {
                     intake.motorOff();
-                    if (odometry.get_x(false) > 30) intake.doorOpen();
+                    if (odometry.get_x(false) > 40) intake.doorOpen();
                 }
 
                 if (wheelControl.drive_to_point(shoot_point, bot_angle, power, pidf_threshold, uk) || timer.milliseconds() > 2000) {

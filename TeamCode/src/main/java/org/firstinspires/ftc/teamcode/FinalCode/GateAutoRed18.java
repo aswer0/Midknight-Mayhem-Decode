@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.PIDdrive.P
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Drivetrain.WheelControl;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Flywheel;
+import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Hood;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Outtake.Turret;
 import org.firstinspires.ftc.teamcode.FinalCode.Subsystems.Sensors;
 import org.opencv.core.Point;
@@ -29,11 +30,16 @@ public class GateAutoRed18 extends OpMode {
 
     public static Point start_point = new Point(offset-25, 126);
     public static Point shoot_point = new Point(offset-60, 81);
+    public static Point intermediate_point = new Point(offset-24, 59);
     public static Point park_point = new Point(122, 81);
     public static Point park_shot_point = new Point(offset-57,105);
+    public static Point new_park_point = new Point(142-48, 118.5);
     public static Point intake_gate_point = new Point(offset-10,58.8);
     public static Point clear_balls_point = new Point(offset-10.5, 54);
     public static Point last_point = new Point(125.9, 62.6);
+
+    public static double last_point_threshold = offset-18;
+    public double hawkTime = 700;
 
     public static double shootAngle = 0;
     public static double openGateAngle = 25;
@@ -42,7 +48,7 @@ public class GateAutoRed18 extends OpMode {
     public static double FIRST_TURRET_ANGLE = -44.2;
     public static double LAST_TURRET_ANGLE = -76.7;
     public  double turretAngle = FIRST_TURRET_ANGLE;
-    public static double rpm = 2490;
+    public static double rpm = 2290;
 
     public static boolean uk = false;
     public static double gvf_threshold = 1;
@@ -123,9 +129,11 @@ public class GateAutoRed18 extends OpMode {
     VectorField vf;
     ElapsedTime timer;
     ElapsedTime autoTimer;
+    ElapsedTime waitTime;
 
     Intake intake;
     Flywheel flywheel;
+    Hood hood;
     Sensors sensors;
     Turret turret;
     Pathing pid_drive;
@@ -146,10 +154,12 @@ public class GateAutoRed18 extends OpMode {
         pid_drive.set_path(farBatch);
         timer = new ElapsedTime();
         autoTimer = new ElapsedTime();
+        waitTime = new ElapsedTime();
 
         sensors = new Sensors(hardwareMap);
         intake = new Intake(hardwareMap, sensors);
         flywheel = new Flywheel(hardwareMap);
+        hood = new Hood(hardwareMap);
         turret = new Turret(hardwareMap, null, odometry, FinalTeleop.Alliance.red, true);
         FinalTeleop.alliance = FinalTeleop.Alliance.red;
 
@@ -175,20 +185,33 @@ public class GateAutoRed18 extends OpMode {
         if (!previousGamepad1.dpad_right && currentGamepad1.dpad_right){
             wait_time++;
         }
+        if (!previousGamepad1.dpad_down && currentGamepad1.dpad_down){
+            hawkTime -= 100;
+            hawkTime = Math.max(hawkTime, 0);
+        }
+        if (!previousGamepad1.dpad_up && currentGamepad1.dpad_up){
+            hawkTime+= 100;
+        }
+
+        hood.set_angle(43);
 
         telemetry.addData("do path 3? (circle)", do_path3);
         telemetry.addData("open gate? (cross)", openGate);
         telemetry.addData("wait time (dpad)", wait_time);
+        telemetry.addData("Hawk time (dpad)", hawkTime);
         telemetry.update();
         turret.CURRENT_VOLTAGE = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        turret.redShootPoint = Turret.redShootPointAuto;
     }
 
     @Override
     public void start() {
         timer.reset();
         autoTimer.reset();
+        waitTime.reset();
         turret.setAngle(turretAngle);
         flywheel.shootClose();
+        hood.set_angle(43);
     }
 
     @Override
@@ -220,17 +243,28 @@ public class GateAutoRed18 extends OpMode {
                     at_point = pid_drive.pointDriver(0, 1, 3, pid_threshold, -1, uk, false);
                 }
 
-                if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 2700 || (loops == 5 && odometry.get_x(false) > offset-20)){
-                    if (loops == 5) {
-                        timer.reset();
-                        vf.setPath(parkShotPath, -45, false);
-                        pathPoints = parkShotPath.get_path_points();
-                        turretAngle = LAST_TURRET_ANGLE;
-                        turret.setAngle(turretAngle);
-                        state = State.park_shot;
+                if (!(openGate && loops == 1)) {
+                    if (vf.at_end(gvf_threshold) || at_point || timer.milliseconds() > 2700 || (loops == 5 && odometry.get_x(false) > offset - 20)) {
+                        if (loops == 5) {
+                            timer.reset();
+                            vf.setPath(parkShotPath, -45, false);
+                            pathPoints = parkShotPath.get_path_points();
+                            turretAngle = LAST_TURRET_ANGLE;
+                            turret.setAngle(turretAngle);
+                            state = State.park_shot;
+                        } else {
+                            timer.reset();
+                            state = State.driveToShootPos;
+                        }
+                    }
+                } else {
+                    if (odometry.get_x(false) > last_point_threshold || timer.milliseconds() > 2700) {
+                        if (waitTime.milliseconds() > 600) {
+                            timer.reset();
+                            state = State.driveToShootPos;
+                        }
                     } else {
-                        timer.reset();
-                        state = State.driveToShootPos;
+                        waitTime.reset();
                     }
                 }
                 break;
@@ -254,7 +288,7 @@ public class GateAutoRed18 extends OpMode {
 
                     case clear:
                         wheelControl.drive_to_point(clear_balls_point, clearBallsAngle, 0.5, 0.5, false);
-                        if (timer.milliseconds() > intake_time || intake.intakeCurrentThreshold(6.7) == 1) {
+                        if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5) == 1 || timer.milliseconds() > intake_time || intake.intakeCurrentThreshold(6.7) == 1) {
                             timer.reset();
                             state = State.driveToShootPos;
                         }
@@ -264,7 +298,7 @@ public class GateAutoRed18 extends OpMode {
                         intake.motorOn();
                         wheelControl.stop();
                         wheelControl.drive_to_point(intake_gate_point, openGateAngle, 0.2, 0.5, false);
-                        if (timer.milliseconds() > intake_time || intake.intakeCurrentThreshold(6.7) == 1) {
+                        if (sensors.hasAllBalls() && intake.intakeCurrentThreshold(5) == 1 || (intake.intakeCurrentThreshold(6.7) == 1) && sensors.hasAnyBall() || timer.milliseconds() > intake_time) {
                             timer.reset();
                             state =State.driveToShootPos;
                         }
@@ -273,17 +307,29 @@ public class GateAutoRed18 extends OpMode {
                 break;
 
             case driveToShootPos:
-                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false) > offset-24) {
-                    intake.motorOn();
-                    intake.doorClose();
+                intake.motorOff();
+                intake.doorOpen();
+
+                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false)> offset-18) {
+                    wheelControl.drive_to_point(intermediate_point, openGateAngle, power, pid_threshold, uk);
                 } else {
-                    intake.motorOff();
-                    intake.doorOpen();
+                    if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
+                        timer.reset();
+                        state = State.shootBall;
+                    }
                 }
-                if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
-                    timer.reset();
-                    state = State.shootBall;
-                }
+
+//                if (loops > 1 && (loops + (do_path3 ? 1 : 0)) < 5 && odometry.get_x(false) > offset-24) {
+//                    intake.motorOn();
+//                    intake.doorClose();
+//                } else {
+//                    intake.motorOff();
+//                    intake.doorOpen();
+//                }
+//                if (wheelControl.drive_to_point(shoot_point, shootAngle, power, pid_threshold, uk) || timer.milliseconds() >= 3000){
+//                    timer.reset();
+//                    state = State.shootBall;
+//                }
                 break;
 
             case shootBall:
@@ -360,18 +406,40 @@ public class GateAutoRed18 extends OpMode {
                 break;
 
             case park_shot:
-                intake.motorOff();
-                intake.doorOpen();
+                hood.set_angle(33);
+                turret.autoAiming = true;
+                flywheel.setTargetRPM(rpm);
 
-                if (Math.abs(Math.abs(odometry.get_heading(false))-0) < 26.7) {
-                    wheelControl.drive_to_point(new Point(100,90), -45, power, pid_threshold, false);
-                } else {
-                    if (wheelControl.drive_to_point(park_shot_point, -45, power, 2, false)) {
-                        timer.reset();
-                        flywheel.setTargetRPM(rpm);
-                        state = State.shootBall;
-                    }
+                wheelControl.drive_to_point(new_park_point, 0, 1, pid_threshold, false);
+                if (odometry.get_x(false) > 142-20) {
+                    intake.motorOn();
+                    intake.doorClose();
                 }
+                if (odometry.get_x(false) < 142-24) {
+                    if (odometry.get_x(false) < new_park_point.x + 4) {
+                        intake.doorClose();
+                    } else {
+                        intake.doorOpen();
+                        intake.motorOn();
+                    }
+
+                    FinalTeleop.startX = odometry.get_x(false);
+                    FinalTeleop.startY = odometry.get_y(false);
+                    FinalTeleop.startHeading = odometry.get_heading(false);
+                }
+
+//                intake.motorOff();
+//                intake.doorOpen();
+//
+//                if (Math.abs(Math.abs(odometry.get_heading(false))-0) < 26.7) {
+//                    wheelControl.drive_to_point(new Point(100,90), -45, power, pid_threshold, false);
+//                } else {
+//                    if (wheelControl.drive_to_point(park_shot_point, -45, power, 2, false)) {
+//                        timer.reset();
+//                        flywheel.setTargetRPM(rpm);
+//                        state = State.shootBall;
+//                    }
+//                }
                 break;
         }
 

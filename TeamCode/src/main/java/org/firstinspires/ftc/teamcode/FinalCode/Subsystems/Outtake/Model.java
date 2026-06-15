@@ -139,7 +139,7 @@ public class Model {
         }
 
 //        return TEST_HOOD_ANGLE;
-        theta_min = calculate_rolling_average(theta_min);
+//        theta_min = calculate_rolling_average(theta_min);
         return theta_min;
 
     }

@@ -33,7 +33,8 @@ public class GateAutoRed18 extends OpMode {
     public static Point intermediate_point = new Point(offset-24, 59);
     public static Point park_point = new Point(122, 81);
     public static Point park_shot_point = new Point(offset-57,105);
-    public static Point new_park_point = new Point(142-48, 118.5);
+    public static Point new_park_point = new Point(offset-53.4, 125.4);
+    //    public static Point new_park_point = new Point(142-48, 118.5);
     public static Point intake_gate_point = new Point(offset-10,58.8);
     public static Point clear_balls_point = new Point(offset-10.5, 54);
     public static Point last_point = new Point(125.9, 62.6);

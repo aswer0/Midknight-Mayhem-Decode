@@ -31,7 +31,8 @@ public class GateAutoBlue18 extends OpMode {
     public static Point intermediate_point = new Point(24, 60);
     public static Point park_point = new Point(18, 81);
     public static Point park_shot_point = new Point(56.7,102);
-    public static Point new_park_point = new Point(48, 118.5);
+    public static Point new_park_point = new Point(53.4, 125.4);
+//    public static Point new_park_point = new Point(48, 118.5);
     public static Point intake_gate_point = new Point(9, 59.2);
     public static Point clear_balls_point = new Point(9.5, 54);
     public static Point last_point = new Point(14.3,62.5);

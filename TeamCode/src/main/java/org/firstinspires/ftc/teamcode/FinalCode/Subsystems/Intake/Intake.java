@@ -21,7 +21,7 @@ public class Intake {
 
     public static double INTAKE_POWER = 1;
     public static double DOOR_OPEN_POSITION = 0.49;
-    public static double DOOR_CLOSE_POSITION = 0.59;
+    public static double DOOR_CLOSE_POSITION = 0.60; //0.59
     public static double slowSpeed = 0.4;
 
     public double v;
